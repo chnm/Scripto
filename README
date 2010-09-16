@@ -1,0 +1,27 @@
+Scripto
+© 2010, Center for History and New Media
+license: http://www.gnu.org/licenses/gpl-3.0.txt
+
+Scripto is an open source documentary transcription tool written in PHP. It 
+features a lightweight library that interfaces MediaWiki and potentially any 
+content management system that serves document images. MediaWiki is a good 
+choice for the transcription database for several reasons:
+  * It is the most popular wiki application and had a sizable and active 
+    developer community.
+  * Wiki markup is relatively easy to learn and there are useful WYSIWYG editors 
+    available.
+  * It offers helpful features, such as discussion pages and user 
+    administration. 
+  * It comes with a powerful, fully-featured API.
+
+Requirements:
+  * PHP 5.2.4+
+  * Zend Framework 1.10+
+  * MediaWiki 1.15.4+
+  * Custom adapter interface to (and possibly an API for) the external CMS
+
+Installation:
+  * Download and install MediaWiki
+  * Download the Zend Framework library
+  * Download Scripto library, set the required configuration, and use the 
+    Scripto library API to build your documentary transcription application.
