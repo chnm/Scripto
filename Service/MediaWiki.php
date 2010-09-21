@@ -29,9 +29,9 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         
         // Get the MediaWiki authentication cookies from the browser and add 
         // them to the HTTP client cookie jar.
-        foreach ($_COOKIE as $name => $value) {
-            if (in_array($name, $this->_cookieNames)) {
-                $cookie = new Zend_Http_Cookie($name, $value, 
+        foreach ($this->_cookieNames as $name) {
+            if (array_key_exists($name, $_COOKIE)) {
+                $cookie = new Zend_Http_Cookie($name, $_COOKIE[$name], 
                                                self::getHttpClient()->getUri()->getHost());
                 self::getHttpClient()->getCookieJar()->addCookie($cookie);
             }
@@ -103,8 +103,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->getCookieJar()->reset();
         
         // Delete the MediaWiki authentication cookies from the browser.
-        foreach ($_COOKIE as $name => $value) {
-            if (in_array($name, $this->_cookieNames)) {
+        foreach ($this->_cookieNames as $name) {
+            if (array_key_exists($name, $_COOKIE)) {
                 setcookie($name, false);
             }
         }
