@@ -238,6 +238,17 @@ class Scripto_Document
     }
     
     /**
+     * Get an HTML preview of the provided wikitext.
+     * 
+     * @param string $wikitext The wikitext.
+     * @return string The wikitext parsed as HTML.
+     */
+    public function getPreview($wikitext)
+    {
+        return $this->_mediawiki->getPreview($wikitext);
+    }
+    
+    /**
     * Determine if the current user can edit the MediaWiki page.
     * 
     * This assumes that self::getEditCredentials() will return NULL when the 
