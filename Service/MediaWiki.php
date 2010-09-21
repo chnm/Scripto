@@ -5,12 +5,12 @@
  */
 
 require_once 'Zend/Service/Abstract.php';
-
+require_once 'Zend/Http/Cookie.php';
 require_once 'Scripto/Service/Exception.php';
+
 
 class Scripto_Service_MediaWiki extends Zend_Service_Abstract
 {
-    const SESSION_NAMESPACE     = 'scripto_cookiejar';
     const LOGIN_ERROR_WRONGPASS = 'WrongPass';
     const LOGIN_ERROR_EMPTYPASS = 'EmptyPass';
     const LOGIN_ERROR_NOTEXISTS = 'NotExists';
@@ -18,37 +18,24 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     const LOGIN_ERROR_NONAME    = 'NoName';
     const LOGIN_SUCCESS         = 'Success';
     
+    private $_cookieNames = array('mediawiki_session', 'mediawikiUserID', 
+                                  'mediawikiUserName', 'mediawikiToken');
+    
     public function __construct($url)
     {
         self::getHttpClient()->setUri($url)
-                             ->setConfig(array('keepalive' => true));
-        $this->_setCookieJar();
-    }
-    
-    /**
-     * Persist aunthentication cookies in a session, if they exist.
-     * 
-     * See: http://framework.zend.com/manual/en/zend.http.client.advanced.html#zend.http.client.multiple_requests
-     */
-    private function _setCookieJar()
-    {
-        // Start the session if it hasn't already been started.
-        if (!isset($_SESSION)) {
-            session_start();
-        }
+                             ->setConfig(array('keepalive' => true))
+                             ->setCookieJar();
         
-        // Set the cookie jar.
-        $cookieJar = true;
-        if (isset($_SESSION[self::SESSION_NAMESPACE])) {
-            // Must load the class definition before unserializing the 
-            // Zend_Http_CookieJar object.
-            require_once 'Zend/Http/CookieJar.php';
-            $cookieJar = unserialize($_SESSION[self::SESSION_NAMESPACE]);
-            if (!($cookieJar instanceof Zend_Http_CookieJar)) {
-                $cookieJar = true;
+        // Get the MediaWiki authentication cookies from the browser and add 
+        // them to the HTTP client cookie jar.
+        foreach ($_COOKIE as $name => $value) {
+            if (in_array($name, $this->_cookieNames)) {
+                $cookie = new Zend_Http_Cookie($name, $value, 
+                                               self::getHttpClient()->getUri()->getHost());
+                self::getHttpClient()->getCookieJar()->addCookie($cookie);
             }
         }
-        self::getHttpClient()->setCookieJar($cookieJar);
     }
     
     /**
@@ -87,10 +74,12 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         
         switch ($loginResult) {
             case self::LOGIN_SUCCESS:
-                // Must serialize the Zend_Http_CookieJar object so session_start() 
-                // does not unserialize it as a __PHP_Incomplete_Class_Name.
-                // See: http://php.net/manual/en/language.oop5.serialization.php
-                $_SESSION[self::SESSION_NAMESPACE] = serialize(self::getHttpClient()->getCookieJar());
+                // Persist MediaWiki authentication cookies in the browser.
+                foreach (self::getHttpClient()->getCookieJar()->getAllCookies() as $cookie) {
+                    setcookie($cookie->getName(), 
+                              $cookie->getValue(), 
+                              $cookie->getExpiryTime());
+                }
                 break;
             case self::LOGIN_ERROR_WRONGPASS:
                 throw new Scripto_Service_Exception('Password incorrect.');
@@ -110,10 +99,15 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     public function logout()
     {
-        // Empty the cookie jar.
+        // Reset the cookie jar.
         self::getHttpClient()->getCookieJar()->reset();
-        // Unset the Scripto session.
-        unset($_SESSION[self::SESSION_NAMESPACE]);
+        
+        // Delete the MediaWiki authentication cookies from the browser.
+        foreach ($_COOKIE as $name => $value) {
+            if (in_array($name, $this->_cookieNames)) {
+                setcookie($name, false);
+            }
+        }
     }
     
     /**
