@@ -160,6 +160,19 @@ class Scripto_Document
     }
     
     /**
+     * Get the page image URL.
+     * 
+     * @return string
+     */
+    public function getPageImageUrl()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the page image URL.');
+        }
+        return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
+    }
+    
+    /**
      * Get the MediaWiki transcription page wikitext for the current page.
      * 
      * @return string The transcription wikitext.
