@@ -18,14 +18,23 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     const LOGIN_ERROR_NONAME    = 'NoName';
     const LOGIN_SUCCESS         = 'Success';
     
-    private $_cookieNames = array('mediawiki_session', 'mediawikiUserID', 
-                                  'mediawikiUserName', 'mediawikiToken');
+    private $_cookieNames;
     
-    public function __construct($url)
+    /**
+     * @param string $apiUrl
+     * @param string $dbName The name of the MediaWiki database.
+     */
+    public function __construct($apiUrl, $dbName)
     {
-        self::getHttpClient()->setUri($url)
+        self::getHttpClient()->setUri($apiUrl)
                              ->setConfig(array('keepalive' => true))
                              ->setCookieJar();
+        
+        // Set the cookie names with the namespace prefix.
+        $this->_cookieNames = array("{$dbName}_session", 
+                                    "{$dbName}UserID", 
+                                    "{$dbName}UserName", 
+                                    "{$dbName}Token");
         
         // Get the MediaWiki authentication cookies from the browser and add 
         // them to the HTTP client cookie jar.

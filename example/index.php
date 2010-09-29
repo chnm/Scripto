@@ -10,6 +10,9 @@ define('SCRIPTO_PATH', '');
 // URL to the MediaWiki installation API.
 define('MEDIAWIKI_API_URL', '');
 
+// Name of the MediaWiki database.
+define('MEDIAWIKI_DB_NAME', '');
+
 // Set the include path to Zend and Scripto libraries.
 set_include_path(get_include_path() 
                  . PATH_SEPARATOR . ZEND_PATH 
@@ -28,7 +31,10 @@ $adapter = new Scripto_Adapter_Example;
 
 // Set the Document object.
 require_once 'Scripto/Document.php';
-$doc = new Scripto_Document($documentId, MEDIAWIKI_API_URL, $adapter);
+$doc = new Scripto_Document($documentId, 
+                            MEDIAWIKI_API_URL, 
+                            MEDIAWIKI_DB_NAME, 
+                            $adapter);
 
 // Must set the current page first.
 $doc->setPage($pageId);

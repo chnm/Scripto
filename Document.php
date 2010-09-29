@@ -59,10 +59,14 @@ class Scripto_Document
      * Construct the Scripto document object.
      * 
      * @param string|int $id The unique document identifier.
-     * @param string $url The MediaWiki API URL.
+     * @param string $mediaWikiApiUrl The MediaWiki API URL.
+     * @param string $mediaWikiDbName The MediaWiki database name.
      * @param Scripto_Adapter_Interface $adapter The adapter object.
      */
-    public function __construct($id, $url, Scripto_Adapter_Interface $adapter)
+    public function __construct($id, 
+                                $mediaWikiApiUrl, 
+                                $mediaWikiDbName, 
+                                Scripto_Adapter_Interface $adapter)
     {
         // Document IDs must not be empty strings, null, or false.
         if (!strlen($id) 
@@ -80,7 +84,8 @@ class Scripto_Document
         $this->_adapter = $adapter;
         
         require_once 'Scripto/Service/MediaWiki.php';
-        $this->_mediawiki = new Scripto_Service_MediaWiki($url);
+        $this->_mediawiki = new Scripto_Service_MediaWiki($mediaWikiApiUrl, 
+                                                          $mediaWikiDbName);
     }
     
     /**
