@@ -39,8 +39,7 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
      */
     private $_documents = array(
         // Example of the preferred way to set the document and page IDs using 
-        // unique keys.
-        // See: http://wardepartmentpapers.org/document.php?id=16344
+        // unique keys. See: http://wardepartmentpapers.org/document.php?id=16344
         16344 => array(
             67799 => array(
                 'page_name' => 'Letter Outside', 
@@ -71,19 +70,27 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
                 'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07007.jpg'
             )
         ), 
-        // Alternate way to set document and page IDs using all possible 
-        // characters.
-        // See: http://wardepartmentpapers.org/document.php?id=41827
-        'Request for Purchase of Liver Oil & Drum Heads' => array( // document ID
-            'xbe/XBE02001.jpg' => array( // page ID
-                'page_name' => '1', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/xbe/XBE02001.jpg'
+        // An alternate way to set the document using a document title as the 
+        // document ID and the image file path as the page ID. See: http://books.google.com/books?id=eAuOQMmGEYIC&lpg=PA515&ots=PtWRBKDZbf&pg=PA515
+        // %5BFacsimile%20of%5D%20letter%20to%20Messrs.%20O.%20P.%20Hall%20et%20al%20from%20Lincoln.
+        '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.' => array(
+            // rbc%2Flprbscsm%2Fscsm0455%2F001r.jpg
+            'rbc/lprbscsm/scsm0455/001r.jpg' => array(
+                'page_name' => '001r', 
+                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/001r.jpg'
             ), 
-            // page ID
-            'xbe/XBE02002.jpg' => array( // page ID
-                'page_name' => '2', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/xbe/XBE02002.jpg'
-            )
+            'rbc/lprbscsm/scsm0455/002r.jpg' => array(
+                'page_name' => '002r', 
+                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/002r.jpg'
+            ), 
+            'rbc/lprbscsm/scsm0455/003r.jpg' => array(
+                'page_name' => '003r', 
+                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/003r.jpg'
+            ), 
+            'rbc/lprbscsm/scsm0455/004r.jpg' => array(
+                'page_name' => '004r', 
+                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/004r.jpg'
+            ), 
         )
     );
     
