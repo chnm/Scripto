@@ -71,6 +71,14 @@ interface Scripto_Adapter_Interface
     public function getDocumentPageImageUrl($documentId, $pageId);
     
     /**
+     * Get the first page of the document.
+     * 
+     * @param int|string $documentId
+     * @return int|string
+     */
+    public function getDocumentFirstPageId($documentId);
+    
+    /**
      * Import a document page's transcription into the external system.
      * 
      * @param int|string The document ID

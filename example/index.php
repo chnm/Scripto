@@ -23,7 +23,7 @@ header('Content-Type: text/html; charset=utf-8');
 
 // Get the document ID and page ID.
 $documentId = isset($_GET['documentId']) ? $_GET['documentId'] : 16344;
-$pageId = isset($_GET['pageId']) ? $_GET['pageId'] : 67799;
+$pageId = isset($_GET['pageId']) ? $_GET['pageId'] : null;
 
 // Set the Adapter object.
 require_once 'Scripto/Adapter/Example.php';

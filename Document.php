@@ -110,10 +110,17 @@ class Scripto_Document
     /**
      * Validate and set the page ID and the base title used by MediaWiki.
      * 
-     * @param string $pageId The unique page identifier.
+     * Will set the first page of the document if the provided page ID is NULL 
+     * or FALSE.
+     * 
+     * @param string|null $pageId The unique page identifier.
      */
     public function setPage($pageId)
     {
+        if (null === $pageId || false === $pageId) {
+            $pageId = $this->getFirstPageId();
+        }
+        
         if (!$this->_adapter->documentPageExists($this->_id, $pageId)) {
             throw new Scripto_Exception("The specified page does not exist: $pageId");
         }
@@ -175,6 +182,16 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before getting the page image URL.');
         }
         return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
+    }
+    
+    /**
+     * Get the first page ID of the document.
+     * 
+     * @return array
+     */
+    public function getFirstPageId()
+    {
+        return $this->_adapter->getDocumentFirstPageId($this->_id);
     }
     
     /**

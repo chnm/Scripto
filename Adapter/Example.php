@@ -118,6 +118,11 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
         return $this->_documents[$documentId][$pageId]['page_image_url'];
     }
     
+    public function getDocumentFirstPageId($documentId)
+    {
+        return key($this->_documents[$documentId]);
+    }
+    
     public function importDocumentPageTranscription($documentId, $pageId, $text)
     {
         return false;
