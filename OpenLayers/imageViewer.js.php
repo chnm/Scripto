@@ -64,6 +64,8 @@ var rotationIntervalId;
 
 function rotate(degrees, interval)
 {
+    // Rotate once immediately, then interval.
+    rotateGraphic(degrees)
     rotationIntervalId = setInterval('rotateGraphic(' + degrees + ')', interval);
 }
 

@@ -82,7 +82,7 @@ if ($canEdit) {
     <script src="<?php echo $mwUrl; ?>/skins/common/edit.js" type="text/javascript"><!-- Core MediaWiki edit toolbar functions --></script>
     <?php endif; ?>
 </head>
-<body onload="init()">
+<body <?php echo $canEdit ? 'onload="init()' : ''; ?>">
     <h1>Scripto Example</h1>
     <?php if (!$canEdit): // Display the login form if the current user does not have permission to edit. ?>
     <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
@@ -92,8 +92,8 @@ if ($canEdit) {
     </form>
     <?php else: // Display the edit and logout forms and/or process the edit form if the current user has permission to edit. ?>
     <div id="mapContainer">
-        <button onmousedown="rotate(-3, 50)" onmouseup="stopRotate()" onmouseout="stopRotate()">Rotate ←</button>
-        <button onmousedown="rotate(3, 50)" onmouseup="stopRotate()" onmouseout="stopRotate()">Rotate →</button>
+        <button onmousedown="rotate(-1, 50)" onmouseup="stopRotate()" onmouseout="stopRotate()">Rotate ←</button>
+        <button onmousedown="rotate(1, 50)" onmouseup="stopRotate()" onmouseout="stopRotate()">Rotate →</button>
         <button onclick="rotateGraphic(90)">Rotate 90°</button>
         <button onclick="rotateGraphic(0)">Reset</button>
         <div id="olMap"></div>
