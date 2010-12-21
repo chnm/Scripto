@@ -1,0 +1,85 @@
+p {
+	margin:0;
+}
+
+#wrap {
+	width:995px;
+	margin:auto;
+	padding:0 20px;
+	overflow:hidden;
+}
+
+#mapContainer {
+	width:460px;
+	float:left;
+	border:solid 1px black;
+}
+
+#formWrap {
+	height:422px;
+	width:510px;
+	float:left;
+	margin-left:20px;
+	overflow:hidden;
+	border:solid 1px black;
+	position:relative;
+	
+}
+
+#formWrapList {
+	overflow:hidden;
+	border-bottom:1px solid black;
+}
+
+#transcriptionWrapList {
+	width:100%;
+	position:absolute;
+	bottom:0;
+	overflow:hidden;
+	border-top:1px solid black;
+	}
+	
+#discussionWrapList {
+	width:100%;
+	position:absolute;
+	bottom:0;
+	overflow:hidden;
+	border-top:1px solid black;
+	}
+	
+#formWrap ul li {
+	padding-right:.5em;
+}
+
+li.ui-tabs-selected a {
+	color:black;
+}
+
+#documentPages {
+	clear:both;
+	width:220px;
+}
+
+#logOut {
+	float:right;
+	margin:1em 20px 0 0;
+}
+
+
+ * jQuery UI Tabs @VERSION
+ *
+ * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Tabs#theming
+ */
+.ui-tabs { position: relative; padding: .2em; zoom: 1; } /* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
+.ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em 0; }
+.ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 1px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
+.ui-tabs .ui-tabs-nav li a { float: left; padding: .25em .5em; text-decoration: none; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
+.ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
+.ui-tabs .ui-tabs-panel { }
+.ui-tabs .ui-tabs-hide { display: none !important; }

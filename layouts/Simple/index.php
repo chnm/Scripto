@@ -1,22 +1,5 @@
 <?php
-ini_set('display_errors', 1);
-
-// Path to directory containing Zend Framework, from root.
-define('ZEND_PATH', '');
-
-// Path to directory containing the Scripto library, from root.
-define('SCRIPTO_PATH', '');
-
-// URL to the MediaWiki installation API.
-define('MEDIAWIKI_API_URL', '');
-
-// Name of the MediaWiki database.
-define('MEDIAWIKI_DB_NAME', '');
-
-// Set the include path to Zend and Scripto libraries.
-set_include_path(get_include_path() 
-                 . PATH_SEPARATOR . ZEND_PATH 
-                 . PATH_SEPARATOR . SCRIPTO_PATH);
+require('../config.php');
 
 // Must set the Content-Type header to correctly display UTF-8.
 header('Content-Type: text/html; charset=utf-8');
@@ -64,25 +47,29 @@ if ($canEdit) {
     $size = getimagesize($olExternalGraphicUrl);
     $olGraphicWidth = 400;
     $olGraphicHeight = (400 * $size[1]) / $size[0];
-    $olMapWidth = 600;
+    $olMapWidth = 700;
+	$olMapHeight = 250;
     
     // Set up the MediaWiki edit toolbar.
     $mwUrl = dirname(MEDIAWIKI_API_URL);
 }
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
     <title>Scripto Example</title>
     <link rel="stylesheet" href="screen.css" />
     <?php if ($canEdit): // Include the necessary scripts if the user can edit. ?>
-    <style type="text/css"><?php include '../OpenLayers/imageViewer.css.php'; ?></style>
-    <script src="../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
-    <script type="text/javascript"><?php  include '../OpenLayers/imageViewer.js.php'; ?></script>
-    <script src="MediaWikiToolbar.js" type="text/javascript"></script>
+    <style type="text/css"><?php include '../../OpenLayers/imageViewer.css.php'; ?></style>
+    <script src="../../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
+    <script type="text/javascript"><?php  include '../../OpenLayers/imageViewer.js.php'; ?></script>
+    <script src="../MediaWikiToolbar.js" type="text/javascript"></script>
     <script src="<?php echo $mwUrl; ?>/skins/common/edit.js" type="text/javascript"><!-- Core MediaWiki edit toolbar functions --></script>
     <?php endif; ?>
 </head>
 <body <?php echo $canEdit ? 'onload="init()' : ''; ?>">
+<div id="wrap">
+		
     <h1>Scripto Example</h1>
     <?php if (!$canEdit): // Display the login form if the current user does not have permission to edit. ?>
     <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
@@ -107,11 +94,16 @@ if ($canEdit) {
         <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
             <input type="submit" name="submit_logout" value="Logout" />
         </form>
-    <?php endif; ?>
-    <?php foreach ($doc->getPages() as $pageId => $pageName): ?>
-    <a href="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($pageId); ?>"><?php echo $pageName; ?></a><br />
-    <?php endforeach; ?>
-    <?php echo $doc->getTranscriptionPageHtml(); ?>
     </div>
+
+	<div id="documentPages">
+		<?php endif; ?>
+	    <?php foreach ($doc->getPages() as $pageId => $pageName): ?>
+	    <a href="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($pageId); ?>"><?php echo $pageName; ?></a><br />
+	    <?php endforeach; ?>
+	    <?php echo $doc->getTranscriptionPageHtml(); ?>
+	</div>
+
+</div><!--end wrap-->
 </body>
 </html>
