@@ -43,6 +43,11 @@ li.ui-tabs-selected a {
 
 #transcriptionWrap form {
 	padding:1em 1em 0;
+	height:300px;
+}
+
+#transcriptionWrap form textarea {
+    height:270px;
 }
 
 #logOut {
