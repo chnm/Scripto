@@ -81,13 +81,13 @@ if ($canEdit) {
 
             // bind 'myForm' and provide a simple callback function 
             jQuery('#transcriptionEditForm').ajaxForm(function() {
-                jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId; ?>, type:'transcription'}, function(data){
+                jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'transcription'}, function(data){
                     jQuery('#transcriptionCurrent').html(data);
                 });
                 return false; 
             }); 
 			jQuery('#talkEditForm').ajaxForm(function() { 
-			    jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId; ?>, type:'talk'}, function(data){
+			    jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'talk'}, function(data){
                     jQuery('#discussionCurrent').html(data);
                  });   
                 return false; 
