@@ -39,11 +39,15 @@ p {
 	}
 	
 #formWrap ul {
-    height:8%;
+    height:30px;
 }	
-#transcriptionWrap {
-    height:82%;
+#transcriptionCurrent {
+    height:346px;
     overflow:auto;
+    padding:4px;
+}
+#formWrap textarea {
+    width:98%;
 }
 	
 #discussionWrapList {

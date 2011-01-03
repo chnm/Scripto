@@ -49,6 +49,9 @@ li.ui-tabs-selected a {
 #transcriptionWrap form textarea {
     height:270px;
 }
+#transcriptionWrap textarea {
+    width:98%;
+}
 
 #logOut {
 	clear:right;
