@@ -10,6 +10,7 @@ require_once 'config.php';
  */
 class TestAdapter extends UnitTestCase {
     
+    private $_testAdapterFilename;
     private $_testAdapterClassName;
     private $_testDocumentId;
     private $_testAdapter;
@@ -17,6 +18,7 @@ class TestAdapter extends UnitTestCase {
     
     public function setUp()
     {
+        $this->_testAdapterFilename = TEST_ADAPTER_FILENAME;
         $this->_testAdapterClassName = TEST_ADAPTER_CLASS_NAME;
         $this->_testDocumentId = TEST_DOCUMENT_ID;
     }
@@ -24,11 +26,10 @@ class TestAdapter extends UnitTestCase {
     public function testAdapterIsValid()
     {
         // Assert adapter file exists.
-        $filename = TEST_ADAPTER_FILENAME;
-        $this->assertTrue(file_exists($filename), 'Example adapter file does not exist');
+        $this->assertTrue(file_exists($this->_testAdapterFilename), 'Example adapter file does not exist');
         
         // Assert adapter file is instance of Scripto_Adapter_Interface.
-        require_once $filename;
+        require_once $this->_testAdapterFilename;
         $adapter = new $this->_testAdapterClassName;
         $this->assertIsA($adapter, 'Scripto_Adapter_Interface', 'Example adapter is not an instance of Scripto_Adapter_Interface');
         
@@ -37,7 +38,8 @@ class TestAdapter extends UnitTestCase {
     
     public function testDocumentIsValid()
     {
-        // Assert document ID exists.
+        // Assert document ID is valid and exists.
+        $this->assertTrue((is_int($this->_testDocumentId) || is_string($this->_testDocumentId)), 'Document ID must be int or string. ' . gettype($this->_testDocumentId) . ' given');
         $this->assertTrue($this->_testAdapter->documentExists($this->_testDocumentId), "Document ID \"{$this->_testDocumentId}\" does not exist");
         
         // Assert valid document pages format.
