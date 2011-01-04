@@ -1,0 +1,31 @@
+<?php
+// Path to SimpleTest directory, from root.
+define('SIMPLETEST_PATH', '');
+
+// Path to the test adapter file.
+define('TEST_ADAPTER_FILENAME', '');
+
+// Test adapter class name.
+define('TEST_ADAPTER_CLASS_NAME', '');
+
+// Test document ID.
+define('TEST_DOCUMENT_ID', '');
+
+// Path to directory containing Zend Framework, from root.
+define('ZEND_PATH', '');
+
+// Path to directory containing the Scripto library, from root.
+define('SCRIPTO_PATH', '');
+
+// URL to the MediaWiki installation API.
+define('MEDIAWIKI_API_URL', '');
+
+// Name of the MediaWiki database.
+define('MEDIAWIKI_DB_NAME', '');
+
+// Set the include path to Zend and Scripto libraries.
+set_include_path(get_include_path() 
+               . PATH_SEPARATOR . ZEND_PATH 
+               . PATH_SEPARATOR . SCRIPTO_PATH);
+
+require_once(SIMPLETEST_PATH . '/autorun.php');
