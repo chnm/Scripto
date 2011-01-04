@@ -27,12 +27,7 @@ function setupToolbar(toolbar) {
 	// Only check for selection capability if the textarea is visible - errors will occur otherwise - just because
 	// the textarea is not visible, doesn't mean we shouldn't build out the toolbar though - it might have been replaced
 	// with some other kind of control
-	if ( textboxes[0].style.display != 'none' ) {
-		if ( !( document.selection && document.selection.createRange )
-			&& textboxes[0].selectionStart === null ) {
-			return false;
-		}
-	}
+
 	for ( var i = 0; i < mwEditButtons.length; i++ ) {
 		mwInsertEditButton( toolbar, mwEditButtons[i] );
 	}

@@ -95,7 +95,7 @@ if ($canEdit) {
                 return false; 
             });
 			jQuery('.toolbar').each(function() {
-				mwSetupToolbar(this);
+				setupToolbar(this);
 				});
 				
         }); 

@@ -1,5 +1,6 @@
-p {
+p, ul {
 	margin:0;
+	padding:0;
 }
 
 #wrap {
@@ -27,14 +28,10 @@ p {
 }
 
 #formWrapList {
-	overflow:hidden;
 	border-bottom:1px solid black;
 }
 
 #transcriptionWrapList {
-	width:100%;
-	position:absolute;
-	bottom:0;
 	border-top:1px solid black;
 	}
 	
@@ -42,22 +39,26 @@ p {
     height:30px;
 }	
 #transcriptionCurrent {
-    height:346px;
     overflow:auto;
     padding:4px;
+}
+#transcriptionEdit {
+    padding:4px 0;
 }
 #formWrap textarea {
     width:98%;
 }
 	
 #discussionWrapList {
-	width:100%;
-	position:absolute;
-	bottom:0;
-	overflow:hidden;
 	border-top:1px solid black;
-	}
-	
+}
+#discussionCurrent {
+    overflow:auto;
+    padding:4px;
+}
+#discussionEdit{
+    padding:4px 0;
+}	
 #formWrap ul li {
 	padding-right:.5em;
 }
@@ -77,7 +78,7 @@ li.ui-tabs-selected a {
 }
 
 
- * jQuery UI Tabs @VERSION
+ /* jQuery UI Tabs @VERSION
  *
  * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -85,12 +86,11 @@ li.ui-tabs-selected a {
  *
  * http://docs.jquery.com/UI/Tabs#theming
  */
-.ui-tabs { position: relative; padding: .2em; zoom: 1; } /* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
-.ui-tabs .ui-tabs-nav { margin: 0; padding: .2em .2em 0; }
+.ui-tabs { position: relative; zoom: 1; } /* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
 .ui-tabs .ui-tabs-nav li { list-style: none; float: left; position: relative; top: 1px; margin: 0 .2em 1px 0; border-bottom: 0 !important; padding: 0; white-space: nowrap; }
 .ui-tabs .ui-tabs-nav li a { float: left; padding: .25em .5em; text-decoration: none; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected { margin-bottom: 0; padding-bottom: 1px; }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-state-processing a { cursor: text; }
 .ui-tabs .ui-tabs-nav li a, .ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a { cursor: pointer; } /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
-.ui-tabs .ui-tabs-panel { }
+.ui-tabs-panel {height:350px;}
 .ui-tabs .ui-tabs-hide { display: none !important; }
