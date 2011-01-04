@@ -1,6 +1,13 @@
 <?php
 require_once 'config.php';
 
+/**
+ * Test the selected adapter.
+ * 
+ * This tests the external system API by calling its adapter directly and 
+ * testing for expected return values. It tests one document thoroughly as an 
+ * indication that all others are valid.
+ */
 class TestAdapter extends UnitTestCase {
     
     private $_testAdapterClassName;
@@ -31,12 +38,12 @@ class TestAdapter extends UnitTestCase {
     public function testDocumentIsValid()
     {
         // Assert document ID exists.
-        $this->assertTrue($this->_testAdapter->documentExists($this->_testDocumentId), 'Document ID does not exist');
+        $this->assertTrue($this->_testAdapter->documentExists($this->_testDocumentId), "Document ID \"{$this->_testDocumentId}\" does not exist");
         
         // Assert valid document pages format.
         $documentPages = $this->_testAdapter->getDocumentPages($this->_testDocumentId);
-        $this->assertIsA($documentPages, 'array', 'Document pages are an invalid format');
-        $this->assertTrue(count($documentPages), 'Document pages should not be empty');
+        $this->assertIsA($documentPages, 'array', 'Document pages must be an array. ' . gettype($documentPages) . ' given');
+        $this->assertTrue(count($documentPages), 'Document pages must not be empty');
         
         $this->_testDocumentPages = $documentPages;
     }
@@ -45,8 +52,8 @@ class TestAdapter extends UnitTestCase {
     {
         // Assert document first page is valid and exists.
         $documentFirstPageId = $this->_testAdapter->getDocumentFirstPageId($this->_testDocumentId);
-        $this->assertTrue((is_int($documentFirstPageId) || is_string($documentFirstPageId)), 'Document first page ID is invalid type');
-        $this->assertTrue(array_key_exists($documentFirstPageId, $this->_testDocumentPages), 'Document first page ID does not exist');
+        $this->assertTrue((is_int($documentFirstPageId) || is_string($documentFirstPageId)), 'Document first page ID must be int or string. ' . gettype($documentFirstPageId) . ' given');
+        $this->assertTrue(array_key_exists($documentFirstPageId, $this->_testDocumentPages), "Document first page ID \"$documentFirstPageId\" does not exist");
         
         // Iterate all document pages.
         foreach ($this->_testDocumentPages as $pageId => $pageName) {
@@ -58,13 +65,13 @@ class TestAdapter extends UnitTestCase {
             // reliable, and lightweight way to validate a URL, even with 
             // regular expressions, so just check to see if it returns a string.
             $documentPageImageUrl = $this->_testAdapter->getDocumentPageImageUrl($this->_testDocumentId, $pageId);
-            $this->assertIsA($documentPageImageUrl, 'string', "Document page ID \"$pageId\" has an invalid image URL");
+            $this->assertIsA($documentPageImageUrl, 'string', "Document page image URL for page ID \"$pageId\" must be a string. " . gettype($documentPageImageUrl) . " given");
         }
     }
     
     public function testImportTranscriptions()
     {
         // Must install a parallel external system to test imports. This may be 
-        // to involved to be feasible for most people.
+        // too involved to be feasible for most people.
     }
 }
