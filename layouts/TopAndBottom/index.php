@@ -74,7 +74,6 @@ if ($canEdit) {
     <script src="../../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
     <script type="text/javascript"><?php  include '../../OpenLayers/imageViewer.js.php'; ?></script>
     <script src="../MediaWikiToolbar.js" type="text/javascript"></script>
-    <script src="<?php echo $mwUrl; ?>/skins/common/edit.js" type="text/javascript"><!-- Core MediaWiki edit toolbar functions --></script>
 	<script>
 	  jQuery(document).ready(function() {
 	    jQuery("#transcriptionWrap").tabs();

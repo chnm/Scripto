@@ -74,29 +74,28 @@ if ($canEdit) {
     <script src="../../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
     <script type="text/javascript"><?php  include '../../OpenLayers/imageViewer.js.php'; ?></script>
     <script src="../MediaWikiToolbar.js" type="text/javascript"></script>
-    <script src="<?php echo $mwUrl; ?>/skins/common/edit.js" type="text/javascript"><!-- Core MediaWiki edit toolbar functions --></script>
 	<script type="text/javascript">
 	  jQuery(document).ready(function() {
 		jQuery("#formWrap").tabs();
 	    jQuery("#transcriptionWrap").tabs();
 	    jQuery("#discussionWrap").tabs();
 
-            // bind 'myForm' and provide a simple callback function 
-            jQuery('#transcriptionEditForm').ajaxForm(function() { 
-                jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'transcription'}, function(data){
-                    jQuery('#transcriptionCurrent').html(data);
-                });
-                return false; 
-            }); 
-			jQuery('#talkEditForm').ajaxForm(function() { 
-			    jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'talk'}, function(data){
-                    jQuery('#discussionCurrent').html(data);
-                 });
-                return false; 
+        // bind 'myForm' and provide a simple callback function 
+        jQuery('#transcriptionEditForm').ajaxForm(function() { 
+            jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'transcription'}, function(data){
+                jQuery('#transcriptionCurrent').html(data);
             });
-			jQuery('.toolbar').each(function() {
-				setupToolbar(this);
-				});
+            return false; 
+        }); 
+		jQuery('#talkEditForm').ajaxForm(function() { 
+		    jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'talk'}, function(data){
+                jQuery('#discussionCurrent').html(data);
+             });
+            return false; 
+        });
+		jQuery('.toolbar').each(function() {
+			setupToolbar(this);
+			});
 				
         }); 
     </script>

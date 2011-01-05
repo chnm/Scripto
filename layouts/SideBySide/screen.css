@@ -47,6 +47,7 @@ p, ul {
 }
 #formWrap textarea {
     width:98%;
+    height:290px;
 }
 	
 #discussionWrapList {
