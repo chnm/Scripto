@@ -1,12 +1,19 @@
 <?php
 require_once 'config.php';
 
-class TestDocument extends UnitTestCase {
+class TestDocument extends UnitTestCase
+{
     
     private $_testDocument;
     
-    public function setUp()
+    /**
+     * Use __construct() instead of setUp() because it's unnecessary to set up 
+     * the test case before every test method.
+     */
+    public function __construct()
     {
+        parent::__construct();
+        
         // Assume TestAdapter has already verified the test adapter and test 
         // document.
         $testAdapterClassName = TEST_ADAPTER_CLASS_NAME;

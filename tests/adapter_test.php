@@ -8,7 +8,8 @@ require_once 'config.php';
  * testing for expected return values. It tests one document thoroughly as an 
  * indication that all others are valid.
  */
-class TestAdapter extends UnitTestCase {
+class TestAdapter extends UnitTestCase
+{
     
     private $_testAdapterFilename;
     private $_testAdapterClassName;
@@ -16,8 +17,14 @@ class TestAdapter extends UnitTestCase {
     private $_testAdapter;
     private $_testDocumentPages;
     
-    public function setUp()
+    /**
+     * Use __construct() instead of setUp() because it's unnecessary to set up 
+     * the test case before every test method.
+     */
+    public function __construct()
     {
+        parent::__construct();
+        
         $this->_testAdapterFilename = TEST_ADAPTER_FILENAME;
         $this->_testAdapterClassName = TEST_ADAPTER_CLASS_NAME;
         $this->_testDocumentId = TEST_DOCUMENT_ID;

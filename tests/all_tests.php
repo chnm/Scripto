@@ -6,8 +6,10 @@ require_once 'config.php';
 
 class AllTests extends TestSuite {
     public function AllTests() {
+        $this->TestSuite('All tests');
         $path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
         $this->addFile($path . 'adapter_test.php');
+        $this->addFile($path . 'mediawiki_test.php');
         $this->addFile($path . 'document_test.php');
     }
 }
