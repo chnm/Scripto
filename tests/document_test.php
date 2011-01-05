@@ -15,8 +15,8 @@ class TestDocument extends UnitTestCase {
         // Instantiate the Scripto_Document object and set it.
         require 'Scripto/Document.php';
         $this->_testDocument = new Scripto_Document(TEST_DOCUMENT_ID, 
-                                                    MEDIAWIKI_API_URL, 
-                                                    MEDIAWIKI_DB_NAME, 
+                                                    TEST_MEDIAWIKI_API_URL, 
+                                                    TEST_MEDIAWIKI_DB_NAME, 
                                                     new $testAdapterClassName);
     }
     
