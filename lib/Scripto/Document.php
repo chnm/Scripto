@@ -62,11 +62,13 @@ class Scripto_Document
      * @param string $mediaWikiApiUrl The MediaWiki API URL.
      * @param string $mediaWikiDbName The MediaWiki database name.
      * @param Scripto_Adapter_Interface $adapter The adapter object.
+     * @param bool $passCookies Pass cookies to the web browser via API client.
      */
     public function __construct($id, 
                                 $mediaWikiApiUrl, 
                                 $mediaWikiDbName, 
-                                Scripto_Adapter_Interface $adapter)
+                                Scripto_Adapter_Interface $adapter, 
+                                $passCookies = true)
     {
         // Document IDs must not be empty strings, null, or false.
         if (!strlen($id) 
@@ -85,7 +87,8 @@ class Scripto_Document
         
         require_once 'Scripto/Service/MediaWiki.php';
         $this->_mediawiki = new Scripto_Service_MediaWiki($mediaWikiApiUrl, 
-                                                          $mediaWikiDbName);
+                                                          $mediaWikiDbName, 
+                                                          (bool) $passCookies);
     }
     
     /**

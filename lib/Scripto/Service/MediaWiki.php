@@ -18,31 +18,37 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     const LOGIN_ERROR_NONAME    = 'NoName';
     const LOGIN_SUCCESS         = 'Success';
     
+    private $_passCookies;
     private $_cookieNames;
     
     /**
      * @param string $apiUrl
      * @param string $dbName The name of the MediaWiki database.
+     * @param bool $passCookies Pass cookies to the web browser.
      */
-    public function __construct($apiUrl, $dbName)
+    public function __construct($apiUrl, $dbName, $passCookies = true)
     {
+        $this->_passCookies = (bool) $passCookies;
+        
         self::getHttpClient()->setUri($apiUrl)
                              ->setConfig(array('keepalive' => true))
                              ->setCookieJar();
         
-        // Set the cookie names with the namespace prefix.
-        $this->_cookieNames = array("{$dbName}_session", 
-                                    "{$dbName}UserID", 
-                                    "{$dbName}UserName", 
-                                    "{$dbName}Token");
-        
-        // Get the MediaWiki authentication cookies from the browser and add 
-        // them to the HTTP client cookie jar.
-        foreach ($this->_cookieNames as $name) {
-            if (array_key_exists($name, $_COOKIE)) {
-                $cookie = new Zend_Http_Cookie($name, $_COOKIE[$name], 
-                                               self::getHttpClient()->getUri()->getHost());
-                self::getHttpClient()->getCookieJar()->addCookie($cookie);
+        if ($this->_passCookies) {
+            // Set the cookie names with the namespace prefix.
+            $this->_cookieNames = array("{$dbName}_session", 
+                                        "{$dbName}UserID", 
+                                        "{$dbName}UserName", 
+                                        "{$dbName}Token");
+            
+            // Get the MediaWiki authentication cookies from the browser and add 
+            // them to the HTTP client cookie jar.
+            foreach ($this->_cookieNames as $name) {
+                if (array_key_exists($name, $_COOKIE)) {
+                    $cookie = new Zend_Http_Cookie($name, $_COOKIE[$name], 
+                                                   self::getHttpClient()->getUri()->getHost());
+                    self::getHttpClient()->getCookieJar()->addCookie($cookie);
+                }
             }
         }
     }
@@ -83,11 +89,13 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         
         switch ($loginResult) {
             case self::LOGIN_SUCCESS:
-                // Persist MediaWiki authentication cookies in the browser.
-                foreach (self::getHttpClient()->getCookieJar()->getAllCookies() as $cookie) {
-                    setcookie($cookie->getName(), 
-                              $cookie->getValue(), 
-                              $cookie->getExpiryTime());
+                if ($this->_passCookies) {
+                    // Persist MediaWiki authentication cookies in the browser.
+                    foreach (self::getHttpClient()->getCookieJar()->getAllCookies() as $cookie) {
+                        setcookie($cookie->getName(), 
+                                  $cookie->getValue(), 
+                                  $cookie->getExpiryTime());
+                    }
                 }
                 break;
             case self::LOGIN_ERROR_WRONGPASS:
@@ -111,10 +119,12 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // Reset the cookie jar.
         self::getHttpClient()->getCookieJar()->reset();
         
-        // Delete the MediaWiki authentication cookies from the browser.
-        foreach ($this->_cookieNames as $name) {
-            if (array_key_exists($name, $_COOKIE)) {
-                setcookie($name, false);
+        if ($this->_passCookies) {
+            // Delete the MediaWiki authentication cookies from the browser.
+            foreach ($this->_cookieNames as $name) {
+                if (array_key_exists($name, $_COOKIE)) {
+                    setcookie($name, false);
+                }
             }
         }
     }
