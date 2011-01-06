@@ -23,6 +23,12 @@ define('TEST_MEDIAWIKI_API_URL', '');
 // Name of the MediaWiki database.
 define('TEST_MEDIAWIKI_DB_NAME', '');
 
+// MediaWiki username, if required.
+define('TEST_MEDIAWIKI_USERNAME', '');
+
+// MediaWiki password, if required.
+define('TEST_MEDIAWIKI_PASSWORD', '');
+
 // Set the include path to Zend and Scripto libraries.
 set_include_path(get_include_path() 
                . PATH_SEPARATOR . ZEND_PATH 

@@ -67,23 +67,43 @@ Block quote
     {
         parent::__construct();
         
+        // Do not pass cookies to a browser when testing.
         require_once 'Scripto/Service/MediaWiki.php';
         $this->_testMediawiki = new Scripto_Service_MediaWiki(TEST_MEDIAWIKI_API_URL, 
-                                                              TEST_MEDIAWIKI_DB_NAME);
+                                                              TEST_MEDIAWIKI_DB_NAME, 
+                                                              false);
     }
     
     public function testCredentials()
     {
-        // Assert edit credentials are valid.
+        // Assert credentials are valid.
         $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
-        $this->assertIsA($editCredentials, 'array', 'Edit credentials must be an array. ' . gettype($editCredentials) . ' given');
-        if (is_array($editCredentials)) {
-            $this->assertTrue(array_key_exists('edittoken', $editCredentials), 'Edit credentials array must contain a "edittoken" key');
-            $this->assertTrue(array_key_exists('basetimestamp', $editCredentials), 'Edit credentials array must contain a "basetimestamp" key');
+        $this->assertTrue((is_array($editCredentials) || is_null($editCredentials)), 'Edit credentials must be NULL or an array. ' . gettype($editCredentials) . ' given');
+        
+        // Test login and logout if credentials are required.
+        if (is_null($editCredentials)) {
+            
+            // Assert login works.
+            $this->_testMediawiki->login(TEST_MEDIAWIKI_USERNAME, TEST_MEDIAWIKI_PASSWORD);
+            $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
+            $this->assertTrue(is_array($editCredentials), 'Login did not work.');
+            
+            // Assert logout works.
+            $this->_testMediawiki->logout();
+            $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
+            $this->assertTrue(is_null($editCredentials), 'Logout did not work.');
+            
+            // Login and get credentials again to continue testing.
+            $this->_testMediawiki->login(TEST_MEDIAWIKI_USERNAME, TEST_MEDIAWIKI_PASSWORD);
+            $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
         }
+        
+        // Assert credential keys are valid.
+        $this->assertTrue(array_key_exists('edittoken', $editCredentials), 'Edit credentials array must contain a "edittoken" key');
+        $this->assertTrue(array_key_exists('basetimestamp', $editCredentials), 'Edit credentials array must contain a "basetimestamp" key');
     }
     
-    public function testPages()
+    public function testEditPage()
     {
         // Clear the page before testing edit page. Resetting the database or 
         // deleting the page is preferable, but resetting is too involved and 
