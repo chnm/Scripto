@@ -1,5 +1,5 @@
 <?php
-require('../config.php');
+require('../shared/config.php');
 
 // Must set the Content-Type header to correctly display UTF-8.
 header('Content-Type: text/html; charset=utf-8');
@@ -9,11 +9,11 @@ $documentId = isset($_GET['documentId']) ? $_GET['documentId'] : 16344;
 $pageId = isset($_GET['pageId']) ? $_GET['pageId'] : null;
 
 // Set the Adapter object.
-require_once 'Scripto/Adapter/Example.php';
+require_once '../../lib/Scripto/Adapter/Example.php';
 $adapter = new Scripto_Adapter_Example;
 
 // Set the Document object.
-require_once 'Scripto/Document.php';
+require_once '../../lib/Scripto/Document.php';
 $doc = new Scripto_Document($documentId, 
                             MEDIAWIKI_API_URL, 
                             MEDIAWIKI_DB_NAME, 
@@ -64,29 +64,29 @@ if ($canEdit) {
     <!--link rel="stylesheet" href="screen.css" /-->
 	<link rel="stylesheet" href="screen.css" />
     <?php if ($canEdit): // Include the necessary scripts if the user can edit. ?>
-    <script src="../jquery-1.4.2.min.js" type="text/javascript"></script>
-	<script src="../jquery-ui-1.8.5.js" type="text/javascript"></script>
-	<script src="../jquery.form.js" type="text/javascript"></script>
+    <script src="../shared/jquery-1.4.2.min.js" type="text/javascript"></script>
+	<script src="../shared/jquery-ui-1.8.5.js" type="text/javascript"></script>
+	<script src="../shared/jquery.form.js" type="text/javascript"></script>
 	<script type="text/javascript">
 		jQuery.noConflict();
 	</script>
-    <style type="text/css"><?php include '../../OpenLayers/imageViewer.css.php'; ?></style>
-    <script src="../../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
-    <script type="text/javascript"><?php  include '../../OpenLayers/imageViewer.js.php'; ?></script>
-    <script src="../MediaWikiToolbar.js" type="text/javascript"></script>
+    <style type="text/css"><?php include '../shared/imageViewer.css.php'; ?></style>
+    <script src="../shared/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
+    <script type="text/javascript"><?php  include '../shared/imageViewer.js.php'; ?></script>
+    <script src="../shared/MediaWikiToolbar.js" type="text/javascript"></script>
 	<script>
 	  jQuery(document).ready(function() {
 	    jQuery("#transcriptionWrap").tabs();
 
             // bind 'myForm' and provide a simple callback function 
             jQuery('#transcriptionEditForm').ajaxForm(function() {
-                jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'transcription'}, function(data){
+                jQuery.get('../shared/ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'transcription'}, function(data){
                     jQuery('#transcriptionCurrent').html(data);
                 });
                 return false; 
             }); 
 			jQuery('#talkEditForm').ajaxForm(function() { 
-			    jQuery.get('../ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'talk'}, function(data){
+			    jQuery.get('../shared/ajax.php', {documentId:<?php echo $documentId; ?>, pageId:<?php echo $pageId ? $pageId : 'null'; ?>, type:'talk'}, function(data){
                     jQuery('#discussionCurrent').html(data);
                  });   
                 return false; 

@@ -1,5 +1,5 @@
 <?php
-require('../config.php');
+require('../shared/config.php');
 
 // Must set the Content-Type header to correctly display UTF-8.
 header('Content-Type: text/html; charset=utf-8');
@@ -58,16 +58,25 @@ if ($canEdit) {
 <html>
 <head>
     <title>Scripto Example</title>
-    <link rel="stylesheet" href="screen.css" />
     <?php if ($canEdit): // Include the necessary scripts if the user can edit. ?>
-    <style type="text/css"><?php include '../../OpenLayers/imageViewer.css.php'; ?></style>
-    <script src="../../OpenLayers/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
-    <script type="text/javascript"><?php  include '../../OpenLayers/imageViewer.js.php'; ?></script>
-    <script src="../MediaWikiToolbar.js" type="text/javascript"></script>
-    <script src="<?php echo $mwUrl; ?>/skins/common/edit.js" type="text/javascript"><!-- Core MediaWiki edit toolbar functions --></script>
+    <script src="../shared/jquery-1.4.2.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+		jQuery.noConflict();
+	</script>
+    <style type="text/css"><?php include '../shared/imageViewer.css.php'; ?></style>
+    <script src="../shared/OpenLayers.ScriptoFork.js" type="text/javascript"></script>
+    <script type="text/javascript"><?php  include '../shared/imageViewer.js.php'; ?></script>
+    <script src="../shared/MediaWikiToolbar.js" type="text/javascript"></script>
+    <script type="text/javascript">
+	  jQuery(document).ready(function() {
+		jQuery('.toolbar').each(function() {
+			setupToolbar(this);
+			});			
+        }); 
+    </script>
     <?php endif; ?>
 </head>
-<body <?php echo $canEdit ? 'onload="init()' : ''; ?>">
+<body <?php echo $canEdit ? 'onload="init()"' : ''; ?>>
 <div id="wrap">
 		
     <h1>Scripto Example</h1>
@@ -86,7 +95,7 @@ if ($canEdit) {
         <div id="olMap"></div>
     </div>
     <div id="transcriptionContainer">
-        <div id="toolbar"><!-- MediaWiki edit toolbar --></div>
+		<div class="toolbar"><!-- MediaWiki edit toolbar --></div>
         <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
             <textarea name="transcription" id="wpTextbox1" rows="24" cols="80"><?php echo $doc->getTranscriptionPageWikitext(); ?></textarea><br />
             <input type="submit" name="submit_transcription" value="Submit" />
@@ -94,6 +103,8 @@ if ($canEdit) {
         <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
             <input type="submit" name="submit_logout" value="Logout" />
         </form>
+        <?php echo $doc->getTranscriptionPageHtml(); ?>
+	    
     </div>
 
 	<div id="documentPages">
@@ -101,7 +112,6 @@ if ($canEdit) {
 	    <?php foreach ($doc->getPages() as $pageId => $pageName): ?>
 	    <a href="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($pageId); ?>"><?php echo $pageName; ?></a><br />
 	    <?php endforeach; ?>
-	    <?php echo $doc->getTranscriptionPageHtml(); ?>
 	</div>
 
 </div><!--end wrap-->
