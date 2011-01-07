@@ -12,27 +12,23 @@ require_once 'config.php';
 class TestMediawiki extends UnitTestCase
 {
     const TEST_TITLE = 'SGVsbG8gV29ybGQ=';
-    const TEST_TEXT = "'''Bold text'''
+    
+    /**
+     * Contains no dynamic or custom Wikitext (e.g. signatures, media file 
+     * links, references.).
+     */
+    const TEST_WIKITEXT = "'''Bold text'''
 ''Italic text''
-[[Link title]]
 [http://www.example.com link title]
-
 == Headline text ==
-[[File:Example.jpg]]
-[[Media:Example.ogg]]
-<math>Insert formula here</math>
 <nowiki>Insert non-formatted text here</nowiki>
---~~~~
-
 ----
-
 <s>Strike-through text</s>
 <br />
 <sup>Superscript text</sup>
 <sub>Subscript text</sub>
 <small>Small Text</small>
 <!-- Comment -->
-
 <gallery>
 Image:Example.jpg|Caption1
 Image:Example.jpg|Caption2
@@ -53,8 +49,70 @@ Block quote
 | row 2, cell 1
 | row 2, cell 2
 | row 2, cell 3
-|}
-<ref>Insert footnote text here</ref>";
+|}";
+    
+    /**
+     * When getting a preview and page HTML, MediaWiki returns an HTML comment 
+     * containing a dynamic "NewPP limit report." Here, this is removed prior to 
+     * asserting valid get responses.
+     */
+    const TEST_EXPECTED_HTML = '<p><b>Bold text</b>
+<i>Italic text</i>
+<a href="http://www.example.com" class="external text" rel="nofollow">link title</a>
+</p>
+<h2> <span class="mw-headline" id="Headline_text"> Headline text </span></h2>
+<p>Insert non-formatted text here
+</p>
+<hr />
+<p><s>Strike-through text</s>
+<br />
+<sup>Superscript text</sup>
+<sub>Subscript text</sub>
+<small>Small Text</small>
+</p>
+<table class="gallery" cellspacing="0" cellpadding="0">
+	<tr>
+		<td><div class="gallerybox" style="width: 155px;">
+			<div style="height: 152px;">Example.jpg</div>
+			<div class="gallerytext">
+<p>Caption1
+</p>
+			</div>
+		</div></td>
+		<td><div class="gallerybox" style="width: 155px;">
+			<div style="height: 152px;">Example.jpg</div>
+			<div class="gallerytext">
+<p>Caption2
+</p>
+			</div>
+		</div></td>
+	</tr>
+</table>
+<blockquote>
+Block quote
+</blockquote>
+<table class="wikitable">
+
+<tr>
+<th> header 1
+</th><th> header 2
+</th><th> header 3
+</th></tr>
+<tr>
+<td> row 1, cell 1
+</td><td> row 1, cell 2
+</td><td> row 1, cell 3
+</td></tr>
+<tr>
+<td> row 2, cell 1
+</td><td> row 2, cell 2
+</td><td> row 2, cell 3
+</td></tr></table>
+
+
+';
+    
+    const TEST_EXPECTED_PREVIEW = '';
     
     private $_testMediawiki;
     private $_testEditCredentials;
@@ -86,12 +144,12 @@ Block quote
             // Assert login works.
             $this->_testMediawiki->login(TEST_MEDIAWIKI_USERNAME, TEST_MEDIAWIKI_PASSWORD);
             $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
-            $this->assertTrue(is_array($editCredentials), 'Login did not work.');
+            $this->assertTrue(is_array($editCredentials), 'Login did not work');
             
             // Assert logout works.
             $this->_testMediawiki->logout();
             $editCredentials = $this->_testMediawiki->getEditCredentials(self::TEST_TITLE);
-            $this->assertTrue(is_null($editCredentials), 'Logout did not work.');
+            $this->assertTrue(is_null($editCredentials), 'Logout did not work');
             
             // Login and get credentials again to continue testing.
             $this->_testMediawiki->login(TEST_MEDIAWIKI_USERNAME, TEST_MEDIAWIKI_PASSWORD);
@@ -105,15 +163,35 @@ Block quote
     
     public function testEditPage()
     {
+        // Assert the test page's preview is valid. Remove dynamic HTML 
+        // comments.
+        $testPagePreview = $this->_testMediawiki->getPreview(self::TEST_WIKITEXT);
+        $this->assertTrue(self::TEST_EXPECTED_HTML == $this->_removeHtmlComments($testPagePreview), 'The test page preview HTML is invalid');
+        
         // Clear the page before testing edit page. Resetting the database or 
         // deleting the page is preferable, but resetting is too involved and 
         // Scripto_Service_MediaWiki does not implement a delete page feature 
         // because deleting requires special (sysops) permissions.
         $this->_testMediawiki->editPage(self::TEST_TITLE, '');
+        $text = $this->_testMediawiki->getPageWikitext(self::TEST_TITLE);
+        $this->assertTrue('' == $text, 'Clearing the test page did not work');
         
-        // Edit the page.
-        $this->_testMediawiki->editPage(self::TEST_TITLE, self::TEST_TEXT);
+        // Edit the page with test text.
+        $this->_testMediawiki->editPage(self::TEST_TITLE, self::TEST_WIKITEXT);
         
-        // Assert get pages successful.
+        // Assert the test page's Wikitext is valid.
+        $textPageWikitext = $this->_testMediawiki->getPageWikitext(self::TEST_TITLE);
+        $this->assertTrue(self::TEST_WIKITEXT == $textPageWikitext, 'Editing the test page with test wikitext did not work ');
+        
+        // Assert the test page's HTML is valid. Remove dynamic HTML comments.
+        $testPageHtml = $this->_testMediawiki->getPageHtml(self::TEST_TITLE);
+        $this->assertTrue(self::TEST_EXPECTED_HTML == $this->_removeHtmlComments($testPageHtml), 'The test page HTML is invalid');
+        
+    }
+    
+    private function _removeHtmlComments($text)
+    {
+        // Must include "s" modifier so "." matches new lines.
+        return preg_replace('/<!--.*-->/s', '', $text);
     }
 }
