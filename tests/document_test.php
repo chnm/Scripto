@@ -1,6 +1,9 @@
 <?php
 require_once 'config.php';
 
+/**
+ * Test the base Scripto_Document class.
+ */
 class TestDocument extends UnitTestCase
 {
     
@@ -24,7 +27,8 @@ class TestDocument extends UnitTestCase
         $this->_testDocument = new Scripto_Document(TEST_DOCUMENT_ID, 
                                                     TEST_MEDIAWIKI_API_URL, 
                                                     TEST_MEDIAWIKI_DB_NAME, 
-                                                    new $testAdapterClassName);
+                                                    new $testAdapterClassName, 
+                                                    false);
     }
     
     public function testDocumentIsValid()
@@ -39,5 +43,12 @@ class TestDocument extends UnitTestCase
         // Assert accessor methods return expected values.
         $this->assertIdentical(TEST_DOCUMENT_ID, $this->_testDocument->getId());
         
+        // Assert the decoding the base title works.
+        $baseTitle = Scripto_Document::encodeBaseTitle($this->_testDocument->getId(), 
+                                                       $this->_testDocument->getPageId());
+        $decodedBaseTitle = Scripto_Document::decodeBaseTitle($baseTitle);
+        
+        $this->assertEqual($decodedBaseTitle[0], TEST_DOCUMENT_ID, 'Something wen wrong during base title encoding/decoding. Document ID does not match');
+        $this->assertEqual($decodedBaseTitle[1], $this->_testDocument->getPageId(), 'Something wen wrong during base title encoding/decoding. Page ID does not match');
     }
 }
