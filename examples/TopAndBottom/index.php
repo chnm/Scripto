@@ -9,11 +9,11 @@ $documentId = isset($_GET['documentId']) ? $_GET['documentId'] : 16344;
 $pageId = isset($_GET['pageId']) ? $_GET['pageId'] : null;
 
 // Set the Adapter object.
-require_once '../../lib/Scripto/Adapter/Example.php';
+require_once 'Scripto/Adapter/Example.php';
 $adapter = new Scripto_Adapter_Example;
 
 // Set the Document object.
-require_once '../../lib/Scripto/Document.php';
+require_once 'Scripto/Document.php';
 $doc = new Scripto_Document($documentId, 
                             MEDIAWIKI_API_URL, 
                             MEDIAWIKI_DB_NAME, 
