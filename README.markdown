@@ -36,6 +36,8 @@ Installation
 Suggested Configuration and Setup
 -------------
 
+Here's a basic configuration:
+
     <?php
     
     // Path to directory containing Zend Framework, from root.
@@ -68,3 +70,29 @@ Suggested Configuration and Setup
 
 See the examples/ directory for more suggestions on configuration, setup, 
 layout, and styles.
+
+To run the examples, mv examples/shared/config.php.changeme examples/shared/config.php, and set up the configuration something like this:
+
+	<?php
+	ini_set('display_errors', 1);
+	
+	
+	// Path to directory containing Zend Framework, from root.
+	define('ZEND_PATH', '/home/myuser/lib/php/Zend/library');
+	
+	// Path to directory containing the Scripto library, from root.
+	define('SCRIPTO_PATH', '/home/myuser/mydomain.org/Scripto/lib');
+	
+	// URL to the MediaWiki installation API.
+	define('MEDIAWIKI_API_URL', 'http://mydomain.org/wiki/api.php');
+	
+	// Name of the MediaWiki database.
+	define('MEDIAWIKI_DB_NAME', 'mediawiki_db');
+	
+	// Set the include path to Zend and Scripto libraries.
+	set_include_path(get_include_path() 
+					 . PATH_SEPARATOR . ZEND_PATH 
+					 . PATH_SEPARATOR . SCRIPTO_PATH);
+					 
+After that, you should be able to load http://mydomain.org/Scripto/examples/Simple/ to see a basic example.
+
