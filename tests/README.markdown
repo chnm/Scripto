@@ -12,18 +12,24 @@ Installation
 -------------
 
 * Download the [SimpleTest](http://www.simpletest.org/) framework;
-* Copy config.php.changeme to config.php;
-* Set the configuration in config.php;
+* Copy config.php.changeme to config.php:
 
-To copy the configuration file:
+On the command line:
 
     $ cd /path/to/scripto/tests/
     $ cp config.php.changeme config.php
 
-If you're using the Example adapter, here's a value that will work for the document id: (Look inside lib/Scripto/Adapter/Example.php for why.)
+* Set the configuration in config.php:
 
-	// Test document ID.
-	define('TEST_DOCUMENT_ID', '16344');
+You can use the following document IDs to test Scripto's Example adapter:
+
+    // Test document ID.
+    define('TEST_DOCUMENT_ID', '16344');
+    
+or:
+
+    // Test document ID.
+    define('TEST_DOCUMENT_ID', '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.');
 
 Running the Tests
 -------------

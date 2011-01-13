@@ -54,8 +54,8 @@ Here's a basic configuration:
 
     // Set the include path to Zend and Scripto libraries.
     set_include_path(get_include_path() 
-                     . PATH_SEPARATOR . ZEND_PATH 
-                     . PATH_SEPARATOR . SCRIPTO_PATH);
+                   . PATH_SEPARATOR . ZEND_PATH 
+                   . PATH_SEPARATOR . SCRIPTO_PATH);
     
     // Set the Document and Adapter objects.
     require_once 'Scripto/Document.php';
@@ -71,28 +71,43 @@ Here's a basic configuration:
 See the examples/ directory for more suggestions on configuration, setup, 
 layout, and styles.
 
-To run the examples, mv examples/shared/config.php.changeme examples/shared/config.php, and set up the configuration something like this:
+Running the Examples
+-------------
 
-	<?php
-	ini_set('display_errors', 1);
-	
-	
-	// Path to directory containing Zend Framework, from root.
-	define('ZEND_PATH', '/home/myuser/lib/php/Zend/library');
-	
-	// Path to directory containing the Scripto library, from root.
-	define('SCRIPTO_PATH', '/home/myuser/mydomain.org/Scripto/lib');
-	
-	// URL to the MediaWiki installation API.
-	define('MEDIAWIKI_API_URL', 'http://mydomain.org/wiki/api.php');
-	
-	// Name of the MediaWiki database.
-	define('MEDIAWIKI_DB_NAME', 'mediawiki_db');
-	
-	// Set the include path to Zend and Scripto libraries.
-	set_include_path(get_include_path() 
-					 . PATH_SEPARATOR . ZEND_PATH 
-					 . PATH_SEPARATOR . SCRIPTO_PATH);
-					 
-After that, you should be able to load http://mydomain.org/Scripto/examples/Simple/ to see a basic example.
+The examples/ directory contains three example layouts. The Simple layout is the 
+most straightforward; while the SideBySide and TopAndBottom layouts are more 
+intricate, using [OpenLayers](http://openlayers.org/) for the document image 
+viewer and [jQuery](http://jquery.com/) for a dynamic, AJAX-powered user 
+interface. To run the examples, follow these steps:
+
+* Make sure the Scripto directory is accessible to your web server;
+* Copy config.php.changeme to config.php:
+
+On the command line:
+
+    $ cd /path/to/mydomain.org/Scripto/examples/shared/
+    $ cp config.php.changeme config.php
+
+* Set the configuration in config.php:
+
+Something like this:
+
+    <?php
+    
+    // Path to directory containing Zend Framework, from root.
+    define('ZEND_PATH', '/path/to/zend/library');
+    
+    // Path to directory containing the Scripto library, from root.
+    define('SCRIPTO_PATH', '/path/to/mydomain.org/Scripto/lib');
+    
+    // URL to the MediaWiki installation API.
+    define('MEDIAWIKI_API_URL', 'http://mydomain.org/wiki/api.php');
+    
+    // Name of the MediaWiki database.
+    define('MEDIAWIKI_DB_NAME', 'mediawiki_db');
+
+* Load the following layouts in your web browser:
+ * http://mydomain.org/Scripto/examples/Simple/
+ * http://mydomain.org/Scripto/examples/TopAndBottom/
+ * http://mydomain.org/Scripto/examples/SideBySide/
 
