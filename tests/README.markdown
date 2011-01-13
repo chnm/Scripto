@@ -18,7 +18,7 @@ Installation
 To copy the configuration file:
 
     $ cd /path/to/scripto/tests/
-    $ cp config.php.changeme config.php`
+    $ cp config.php.changeme config.php
 
 
 Running the Tests
