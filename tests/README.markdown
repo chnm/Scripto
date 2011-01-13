@@ -20,6 +20,10 @@ To copy the configuration file:
     $ cd /path/to/scripto/tests/
     $ cp config.php.changeme config.php
 
+If you're using the Example adapter, here's a value that will work for the document id: (Look inside lib/Scripto/Adapter/Example.php for why.)
+
+	// Test document ID.
+	define('TEST_DOCUMENT_ID', '16344');
 
 Running the Tests
 -------------
