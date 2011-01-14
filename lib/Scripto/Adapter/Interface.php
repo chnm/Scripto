@@ -81,8 +81,9 @@ interface Scripto_Adapter_Interface
     /**
      * Import a document page's transcription into the external system.
      * 
-     * @param int|string The document ID
-     * @param int|string The page ID
+     * @param int|string $documentId The document ID
+     * @param int|string $pageId The page ID
+     * @param string $text The text to import
      * @return bool True: success; false: fail
      */
     public function importDocumentPageTranscription($documentId, $pageId, $text);
@@ -91,7 +92,7 @@ interface Scripto_Adapter_Interface
      * Import an entire document's transcription into the external system.
      * 
      * @param int|string The document ID
-     * @param int|string The page ID
+     * @param string The text to import
      * @return bool True: success; false: fail
      */
     public function importDocumentTranscription($documentId, $text);

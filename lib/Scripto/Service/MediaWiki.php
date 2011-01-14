@@ -245,8 +245,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     /**
      * Edit the MediaWiki page for the current document page.
      * 
-     * @param string The title of the page to edit
-     * @param string The wikitext of the page
+     * @param string $title The title of the page to edit
+     * @param string $text The wikitext of the page
      */
     public function editPage($title, $text)
     {

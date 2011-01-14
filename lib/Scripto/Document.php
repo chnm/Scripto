@@ -141,6 +141,8 @@ class Scripto_Document
     
     /**
      * Get the document ID.
+     * 
+     * @return string|int
      */
     public function getId()
     {
@@ -149,6 +151,8 @@ class Scripto_Document
     
     /**
      * Get the page ID.
+     * 
+     * @return string|int
      */
     public function getPageId()
     {
@@ -157,6 +161,8 @@ class Scripto_Document
     
     /**
      * Get the base title.
+     * 
+     * @return string
      */
     public function getBaseTitle()
     {
@@ -368,6 +374,12 @@ class Scripto_Document
              . Scripto_Document::base64UrlEncode($pageId);
     }
     
+    /**
+     * Decode the base title.
+     * 
+     * @param string|int $baseTitle
+     * @return array An array containing the document ID and page ID
+     */
     static public function decodeBaseTitle($baseTitle)
     {
         // First remove the title prefix.
@@ -382,6 +394,7 @@ class Scripto_Document
      * Encode a string to URL-safe Base64.
      * 
      * @param string $str
+     * @return string
      */
     static public function base64UrlEncode($str)
     {
@@ -392,6 +405,7 @@ class Scripto_Document
      * Decode a string from a URL-safe Base64.
      * 
      * @param string $str
+     * @return string
      */
     static public function base64UrlDecode($str)
     {
