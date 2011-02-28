@@ -56,6 +56,11 @@ class Scripto_Document
     private $_mediawiki;
     
     /**
+     * @var array The cached user info of the current user.
+     */
+    private $_userInfo;
+    
+    /**
      * Construct the Scripto document object.
      * 
      * @param string|int $id The unique document identifier.
@@ -290,6 +295,65 @@ class Scripto_Document
     public function getPreview($wikitext)
     {
         return $this->_mediawiki->getPreview($wikitext);
+    }
+    
+    /**
+     * Return information about the currently logged-in user.
+     * 
+     * @return stdClass
+     */
+    public function getUserInfo()
+    {
+        // If not already cached, set the current user info.
+        if (null === $this->_userInfo) {
+            $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
+            $this->_userInfo = array('id'         => $userInfo->id, 
+                                     'name'       => $userInfo->name, 
+                                     'rights'     => $userInfo->rights, 
+                                     'edit_count' => $userInfo->editcount, 
+                                     'email'      => $userInfo->email);
+        }
+        return $this->_userInfo;
+    }
+    
+    /**
+     * Return the specified user's contributions.
+     * 
+     * @param null|string $username
+     * @param int $limit
+     * @return array
+     */
+    public function getUserContributions($username = null, $limit = 10)
+    {
+        // If no username was specified, set it to the current user.
+        if (null === $username) {
+            $userInfo = $this->getUserInfo();
+            $username = $userInfo['name'];
+        }
+        
+        $userContribs = $this->_mediawiki->getUserContributions($username, $limit)
+                                         ->query
+                                         ->usercontribs;
+        $userContributions = array();
+        foreach ($userContribs as $value) {
+            
+            // Filter out contributions that are not document pages. 
+            if (self::BASE_TITLE_PREFIX != $value->title[0]) {
+                continue;
+            }
+            
+            $document = self::decodeBaseTitle($value->title);
+            
+            $userContributions[] = array('page_id'          => $value->pageid, 
+                                         'revision_id'      => $value->revid, 
+                                         'title'            => $value->title, 
+                                         'document_id'      => $document[0], 
+                                         'document_page_id' => $document[1], 
+                                         'timestamp'        => $value->timestamp, 
+                                         'comment'          => $value->comment, 
+                                         'size'             => $value->size);
+        }
+        return $userContributions;
     }
     
     /**

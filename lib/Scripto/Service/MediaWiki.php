@@ -262,4 +262,45 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         $response = self::getHttpClient()->request('POST');
         self::getHttpClient()->resetParameters();
     }
+    
+    /**
+     * Return information about the currently logged-in user.
+     * 
+     * @return stdClass
+     */
+    public function getUserInfo()
+    {
+        // http://www.mediawiki.org/wiki/API:Meta#userinfo_.2F_ui
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('meta', 'userinfo')
+                             ->setParameterPost('uiprop', 'rights|editcount|email');
+        
+        $response = self::getHttpClient()->request('POST')->getBody();
+        self::getHttpClient()->resetParameters();
+        
+        return json_decode($response);
+    }
+    
+    /**
+     * Return the specified user's contributions.
+     * 
+     * @param null|string $username
+     * @param int $limit
+     * @return stdClass
+     */
+    public function getUserContributions($username, $limit = 10)
+    {
+        // http://www.mediawiki.org/wiki/API:Usercontribs
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('list', 'usercontribs')
+                             ->setParameterPost('ucuser', $username)
+                             ->setParameterPost('uclimit', $limit);
+        
+        $response = self::getHttpClient()->request('POST')->getBody();
+        self::getHttpClient()->resetParameters();
+        
+        return json_decode($response);
+     }
 }
