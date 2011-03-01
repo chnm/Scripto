@@ -13,9 +13,9 @@ $adapter = new Scripto_Adapter_Example;
 // Set the Document object.
 require_once 'Scripto/Document.php';
 $doc = new Scripto_Document($documentId, 
+                            $adapter, 
                             MEDIAWIKI_API_URL, 
-                            MEDIAWIKI_DB_NAME, 
-                            $adapter);
+                            MEDIAWIKI_DB_NAME);
 
 // Must set the current page first.
 $doc->setPage($pageId);

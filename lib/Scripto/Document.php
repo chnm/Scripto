@@ -4,13 +4,13 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+require_once 'Scripto.php';
 require_once 'Scripto/Exception.php';
 
 /**
- * Base class for Scripto documents. Serves as a connector object between the 
- * external system API and MediaWiki API.
+ * Represents a Scripto document and its pages.
  */
-class Scripto_Document
+class Scripto_Document extends Scripto
 {
     /**
      * The prefix used in the base title to keep MediaWiki from capitalizing the 
@@ -32,33 +32,17 @@ class Scripto_Document
     /**
      * @var string The document ID provided by the external system.
      */
-    private $_id;
+    protected $_id;
     
     /**
      * @var string The document page ID provided by the external system.
      */
-    private $_pageId;
+    protected $_pageId;
     
     /**
      * @var string The base title of the corresponding MediaWiki page.
      */
-    private $_baseTitle;
-    
-    /**
-     * @var Scripto_Adapter_Interface The adapter object for the external 
-     * system.
-     */
-    private $_adapter;
-    
-    /**
-     * @var Scripto_Service_MediaWiki The MediaWiki service object.
-     */
-    private $_mediawiki;
-    
-    /**
-     * @var array The cached user info of the current user.
-     */
-    private $_userInfo;
+    protected $_baseTitle;
     
     /**
      * Construct the Scripto document object.
@@ -70,49 +54,28 @@ class Scripto_Document
      * @param bool $passCookies Pass cookies to the web browser via API client.
      */
     public function __construct($id, 
+                                Scripto_Adapter_Interface $adapter, 
                                 $mediaWikiApiUrl, 
                                 $mediaWikiDbName, 
-                                Scripto_Adapter_Interface $adapter, 
                                 $passCookies = true)
     {
+        $this->_id = $id;
+        
+        // Send the parameters to the parent constructor.
+        parent::__construct($adapter, 
+                            $mediaWikiApiUrl, 
+                            $mediaWikiDbName, 
+                            $passCookies);
+        
         // Document IDs must not be empty strings, null, or false.
-        if (!strlen($id) 
-            || is_null($id) 
-            || false === $id) {
+        if (!strlen($id) || is_null($id) || false === $id) {
             throw new Scripto_Exception('The document ID is invalid.');
         }
         
         // Query the adapter whether the document exists.
-        if (!$adapter->documentExists($id)) {
+        if (!$this->_adapter->documentExists($id)) {
             throw new Scripto_Exception("The specified document does not exist: {$this->_id}");
         }
-        
-        $this->_id = $id;
-        $this->_adapter = $adapter;
-        
-        require_once 'Scripto/Service/MediaWiki.php';
-        $this->_mediawiki = new Scripto_Service_MediaWiki($mediaWikiApiUrl, 
-                                                          $mediaWikiDbName, 
-                                                          (bool) $passCookies);
-    }
-    
-    /**
-     * Login via the MediaWiki service.
-     * 
-     * @param string $username
-     * @param string $password
-     */
-    public function login($username, $password)
-    {
-        $this->_mediawiki->login($username, $password);
-    }
-    
-    /**
-     * Logout via the MediaWiki service.
-     */
-    public function logout()
-    {
-        $this->_mediawiki->logout();
     }
     
     /**
@@ -295,65 +258,6 @@ class Scripto_Document
     public function getPreview($wikitext)
     {
         return $this->_mediawiki->getPreview($wikitext);
-    }
-    
-    /**
-     * Return information about the currently logged-in user.
-     * 
-     * @return stdClass
-     */
-    public function getUserInfo()
-    {
-        // If not already cached, set the current user info.
-        if (null === $this->_userInfo) {
-            $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
-            $this->_userInfo = array('id'         => $userInfo->id, 
-                                     'name'       => $userInfo->name, 
-                                     'rights'     => $userInfo->rights, 
-                                     'edit_count' => $userInfo->editcount, 
-                                     'email'      => $userInfo->email);
-        }
-        return $this->_userInfo;
-    }
-    
-    /**
-     * Return the specified user's contributions.
-     * 
-     * @param null|string $username
-     * @param int $limit
-     * @return array
-     */
-    public function getUserContributions($username = null, $limit = 10)
-    {
-        // If no username was specified, set it to the current user.
-        if (null === $username) {
-            $userInfo = $this->getUserInfo();
-            $username = $userInfo['name'];
-        }
-        
-        $userContribs = $this->_mediawiki->getUserContributions($username, $limit)
-                                         ->query
-                                         ->usercontribs;
-        $userContributions = array();
-        foreach ($userContribs as $value) {
-            
-            // Filter out contributions that are not document pages. 
-            if (self::BASE_TITLE_PREFIX != $value->title[0]) {
-                continue;
-            }
-            
-            $document = self::decodeBaseTitle($value->title);
-            
-            $userContributions[] = array('page_id'          => $value->pageid, 
-                                         'revision_id'      => $value->revid, 
-                                         'title'            => $value->title, 
-                                         'document_id'      => $document[0], 
-                                         'document_page_id' => $document[1], 
-                                         'timestamp'        => $value->timestamp, 
-                                         'comment'          => $value->comment, 
-                                         'size'             => $value->size);
-        }
-        return $userContributions;
     }
     
     /**
