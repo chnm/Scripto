@@ -69,6 +69,16 @@ class Scripto
     }
     
     /**
+     * Determine if the current user is logged in.
+     * 
+     * @return bool
+     */
+    public function isLoggedIn()
+    {
+        return $this->_mediawiki->isLoggedIn();
+    }
+    
+    /**
      * Return information about the currently logged-in user.
      * 
      * @return stdClass
