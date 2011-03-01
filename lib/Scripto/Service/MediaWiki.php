@@ -61,33 +61,30 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     public function login($username, $password)
     {
-        self::getHttpClient()->setParameterPost('format', 'xml')
+        // Log in request.
+        // See: http://www.mediawiki.org/wiki/API:Login#Log_in
+        self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'login')
                              ->setParameterPost('lgname', $username)
                              ->setParameterPost('lgpassword', $password);
         
-        $response = self::getHttpClient()->request('POST');
+        $logInResponse = json_decode(self::getHttpClient()->request('POST')->getBody());
         self::getHttpClient()->resetParameters();
         
-        $xml = new SimpleXMLElement($response->getBody());
-        $loginResult = (string) $xml->login['result'];
-        
-        // Confirm the login token. See: http://www.mediawiki.org/wiki/API:Login#Confirm_token
-        if (self::LOGIN_ERROR_NEEDTOKEN == $loginResult) {
-            self::getHttpClient()->setParameterPost('format', 'xml')
+        // Confirm the login token.
+        // See: http://www.mediawiki.org/wiki/API:Login#Confirm_token
+        if (self::LOGIN_ERROR_NEEDTOKEN == $logInResponse->login->result) {
+            self::getHttpClient()->setParameterPost('format', 'json')
                                  ->setParameterPost('action', 'login')
                                  ->setParameterPost('lgname', $username)
                                  ->setParameterPost('lgpassword', $password)
-                                 ->setParameterPost('lgtoken', (string) $xml->login['token']);
+                                 ->setParameterPost('lgtoken', $logInResponse->login->token);
             
-            $response = self::getHttpClient()->request('POST');
+            $confirmTokenResponse = json_decode(self::getHttpClient()->request('POST')->getBody());
             self::getHttpClient()->resetParameters();
-            
-            $xml = new SimpleXMLElement($response->getBody());
-            $loginResult = (string) $xml->login['result'];
         }
         
-        switch ($loginResult) {
+        switch ($confirmTokenResponse->login->result) {
             case self::LOGIN_SUCCESS:
                 if ($this->_passCookies) {
                     // Persist MediaWiki authentication cookies in the browser.
@@ -107,7 +104,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             case self::LOGIN_ERROR_NONAME:
                 throw new Scripto_Service_Exception('Username is empty.');
             default:
-                throw new Scripto_Service_Exception("Unknown login error: '$loginResult'");
+                throw new Scripto_Service_Exception("Unknown login error: '{$confirmTokenResponse->login->result}'");
         }
     }
     
@@ -149,6 +146,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     public function getPageWikitext($title)
     {
         // Export page. See: http://www.mediawiki.org/wiki/API:Query#Exporting_pages
+        // Not available in JSON format.
         self::getHttpClient()->setParameterPost('format', 'xml')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('titles', $title)
