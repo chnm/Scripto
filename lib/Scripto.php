@@ -24,11 +24,6 @@ class Scripto
     protected $_mediawiki;
     
     /**
-     * @var array The cached user info of the current user.
-     */
-    protected $_userInfo;
-    
-    /**
      * Construct the Scripto object.
      * 
      * @param Scripto_Adapter_Interface $adapter The adapter object.
@@ -38,7 +33,6 @@ class Scripto
     {
         $this->_adapter = $adapter;
         $this->_mediawiki = self::mediawikiFactory($mediawiki);
-        $this->_userInfo = $this->setUserInfo();
     }
     
     /**
@@ -108,7 +102,6 @@ class Scripto
     public function login($username, $password)
     {
         $this->_mediawiki->login($username, $password);
-        $this->_userInfo = $this->setUserInfo();
     }
     
     /**
@@ -117,7 +110,6 @@ class Scripto
     public function logout()
     {
         $this->_mediawiki->logout();
-        $this->_userInfo = $this->setUserInfo();
     }
     
     /**
@@ -128,30 +120,23 @@ class Scripto
      */
     public function isLoggedIn()
     {
-        return (bool) $this->_userInfo['id'];
+        $userInfo = $this->getUserInfo();
+        return (bool) $userInfo['id'];
     }
     
     /**
-     * Set information about the currently logged-in user.
-     */
-    public function setUserInfo()
-    {
-        $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
-        $this->_userInfo = array('id'         => $userInfo->id, 
-                                 'name'       => $userInfo->name, 
-                                 'rights'     => $userInfo->rights, 
-                                 'edit_count' => $userInfo->editcount, 
-                                 'email'      => $userInfo->email);
-    }
-    
-    /**
-     * Return information about the currently logged-in user.
+     * Return information about the current user.
      * 
      * @return array
      */
     public function getUserInfo()
     {
-        return $this->_userInfo;
+        $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
+        return array('id'         => $userInfo->id, 
+                     'name'       => $userInfo->name, 
+                     'rights'     => $userInfo->rights, 
+                     'edit_count' => $userInfo->editcount, 
+                     'email'      => $userInfo->email);
     }
     
     /**
@@ -165,7 +150,8 @@ class Scripto
     {
         // If no username was specified, set it to the current user.
         if (null === $username) {
-            $username = $this->_userInfo['name'];
+            $userInfo = $this->getUserInfo();
+            $username = $userInfo['name'];
         }
         
         $userContribs = $this->_mediawiki->getUserContributions($username, $limit)
