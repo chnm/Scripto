@@ -11,11 +11,10 @@ require_once 'Scripto/Adapter/Example.php';
 $adapter = new Scripto_Adapter_Example;
 
 // Set the Document object.
-require_once 'Scripto/Document.php';
-$doc = new Scripto_Document($documentId, 
-                            $adapter, 
-                            MEDIAWIKI_API_URL, 
-                            MEDIAWIKI_DB_NAME);
+require_once 'Scripto.php';
+$scripto = new Scripto($adapter, array('api_url' => MEDIAWIKI_API_URL, 
+                                       'db_name' => MEDIAWIKI_DB_NAME));
+$doc = $scripto->getDocument($documentId);
 
 // Must set the current page first.
 $doc->setPage($pageId);

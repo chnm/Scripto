@@ -4,13 +4,12 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
-require_once 'Scripto.php';
 require_once 'Scripto/Exception.php';
 
 /**
  * Represents a Scripto document and its pages.
  */
-class Scripto_Document extends Scripto
+class Scripto_Document
 {
     /**
      * The prefix used in the base title to keep MediaWiki from capitalizing the 
@@ -35,6 +34,17 @@ class Scripto_Document extends Scripto
     protected $_id;
     
     /**
+     * @var Scripto_Adapter_Interface The adapter object for the external 
+     * system.
+     */
+    protected $_adapter;
+    
+    /**
+     * @var Scripto_Service_MediaWiki The MediaWiki service object.
+     */
+    protected $_mediawiki;
+    
+    /**
      * @var string The document page ID provided by the external system.
      */
     protected $_pageId;
@@ -48,34 +58,28 @@ class Scripto_Document extends Scripto
      * Construct the Scripto document object.
      * 
      * @param string|int $id The unique document identifier.
-     * @param string $mediaWikiApiUrl The MediaWiki API URL.
-     * @param string $mediaWikiDbName The MediaWiki database name.
      * @param Scripto_Adapter_Interface $adapter The adapter object.
-     * @param bool $passCookies Pass cookies to the web browser via API client.
+     * @param array|Scripto_Service_MediaWiki $mediawiki {@link Scripto::mediawikiFactory()}
      */
     public function __construct($id, 
                                 Scripto_Adapter_Interface $adapter, 
-                                $mediaWikiApiUrl, 
-                                $mediaWikiDbName, 
-                                $passCookies = true)
+                                $mediawiki)
     {
-        $this->_id = $id;
-        
-        // Send the parameters to the parent constructor.
-        parent::__construct($adapter, 
-                            $mediaWikiApiUrl, 
-                            $mediaWikiDbName, 
-                            $passCookies);
-        
         // Document IDs must not be empty strings, null, or false.
         if (!strlen($id) || is_null($id) || false === $id) {
             throw new Scripto_Exception('The document ID is invalid.');
         }
         
         // Query the adapter whether the document exists.
-        if (!$this->_adapter->documentExists($id)) {
+        if (!$adapter->documentExists($id)) {
             throw new Scripto_Exception("The specified document does not exist: {$this->_id}");
         }
+        
+        $this->_id = $id;
+        $this->_adapter = $adapter;
+        
+        require_once 'Scripto.php';
+        $this->_mediawiki = Scripto::mediawikiFactory($mediawiki);
     }
     
     /**

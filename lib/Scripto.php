@@ -31,22 +31,72 @@ class Scripto
     /**
      * Construct the Scripto object.
      * 
-     * @param string $mediaWikiApiUrl The MediaWiki API URL.
-     * @param string $mediaWikiDbName The MediaWiki database name.
      * @param Scripto_Adapter_Interface $adapter The adapter object.
-     * @param bool $passCookies Pass cookies to the web browser via API client.
+     * @param array|Scripto_Service_MediaWiki $mediawiki {@link Scripto::mediawikiFactory()}
      */
-    public function __construct(Scripto_Adapter_Interface $adapter, 
-                                $mediaWikiApiUrl, 
-                                $mediaWikiDbName, 
-                                $passCookies = true)
+    public function __construct(Scripto_Adapter_Interface $adapter, $mediawiki)
     {
         $this->_adapter = $adapter;
+        $this->_mediawiki = self::mediawikiFactory($mediawiki);
+        $this->_userInfo = $this->setUserInfo();
+    }
+    
+    /**
+     * Build and return a MediaWiki service object.
+     * 
+     * @param array|Scripto_Service_MediaWiki $mediawiki If an array:
+     *     $mediawiki['api_url']: required; the MediaWiki API URL
+     *     $mediawiki['db_name']: required; the MediaWiki database name
+     *     $mediawiki['pass_cookies']: optional pass cookies to the web browser 
+     *     via API client
+     * @return Scripto_Service_MediaWiki|false
+     */
+    public static function mediawikiFactory($mediawiki)
+    {
+        if ($mediawiki instanceof Scripto_Service_MediaWiki) {
+            return $mediawiki;
+        }
         
-        require_once 'Scripto/Service/MediaWiki.php';
-        $this->_mediawiki = new Scripto_Service_MediaWiki($mediaWikiApiUrl, 
-                                                          $mediaWikiDbName, 
-                                                          (bool) $passCookies);
+        if (is_array($mediawiki) 
+         && array_key_exists('api_url', $mediawiki) 
+         && array_key_exists('db_name', $mediawiki)) {
+            if (!isset($mediawiki['pass_cookies'])) {
+                $mediawiki['pass_cookies'] = true;
+            }
+            require_once 'Scripto/Service/MediaWiki.php';
+            return new Scripto_Service_MediaWiki($mediawiki['api_url'], 
+                                                 $mediawiki['db_name'], 
+                                                 (bool) $mediawiki['pass_cookies']);
+        }
+        
+        throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
+   }
+    
+    /**
+     * Check whethe the specified document exists.
+     * 
+     * @param string|int $id The unique document identifier.
+     * @return bool
+     */
+    public function documentExists($id)
+    {
+        // Query the adapter whether the document exists.
+        if ($this->_adapter->documentExists($id)) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Get a Scripto_Document object.
+     * 
+     * @param string|int $id The unique document identifier.
+     * @return Scripto_Document
+     */
+    public function getDocument($id)
+    {
+        require_once 'Scripto/Document.php';
+        return new Scripto_Document($id, $this->_adapter, $this->_mediawiki);
     }
     
     /**
@@ -58,6 +108,7 @@ class Scripto
     public function login($username, $password)
     {
         $this->_mediawiki->login($username, $password);
+        $this->_userInfo = $this->setUserInfo();
     }
     
     /**
@@ -66,34 +117,40 @@ class Scripto
     public function logout()
     {
         $this->_mediawiki->logout();
+        $this->_userInfo = $this->setUserInfo();
     }
     
     /**
-     * Determine if the current user is logged in.
+     * Determine if the current user is logged in by checking against the user 
+     * ID. An anonymous user has an ID of 0.
      * 
      * @return bool
      */
     public function isLoggedIn()
     {
-        return $this->_mediawiki->isLoggedIn();
+        return (bool) $this->_userInfo['id'];
+    }
+    
+    /**
+     * Set information about the currently logged-in user.
+     */
+    public function setUserInfo()
+    {
+        $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
+        $this->_userInfo = array('id'         => $userInfo->id, 
+                                 'name'       => $userInfo->name, 
+                                 'rights'     => $userInfo->rights, 
+                                 'edit_count' => $userInfo->editcount, 
+                                 'email'      => $userInfo->email);
     }
     
     /**
      * Return information about the currently logged-in user.
      * 
-     * @return stdClass
+     * @return array
      */
     public function getUserInfo()
     {
-        // If not already cached, set the current user info.
-        if (null === $this->_userInfo) {
-            $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
-            $this->_userInfo = array('id'         => $userInfo->id, 
-                                     'name'       => $userInfo->name, 
-                                     'rights'     => $userInfo->rights, 
-                                     'edit_count' => $userInfo->editcount, 
-                                     'email'      => $userInfo->email);
-        }
         return $this->_userInfo;
     }
     
@@ -108,8 +165,7 @@ class Scripto
     {
         // If no username was specified, set it to the current user.
         if (null === $username) {
-            $userInfo = $this->getUserInfo();
-            $username = $userInfo['name'];
+            $username = $this->_userInfo['name'];
         }
         
         $userContribs = $this->_mediawiki->getUserContributions($username, $limit)

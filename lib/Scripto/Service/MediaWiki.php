@@ -127,17 +127,6 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Determine if the current user is logged in by checking against the user 
-     * ID. An anonymous user has an ID of 0.
-     * 
-     * @return bool
-     */
-    public function isLoggedIn()
-    {
-        return (bool) $this->getUserInfo()->query->userinfo->id;
-    }
-    
-    /**
      * Get the MediaWiki page wikitext for a specified title.
      * 
      * @param string $title The title of the page.
