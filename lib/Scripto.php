@@ -140,44 +140,62 @@ class Scripto
     }
     
     /**
-     * Return the specified user's contributions.
+     * Get the current user's most recently contributed document pages.
      * 
-     * @param null|string $username
      * @param int $limit
      * @return array
      */
-    public function getUserContributions($username = null, $limit = 10)
+    public function getUserDocumentPages($limit = 10)
     {
         require_once 'Scripto/Document.php';
         
-        // If no username was specified, set it to the current user.
-        if (null === $username) {
-            $userInfo = $this->getUserInfo();
-            $username = $userInfo['name'];
-        }
-        
-        $userContribs = $this->_mediawiki->getUserContributions($username, $limit)
-                                         ->query
-                                         ->usercontribs;
-        $userContributions = array();
-        foreach ($userContribs as $value) {
-            
-            // Filter out contributions that are not document pages. 
-            if (Scripto_Document::BASE_TITLE_PREFIX != $value->title[0]) {
-                continue;
+        $limit = (int) $limit;
+        $userInfo = $this->getUserInfo();
+        $userDocumentPages = array();
+        $start = null;
+        do {
+            $userContribs = $this->_mediawiki->getUserContributions($userInfo['name'], 
+                                                                    $start, 
+                                                                    100);
+            foreach ($userContribs->query->usercontribs as $value) {
+                
+                // Filter out duplicate pages.
+                if (array_key_exists($value->pageid, $userDocumentPages)) {
+                    continue;
+                }
+                
+                // Filter out contributions that are not document pages. 
+                if (Scripto_Document::BASE_TITLE_PREFIX != $value->title[0]) {
+                    continue;
+                }
+                
+                // Set the document ID and page ID.
+                $document = Scripto_Document::decodeBaseTitle($value->title);
+                
+                // Build the user document pages, newest properties first.
+                $userDocumentPages[$value->pageid] = array('revision_id'      => $value->revid, 
+                                                           'title'            => $value->title, 
+                                                           'document_id'      => $document[0], 
+                                                           'document_page_id' => $document[1], 
+                                                           'timestamp'        => $value->timestamp, 
+                                                           'comment'          => $value->comment, 
+                                                           'size'             => $value->size);
+                
+                // Break out of the loops if limit has been reached.
+                if ($limit == count($userDocumentPages)) {
+                    break 2;
+                }
             }
             
-            $document = Scripto_Document::decodeBaseTitle($value->title);
+            // Set the query continue, if any.
+            if (isset($userContribs->{'query-continue'})) {
+                $start = $userContribs->{'query-continue'}->usercontribs->ucstart;
+            } else {
+                $start = null;
+            }
             
-            $userContributions[] = array('page_id'          => $value->pageid, 
-                                         'revision_id'      => $value->revid, 
-                                         'title'            => $value->title, 
-                                         'document_id'      => $document[0], 
-                                         'document_page_id' => $document[1], 
-                                         'timestamp'        => $value->timestamp, 
-                                         'comment'          => $value->comment, 
-                                         'size'             => $value->size);
-        }
-        return $userContributions;
+        } while ($start);
+        
+        return $userDocumentPages;
     }
 }

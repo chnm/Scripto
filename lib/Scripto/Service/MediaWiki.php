@@ -284,16 +284,18 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * Return the specified user's contributions.
      * 
      * @param null|string $username
+     * @param null|string
      * @param int $limit
      * @return stdClass
      */
-    public function getUserContributions($username, $limit = 10)
+    public function getUserContributions($username, $start = null, $limit = 10)
     {
         // http://www.mediawiki.org/wiki/API:Usercontribs
         self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('list', 'usercontribs')
                              ->setParameterPost('ucuser', $username)
+                             ->setParameterPost('ucstart', $start)
                              ->setParameterPost('uclimit', $limit);
         
         $response = self::getHttpClient()->request('POST')->getBody();
