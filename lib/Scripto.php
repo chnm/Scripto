@@ -148,6 +148,8 @@ class Scripto
      */
     public function getUserContributions($username = null, $limit = 10)
     {
+        require_once 'Scripto/Document.php';
+        
         // If no username was specified, set it to the current user.
         if (null === $username) {
             $userInfo = $this->getUserInfo();
@@ -161,11 +163,11 @@ class Scripto
         foreach ($userContribs as $value) {
             
             // Filter out contributions that are not document pages. 
-            if (self::BASE_TITLE_PREFIX != $value->title[0]) {
+            if (Scripto_Document::BASE_TITLE_PREFIX != $value->title[0]) {
                 continue;
             }
             
-            $document = self::decodeBaseTitle($value->title);
+            $document = Scripto_Document::decodeBaseTitle($value->title);
             
             $userContributions[] = array('page_id'          => $value->pageid, 
                                          'revision_id'      => $value->revid, 
