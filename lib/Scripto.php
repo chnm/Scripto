@@ -174,12 +174,13 @@ class Scripto
                 
                 // Build the user document pages, newest properties first.
                 $userDocumentPages[$value->pageid] = array('revision_id'      => $value->revid, 
-                                                           'title'            => $value->title, 
-                                                           'document_id'      => $document[0], 
-                                                           'document_page_id' => $document[1], 
+                                                           'mediawiki_title'  => $value->title, 
                                                            'timestamp'        => $value->timestamp, 
                                                            'comment'          => $value->comment, 
-                                                           'size'             => $value->size);
+                                                           'size'             => $value->size, 
+                                                           'document_id'      => $document[0], 
+                                                           'document_page_id' => $document[1], 
+                                                           'document_title'   => $this->_adapter->getDocumentTitle($document[0]));
                 
                 // Break out of the loops if limit has been reached.
                 if ($limit == count($userDocumentPages)) {
