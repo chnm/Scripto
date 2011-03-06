@@ -152,6 +152,7 @@ class Scripto
         $limit = (int) $limit;
         $userInfo = $this->getUserInfo();
         $userDocumentPages = array();
+        $documentTitles = array();
         $start = null;
         do {
             $userContribs = $this->_mediawiki->getUserContributions($userInfo['name'], 
@@ -172,6 +173,15 @@ class Scripto
                 // Set the document ID and page ID.
                 $document = Scripto_Document::decodeBaseTitle($value->title);
                 
+                // Set the document title. Reduce calls to the adapter by 
+                // caching each title and checking if it already exists.
+                if (array_key_exists($document[0], $documentTitles)) {
+                    $documentTitle = $documentTitles[$document[0]];
+                } else {
+                    $documentTitle = $this->_adapter->getDocumentTitle($document[0]);
+                    $documentTitles[$document[0]] = $documentTitle;
+                }
+                
                 // Build the user document pages, newest properties first.
                 $userDocumentPages[$value->pageid] = array('revision_id'      => $value->revid, 
                                                            'mediawiki_title'  => $value->title, 
@@ -180,7 +190,7 @@ class Scripto
                                                            'size'             => $value->size, 
                                                            'document_id'      => $document[0], 
                                                            'document_page_id' => $document[1], 
-                                                           'document_title'   => $this->_adapter->getDocumentTitle($document[0]));
+                                                           'document_title'   => $documentTitle;
                 
                 // Break out of the loops if limit has been reached.
                 if ($limit == count($userDocumentPages)) {
