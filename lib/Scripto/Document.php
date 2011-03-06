@@ -4,6 +4,7 @@
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+require_once 'Scripto.php';
 require_once 'Scripto/Exception.php';
 
 /**
@@ -45,6 +46,11 @@ class Scripto_Document
     protected $_mediawiki;
     
     /**
+     * @var string This document's title.
+     */
+    protected $_title;
+    
+    /**
      * @var string The document page ID provided by the external system.
      */
     protected $_pageId;
@@ -70,39 +76,38 @@ class Scripto_Document
             throw new Scripto_Exception('The document ID is invalid.');
         }
         
-        // Query the adapter whether the document exists.
+        // Check if the document exists.
         if (!$adapter->documentExists($id)) {
             throw new Scripto_Exception("The specified document does not exist: {$this->_id}");
         }
         
         $this->_id = $id;
         $this->_adapter = $adapter;
-        
-        require_once 'Scripto.php';
         $this->_mediawiki = Scripto::mediawikiFactory($mediawiki);
+        $this->_title = $this->_adapter->getDocumentTitle($id);
     }
     
     /**
-     * Validate and set the page ID and the base title used by MediaWiki.
-     * 
-     * Will set the first page of the document if the provided page ID is NULL 
-     * or FALSE.
+     * Set the current page ID and the base title used by MediaWiki.
      * 
      * @param string|null $pageId The unique page identifier.
      */
     public function setPage($pageId)
     {
+        // Set to the first page if the provided page is NULL or FALSE.
         if (null === $pageId || false === $pageId) {
             $pageId = $this->getFirstPageId();
         }
         
+        // Check if the page exists.
         if (!$this->_adapter->documentPageExists($this->_id, $pageId)) {
             throw new Scripto_Exception("The specified page does not exist: $pageId");
         }
         
         // Mint the page title used by MediaWiki.
         $baseTitle = self::encodeBaseTitle($this->_id, $pageId);
-                          
+        
+        // Check if the base title is under the maximum character length.
         if (self::TITLE_BYTE_LIMIT < strlen($this->_baseTitle)) {
             throw new Scripto_Exception('The document ID and/or page ID are too long to set the provided page.');
         }
@@ -112,7 +117,7 @@ class Scripto_Document
     }
     
     /**
-     * Get the document ID.
+     * Get this document's ID.
      * 
      * @return string|int
      */
@@ -122,7 +127,15 @@ class Scripto_Document
     }
     
     /**
-     * Get the page ID.
+     * Get this document's title.
+     */
+    public function getTitle()
+    {
+        return $this->_title;
+    }
+    
+    /**
+     * Get this document's current page ID.
      * 
      * @return string|int
      */
@@ -132,7 +145,7 @@ class Scripto_Document
     }
     
     /**
-     * Get the base title.
+     * Get this document's current base title.
      * 
      * @return string
      */
