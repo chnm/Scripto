@@ -190,7 +190,7 @@ class Scripto
                                                            'size'             => $value->size, 
                                                            'document_id'      => $document[0], 
                                                            'document_page_id' => $document[1], 
-                                                           'document_title'   => $documentTitle;
+                                                           'document_title'   => $documentTitle);
                 
                 // Break out of the loops if limit has been reached.
                 if ($limit == count($userDocumentPages)) {
