@@ -79,6 +79,14 @@ interface Scripto_Adapter_Interface
     public function getDocumentFirstPageId($documentId);
     
     /**
+     * Get the title of the document.
+     * 
+     * @param int|string $documentId
+     * @return string
+     */
+    public function getDocumentTitle($documentId);
+    
+    /**
      * Import a document page's transcription into the external system.
      * 
      * @param int|string $documentId The document ID

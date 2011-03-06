@@ -19,9 +19,12 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
      * For example purposes the document data are stored following this format:
      * 
      * {documentId} => array(
-     *     {pageId} => array(
-     *         'page_name' => {pageName}, 
-     *         'page_image_url' => {pageImageUrl}
+     *     'document_title' => {documentTitle}, 
+     *     'document_pages' => array(
+     *         {pageId} => array(
+     *             'page_name' => {pageName}, 
+     *             'page_image_url' => {pageImageUrl}
+     *         )
      *     )
      * ) 
      * 
@@ -33,7 +36,8 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
      * pageId: xbe/XBE02001.jpg
      * ?documentId=Request+for+Purchase+of+Liver+Oil+%26+Drum+Heads&pageId=xbe%2FXBE02001.jpg
      * 
-     * These example documents are from CHNM's Papers of the War Department.
+     * These example documents are from Center for History and New Media Papers 
+     * of the War Department and Library of Congress American Memory.
      * 
      * @var array
      */
@@ -41,56 +45,62 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
         // Example of the preferred way to set the document and page IDs using 
         // unique keys. See: http://wardepartmentpapers.org/document.php?id=16344
         16344 => array(
-            67799 => array(
-                'page_name' => 'Letter Outside', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07001.jpg'
-            ), 
-            67800 => array(
-                'page_name' => 'Letter Body', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07002.jpg'
-            ), 
-            67801 => array(
-                'page_name' => 'Worksheet 1, Outside', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07003.jpg'
-            ), 
-            67802 => array(
-                'page_name' => 'Worksheet 1, Page 1', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07004.jpg'
-            ), 
-            67803 => array(
-                'page_name' => 'Worksheet 1, Page 2', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07005.jpg'
-            ), 
-            67804 => array(
-                'page_name' => 'Worksheet 2, Outside', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07006.jpg'
-            ), 
-            67805 => array(
-                'page_name' => 'Worksheet 2, Page 1', 
-                'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07007.jpg'
+            'document_title' => 'Return of articles received and expended; work done at Springfield Massachusetts armory', 
+            'document_pages' => array(
+                67799 => array(
+                    'page_name' => 'Letter Outside', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07001.jpg'
+                ), 
+                67800 => array(
+                    'page_name' => 'Letter Body', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07002.jpg'
+                ), 
+                67801 => array(
+                    'page_name' => 'Worksheet 1, Outside', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07003.jpg'
+                ), 
+                67802 => array(
+                    'page_name' => 'Worksheet 1, Page 1', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07004.jpg'
+                ), 
+                67803 => array(
+                    'page_name' => 'Worksheet 1, Page 2', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07005.jpg'
+                ), 
+                67804 => array(
+                    'page_name' => 'Worksheet 2, Outside', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07006.jpg'
+                ), 
+                67805 => array(
+                    'page_name' => 'Worksheet 2, Page 1', 
+                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07007.jpg'
+                )
             )
         ), 
         // An alternate way to set the document using a document title as the 
         // document ID and the image file path as the page ID. See: http://books.google.com/books?id=eAuOQMmGEYIC&lpg=PA515&ots=PtWRBKDZbf&pg=PA515
         // %5BFacsimile%20of%5D%20letter%20to%20Messrs.%20O.%20P.%20Hall%20et%20al%20from%20Lincoln.
         '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.' => array(
-            // rbc%2Flprbscsm%2Fscsm0455%2F001r.jpg
-            'rbc/lprbscsm/scsm0455/001r.jpg' => array(
-                'page_name' => '001r', 
-                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/001r.jpg'
-            ), 
-            'rbc/lprbscsm/scsm0455/002r.jpg' => array(
-                'page_name' => '002r', 
-                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/002r.jpg'
-            ), 
-            'rbc/lprbscsm/scsm0455/003r.jpg' => array(
-                'page_name' => '003r', 
-                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/003r.jpg'
-            ), 
-            'rbc/lprbscsm/scsm0455/004r.jpg' => array(
-                'page_name' => '004r', 
-                'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/004r.jpg'
-            ), 
+            'document_title' => '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.', 
+            'document_pages' => array(
+                // rbc%2Flprbscsm%2Fscsm0455%2F001r.jpg
+                'rbc/lprbscsm/scsm0455/001r.jpg' => array(
+                    'page_name' => '001r', 
+                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/001r.jpg'
+                ), 
+                'rbc/lprbscsm/scsm0455/002r.jpg' => array(
+                    'page_name' => '002r', 
+                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/002r.jpg'
+                ), 
+                'rbc/lprbscsm/scsm0455/003r.jpg' => array(
+                    'page_name' => '003r', 
+                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/003r.jpg'
+                ), 
+                'rbc/lprbscsm/scsm0455/004r.jpg' => array(
+                    'page_name' => '004r', 
+                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/004r.jpg'
+                )
+            )
         )
     );
     
@@ -101,13 +111,13 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
     
     public function documentPageExists($documentId, $pageId)
     {
-        return array_key_exists($pageId, $this->_documents[$documentId]);
+        return array_key_exists($pageId, $this->_documents[$documentId]['document_pages']);
     }
     
     public function getDocumentPages($documentId)
     {
         $pages = array();
-        foreach ($this->_documents[$documentId] as $pageId => $page) {
+        foreach ($this->_documents[$documentId]['document_pages'] as $pageId => $page) {
             $pages[$pageId] = $page['page_name'];
         }
         return $pages;
@@ -115,12 +125,17 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
     
     public function getDocumentPageImageUrl($documentId, $pageId)
     {
-        return $this->_documents[$documentId][$pageId]['page_image_url'];
+        return $this->_documents[$documentId]['document_pages'][$pageId]['page_image_url'];
     }
     
     public function getDocumentFirstPageId($documentId)
     {
-        return key($this->_documents[$documentId]);
+        return key($this->_documents[$documentId]['document_pages']);
+    }
+    
+    public function getDocumentTitle($documentId)
+    {
+        return $this->_documents[$documentId]['document_title'];
     }
     
     public function importDocumentPageTranscription($documentId, $pageId, $text)

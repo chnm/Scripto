@@ -26,9 +26,8 @@ class TestDocument extends UnitTestCase
         require 'Scripto/Document.php';
         $this->_testDocument = new Scripto_Document(TEST_DOCUMENT_ID, 
                                                     new $testAdapterClassName, 
-                                                    TEST_MEDIAWIKI_API_URL, 
-                                                    TEST_MEDIAWIKI_DB_NAME, 
-                                                    false);
+                                                    array('api_url' => TEST_MEDIAWIKI_API_URL, 
+                                                          'db_name' =>TEST_MEDIAWIKI_DB_NAME));
     }
     
     public function testDocumentIsValid()
