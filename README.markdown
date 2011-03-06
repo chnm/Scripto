@@ -9,7 +9,7 @@ features a lightweight library that interfaces MediaWiki and potentially any
 content management system that serves document images. MediaWiki is a good 
 choice for the transcription database for several reasons:
 
-* It is the most popular wiki application and had a sizable and active developer 
+* It is the most popular wiki application and has a sizable and active developer 
   community;
 * Wiki markup is relatively easy to learn and there are useful WYSIWYG editors 
   available;
@@ -57,15 +57,17 @@ Here's a basic configuration:
                    . PATH_SEPARATOR . ZEND_PATH 
                    . PATH_SEPARATOR . SCRIPTO_PATH);
     
-    // Set the Document and Adapter objects.
-    require_once 'Scripto/Document.php';
+    // Set the Scripto object.
+    require_once 'Scripto.php';
     require_once 'Scripto/Adapter/Example.php';
-    $doc = new Scripto_Document($_REQUEST['documentId'], 
-                                MEDIAWIKI_API_URL, 
-                                MEDIAWIKI_DB_NAME, 
-                                new Scripto_Adapter_Example);
+    $scripto = new Scripto(new Scripto_Adapter_Example, 
+                           array('api_url' => MEDIAWIKI_API_URL, 
+                                 'db_name' => MEDIAWIKI_DB_NAME));
     
-    // Set the current page.
+    // Set the current document object.
+    $doc = $scripto->getDocument($_REQUEST['documentId']);
+    
+    // Set the current document page.
     $doc->setPage($_REQUEST['pageId']);
 
 See the examples/ directory for more suggestions on configuration, setup, 
