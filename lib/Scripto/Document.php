@@ -297,7 +297,7 @@ class Scripto_Document
         $userInfo = $this->_mediawiki->getUserInfo();
         
         // Users without edit rights cannot edit pages.
-        if (!in_array('edit', $userInfo['query']['userinfo']['rights']) {
+        if (!in_array('edit', $userInfo['query']['userinfo']['rights'])) {
             return false;
         }
         
@@ -315,7 +315,7 @@ class Scripto_Document
             if ('edit' == $pageProtection['type']) {
                 
                 // Users with edit and protect rights can edit protected pages.
-                if (in_array('protect', $userInfo['query']['userinfo']['rights']) {
+                if (in_array('protect', $userInfo['query']['userinfo']['rights'])) {
                     return true;
                 
                 // Users with edit but without protect rights cannot edit 

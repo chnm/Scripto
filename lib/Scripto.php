@@ -125,6 +125,17 @@ class Scripto
     }
     
     /**
+     * Return the name of the current user.
+     * 
+     * @return string
+     */
+    public function getUserName()
+    {
+        $userInfo = $this->_mediawiki->getUserInfo();
+        return $userInfo['query']['userinfo']['name'];
+    }
+    
+    /**
      * Get the current user's most recently contributed document pages.
      * 
      * @param int $limit
@@ -135,12 +146,12 @@ class Scripto
         require_once 'Scripto/Document.php';
         
         $limit = (int) $limit;
-        $userInfo = $this->getUserInfo();
+        $userInfo = $this->_mediawiki->getUserInfo();
         $userDocumentPages = array();
         $documentTitles = array();
         $start = null;
         do {
-            $userContribs = $this->_mediawiki->getUserContributions($userInfo['name'], 
+            $userContribs = $this->_mediawiki->getUserContributions($userInfo['query']['userinfo']['name'], 
                                                                     $start, 
                                                                     100);
             foreach ($userContribs->query->usercontribs as $value) {
