@@ -277,7 +277,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();
         
-        return json_decode($response);
+        return json_decode($response, true);
     }
     
     /**
@@ -302,5 +302,26 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->resetParameters();
         
         return json_decode($response);
-     }
+    }
+    
+    /**
+    * Return the protection status of the specified page.
+    * 
+    * @param string $title
+    * @return array
+    */
+    public function getPageProtections($title)
+    {
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('prop', 'info')
+                             ->setParameterPost('inprop', 'protection')
+                             ->setParameterPost('titles', $title);
+
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        self::getHttpClient()->resetParameters();
+
+        $page = current($response['query']['pages']);
+        return $page['protection'];
+    }
 }

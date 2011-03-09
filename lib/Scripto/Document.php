@@ -280,11 +280,6 @@ class Scripto_Document
     /**
     * Determine if the current user can edit the MediaWiki page.
     * 
-    * This assumes that self::getEditCredentials() will return NULL when the 
-    * response does not include an edittoken, which is an indication that the 
-    * user cannot edit the page. The response will also include a warning: 
-    * "Action 'edit' is not allowed for the current user."
-    * 
     * It is possible to restrict anonymous editing in MediaWiki.
     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
     * 
@@ -298,10 +293,41 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before determining whether the user can edit it.');
         }
-        if ($this->_mediawiki->getEditCredentials($this->_baseTitle)) {
+        
+        $userInfo = $this->_mediawiki->getUserInfo();
+        
+        // Users without edit rights cannot edit pages.
+        if (!in_array('edit', $userInfo['query']['userinfo']['rights']) {
+            return false;
+        }
+        
+        $pageProtections = $this->_mediawiki->getPageProtections($this->_baseTitle);
+        
+        // Users with edit rights can edit unprotected pages.
+        if (empty($pageProtections)) {
             return true;
         }
-        return false;
+        
+        // Iterate the page protections.
+        foreach ($pageProtections as $pageProtection) {
+            
+            // The page is edit-protected.
+            if ('edit' == $pageProtection['type']) {
+                
+                // Users with edit and protect rights can edit protected pages.
+                if (in_array('protect', $userInfo['query']['userinfo']['rights']) {
+                    return true;
+                
+                // Users with edit but without protect rights cannot edit 
+                // protected pages.
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        // Users with edit rights can edit pages that are not edit-protected.
+        return true;
     }
     
     /**

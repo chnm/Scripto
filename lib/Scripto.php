@@ -120,23 +120,8 @@ class Scripto
      */
     public function isLoggedIn()
     {
-        $userInfo = $this->getUserInfo();
-        return (bool) $userInfo['id'];
-    }
-    
-    /**
-     * Return information about the current user.
-     * 
-     * @return array
-     */
-    public function getUserInfo()
-    {
-        $userInfo = $this->_mediawiki->getUserInfo()->query->userinfo;
-        return array('id'         => $userInfo->id, 
-                     'name'       => $userInfo->name, 
-                     'rights'     => $userInfo->rights, 
-                     'edit_count' => $userInfo->editcount, 
-                     'email'      => $userInfo->email);
+        $userInfo = $this->_mediawiki->getUserInfo();
+        return (bool) $userInfo['query']['userinfo']['id'];
     }
     
     /**
