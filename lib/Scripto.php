@@ -157,17 +157,17 @@ class Scripto
             foreach ($userContribs['query']['usercontribs'] as $value) {
                 
                 // Filter out duplicate pages.
-                if (array_key_exists($value->pageid, $userDocumentPages)) {
+                if (array_key_exists($value['pageid'], $userDocumentPages)) {
                     continue;
                 }
                 
                 // Filter out contributions that are not document pages. 
-                if (Scripto_Document::BASE_TITLE_PREFIX != $value->title[0]) {
+                if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
                     continue;
                 }
                 
                 // Set the document ID and page ID.
-                $document = Scripto_Document::decodeBaseTitle($value->title);
+                $document = Scripto_Document::decodeBaseTitle($value['title']);
                 
                 // Set the document title. Reduce calls to the adapter by 
                 // caching each title and checking if it already exists.
@@ -179,14 +179,14 @@ class Scripto
                 }
                 
                 // Build the user document pages, newest properties first.
-                $userDocumentPages[$value->pageid] = array('revision_id'      => $value->revid, 
-                                                           'mediawiki_title'  => $value->title, 
-                                                           'timestamp'        => $value->timestamp, 
-                                                           'comment'          => $value->comment, 
-                                                           'size'             => $value->size, 
-                                                           'document_id'      => $document[0], 
-                                                           'document_page_id' => $document[1], 
-                                                           'document_title'   => $documentTitle);
+                $userDocumentPages[$value['pageid']] = array('revision_id'      => $value['revid'], 
+                                                             'mediawiki_title'  => $value['title'], 
+                                                             'timestamp'        => $value['timestamp'], 
+                                                             'comment'          => $value['comment'], 
+                                                             'size'             => $value['size'], 
+                                                             'document_id'      => $document[0], 
+                                                             'document_page_id' => $document[1], 
+                                                             'document_title'   => $documentTitle);
                 
                 // Break out of the loops if limit has been reached.
                 if ($limit == count($userDocumentPages)) {
