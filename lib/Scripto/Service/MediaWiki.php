@@ -68,23 +68,23 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('lgname', $username)
                              ->setParameterPost('lgpassword', $password);
         
-        $logInResponse = json_decode(self::getHttpClient()->request('POST')->getBody());
+        $logInResponse = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
         self::getHttpClient()->resetParameters();
         
         // Confirm the login token.
         // See: http://www.mediawiki.org/wiki/API:Login#Confirm_token
-        if (self::LOGIN_ERROR_NEEDTOKEN == $logInResponse->login->result) {
+        if (self::LOGIN_ERROR_NEEDTOKEN == $logInResponse['login']['result']) {
             self::getHttpClient()->setParameterPost('format', 'json')
                                  ->setParameterPost('action', 'login')
                                  ->setParameterPost('lgname', $username)
                                  ->setParameterPost('lgpassword', $password)
-                                 ->setParameterPost('lgtoken', $logInResponse->login->token);
+                                 ->setParameterPost('lgtoken', $logInResponse['login']['token']);
             
-            $confirmTokenResponse = json_decode(self::getHttpClient()->request('POST')->getBody());
+            $confirmTokenResponse = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
             self::getHttpClient()->resetParameters();
         }
         
-        switch ($confirmTokenResponse->login->result) {
+        switch ($confirmTokenResponse['login']['result']) {
             case self::LOGIN_SUCCESS:
                 if ($this->_passCookies) {
                     // Persist MediaWiki authentication cookies in the browser.
@@ -104,7 +104,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             case self::LOGIN_ERROR_NONAME:
                 throw new Scripto_Service_Exception('Username is empty.');
             default:
-                throw new Scripto_Service_Exception("Unknown login error: '{$confirmTokenResponse->login->result}'");
+                throw new Scripto_Service_Exception("Unknown login error: '{$confirmTokenResponse['login']['result']}'");
         }
     }
     
@@ -301,7 +301,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();
         
-        return json_decode($response);
+        return json_decode($response, true);
     }
     
     /**

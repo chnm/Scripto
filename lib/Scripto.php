@@ -154,7 +154,7 @@ class Scripto
             $userContribs = $this->_mediawiki->getUserContributions($userInfo['query']['userinfo']['name'], 
                                                                     $start, 
                                                                     100);
-            foreach ($userContribs->query->usercontribs as $value) {
+            foreach ($userContribs['query']['usercontribs'] as $value) {
                 
                 // Filter out duplicate pages.
                 if (array_key_exists($value->pageid, $userDocumentPages)) {
@@ -195,8 +195,8 @@ class Scripto
             }
             
             // Set the query continue, if any.
-            if (isset($userContribs->{'query-continue'})) {
-                $start = $userContribs->{'query-continue'}->usercontribs->ucstart;
+            if (isset($userContribs['query-continue'])) {
+                $start = $userContribs['query-continue']['usercontribs']['ucstart'];
             } else {
                 $start = null;
             }
