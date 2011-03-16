@@ -331,6 +331,28 @@ class Scripto_Document
     }
     
     /**
+     * Determine if the current user can protect the MediaWiki page.
+     * 
+     * @return bool
+     */
+    public function canProtect()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether the user can protect it.');
+        }
+        
+        $userInfo = $this->_mediawiki->getUserInfo();
+        
+        // Users without protect rights cannot protect pages.
+        if (!in_array('protect', $userInfo['query']['userinfo']['rights'])) {
+            return false;
+        }
+        
+        // Users with protect rights can protect pages.
+        return true;
+    }
+    
+    /**
      * Edit the MediaWiki transcription page for the current document.
      * 
      * @param string $text The wikitext of the transcription
@@ -365,7 +387,7 @@ class Scripto_Document
         if (is_null($protectToken)) {
             throw new Scripto_Exception('The current user cannot protect the specified page.');
         }
-        $this->_mediawiki->protectPage($this->baseTitle, $protectToken);
+        $this->_mediawiki->protectPage($this->_baseTitle, $protectToken);
     }
     
     /**
