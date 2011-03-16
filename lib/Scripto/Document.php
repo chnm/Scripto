@@ -357,6 +357,18 @@ class Scripto_Document
     }
     
     /**
+     * Protect the current page.
+     */
+    public function protectPage()
+    {
+        $protectToken = $this->_mediawiki->getProtectToken($this->_baseTitle);
+        if (is_null($protectToken)) {
+            throw new Scripto_Exception('The current user cannot protect the specified page.');
+        }
+        $this->_mediawiki->protectPage($this->baseTitle, $protectToken);
+    }
+    
+    /**
      * Encode a base title that enables fail-safe document page transport 
      * between the external system, Scripto, and MediaWiki.
      * 

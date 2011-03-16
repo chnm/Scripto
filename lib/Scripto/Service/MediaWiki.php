@@ -261,6 +261,48 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->resetParameters();
     }
     
+    
+    /**
+     * Return a protect token.
+     * 
+     * @param string $title
+     * @return string|null
+     */
+    public function getProtectToken($title)
+    {
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('prop', 'info')
+                             ->setParameterPost('intoken', 'protect')
+                             ->setParameterPost('titles', $title);
+        
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        self::getHttpClient()->resetParameters();
+        
+        $page = current($response['query']['pages']);
+        if (!isset($page['protecttoken'])) {
+            return null;
+        }
+        return $page['protecttoken'];
+    }
+    
+    /**
+     * Protect a page.
+     * 
+     * @param string $title
+     * @param string $protectToken
+     */
+    public function protectPage($title, $protectToken)
+    {
+        self::getHttpClient()->setParameterPost('action', 'protect')
+                             ->setParameterPost('title', $title)
+                             ->setParameterPost('token', $protectToken)
+                             ->setParameterPost('protections', 'edit=sysop|move=sysop');
+        
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        self::getHttpClient()->resetParameters();
+    }
+    
     /**
      * Return information about the currently logged-in user.
      * 
