@@ -391,6 +391,48 @@ class Scripto_Document
     }
     
     /**
+     * Unprotect the current page.
+     */
+    public function unprotectPage()
+    {
+        $protectToken = $this->_mediawiki->getProtectToken($this->_baseTitle);
+        if (is_null($protectToken)) {
+            throw new Scripto_Exception('The current user cannot unprotect the specified page.');
+        }
+        $this->_mediawiki->unprotectPage($this->_baseTitle, $protectToken);
+    }
+    
+    /**
+     * Determine whether the current page is edit protected.
+     * 
+     * @return bool
+     */
+    public function isProtected()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether it is protected.');
+        }
+        
+        $pageProtections = $this->_mediawiki->getPageProtections($this->_baseTitle);
+        
+        // There are no protections.
+        if (empty($pageProtections)) {
+            return false;
+        }
+        
+        // Iterate the page protections.
+        foreach ($pageProtections as $pageProtection) {
+            // The page is edit protected.
+            if ('edit' == $pageProtection['type']) {
+                return true;
+            }
+        }
+        
+        // There are no edit protections.
+        return false;
+    }
+    
+    /**
      * Encode a base title that enables fail-safe document page transport 
      * between the external system, Scripto, and MediaWiki.
      * 

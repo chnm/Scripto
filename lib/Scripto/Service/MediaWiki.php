@@ -297,9 +297,26 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->setParameterPost('action', 'protect')
                              ->setParameterPost('title', $title)
                              ->setParameterPost('token', $protectToken)
-                             ->setParameterPost('protections', 'edit=sysop|move=sysop');
+                             ->setParameterPost('protections', 'edit=sysop');
         
-        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        $response = self::getHttpClient()->request('POST')->getBody();
+        self::getHttpClient()->resetParameters();
+    }
+    
+    /**
+     * Unprotect a page.
+     * 
+     * @param string $title
+     * @param string $protectToken
+     */
+    public function unprotectPage($title, $protectToken)
+    {
+        self::getHttpClient()->setParameterPost('action', 'protect')
+                             ->setParameterPost('title', $title)
+                             ->setParameterPost('token', $protectToken)
+                             ->setParameterPost('protections', 'edit=all');
+        
+        $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();
     }
     
