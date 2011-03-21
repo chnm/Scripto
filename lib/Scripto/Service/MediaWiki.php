@@ -331,7 +331,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('meta', 'userinfo')
-                             ->setParameterPost('uiprop', 'rights|editcount|email');
+                             ->setParameterPost('uiprop', 'rights|editcount|email|groups');
         
         $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();

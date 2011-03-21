@@ -87,6 +87,14 @@ interface Scripto_Adapter_Interface
     public function getDocumentTitle($documentId);
     
     /**
+     * Indicate whether the document transcription has been imported.
+     * 
+     * @param int|string The document ID
+     * @return bool True: has been imported; false: has not been imported
+     */
+    public function documentTranscriptionIsImported($documentId);
+    
+    /**
      * Import a document page's transcription into the external system.
      * 
      * @param int|string $documentId The document ID

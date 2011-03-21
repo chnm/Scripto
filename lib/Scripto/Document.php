@@ -500,13 +500,39 @@ class Scripto_Document
     }
     
     /**
-     * Import the document page transcription to the external system by calling 
+     * Determine whether the document transcription is already imported in the 
+     * external system.
+     * 
+     * @return bool
+     */
+    public function isImported()
+    {
+        return $this->_adapter->documentTranscriptionIsImported($this->_id);
+    }
+    
+    /**
+     * Determine if the current user can export transcriptions to the external 
+     * system.
+     * 
+     * @return bool
+     */
+    public function canExport()
+    {
+        $userInfo = $this->_mediawiki->getUserInfo();
+        if (in_array('sysop', $userInfo['query']['userinfo']['groups'])) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Export the document page transcription to the external system by calling 
      * the adapter.
      * 
      * @param string $type The type of text to set, valid options are 
      *                     plain_text, html, and wikitext.
      */
-    public function importDocumentPageTranscription($type = 'plain_text')
+    public function exportPage($type = 'plain_text')
     {
         switch ($type) {
             case 'plain_text':
@@ -520,7 +546,6 @@ class Scripto_Document
                 break;
             default:
                 throw new Scripto_Exception('The provided import type is invalid.');
-                break;
         }
         $this->_adapter->importDocumentPageTranscription($this->_id, 
                                                          $this->_pageId, 
@@ -528,15 +553,15 @@ class Scripto_Document
     }
     
     /**
-     * Import the entire document transcription to the external system by 
+     * Export the entire document transcription to the external system by 
      * calling the adapter.
      * 
      * @param string $type The type of text to set, valid options are 
      *                     plain_text, html, and wikitext.
      * @param string $pageDelimiter The delimiter used to stitch pages together.
      */
-    public function importDocumentTranscription($type = 'plain_text', 
-                                                $pageDelimiter = "\n")
+    public function export($type = 'plain_text', 
+                                   $pageDelimiter = "\n")
     {
         $text = array();
         foreach ($this->getPages() as $pageId => $pageName) {
@@ -553,7 +578,6 @@ class Scripto_Document
                     break;
                 default:
                     throw new Scripto_Exception('The provided import type is invalid.');
-                    break;
             }
         }
         $this->_adapter->importDocumentTranscription($this->_id, 
