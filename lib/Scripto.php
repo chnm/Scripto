@@ -125,6 +125,21 @@ class Scripto
     }
     
     /**
+     * Determine if the current user can export transcriptions to the external 
+     * system.
+     * 
+     * @return bool
+     */
+    public function canExport()
+    {
+        $userInfo = $this->_mediawiki->getUserInfo();
+        if (in_array('sysop', $userInfo['query']['userinfo']['groups'])) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
      * Return the name of the current user.
      * 
      * @return string

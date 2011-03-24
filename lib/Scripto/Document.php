@@ -511,28 +511,13 @@ class Scripto_Document
     }
     
     /**
-     * Determine if the current user can export transcriptions to the external 
-     * system.
-     * 
-     * @return bool
-     */
-    public function canExport()
-    {
-        $userInfo = $this->_mediawiki->getUserInfo();
-        if (in_array('sysop', $userInfo['query']['userinfo']['groups'])) {
-            return true;
-        }
-        return false;
-    }
-    
-    /**
      * Export the document page transcription to the external system by calling 
      * the adapter.
      * 
      * @param string $type The type of text to set, valid options are 
      *                     plain_text, html, and wikitext.
      */
-    public function exportPage($type = 'plain_text')
+    public function exportPageTranscription($type = 'plain_text')
     {
         switch ($type) {
             case 'plain_text':
@@ -549,7 +534,7 @@ class Scripto_Document
         }
         $this->_adapter->importDocumentPageTranscription($this->_id, 
                                                          $this->_pageId, 
-                                                         $text);
+                                                         trim($text));
     }
     
     /**
@@ -560,8 +545,8 @@ class Scripto_Document
      *                     plain_text, html, and wikitext.
      * @param string $pageDelimiter The delimiter used to stitch pages together.
      */
-    public function export($type = 'plain_text', 
-                                   $pageDelimiter = "\n")
+    public function exportTranscription($type = 'plain_text', 
+                                        $pageDelimiter = "\n")
     {
         $text = array();
         foreach ($this->getPages() as $pageId => $pageName) {
@@ -580,7 +565,7 @@ class Scripto_Document
                     throw new Scripto_Exception('The provided import type is invalid.');
             }
         }
-        $this->_adapter->importDocumentTranscription($this->_id, 
-                                                     implode($pageDelimiter, $text));
+        $text = implode($pageDelimiter, array_map('trim', $text));
+        $this->_adapter->importDocumentTranscription($this->_id, $text);
     }
 }

@@ -18,6 +18,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     const LOGIN_ERROR_NONAME    = 'NoName';
     const LOGIN_SUCCESS         = 'Success';
     
+    private $_apiUrl;
+    private $_dbName;
     private $_passCookies;
     private $_cookieNames;
     
@@ -28,24 +30,29 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     public function __construct($apiUrl, $dbName, $passCookies = true)
     {
+        $this->_apiUrl = (string) $apiUrl;
+        $this->_dbName = (string) $dbName;
         $this->_passCookies = (bool) $passCookies;
         
-        self::getHttpClient()->setUri($apiUrl)
+        // Set the cookie names used by the API.
+        $this->_cookieNames = array('_session' => "{$this->_dbName}_session", 
+                                    'UserID'   => "{$this->_dbName}UserID", 
+                                    'UserName' => "{$this->_dbName}UserName", 
+                                    'Token'    => "{$this->_dbName}Token");
+        
+        // Set the HTTP client for the MediaWiki API .
+        self::getHttpClient()->setUri($this->_apiUrl)
                              ->setConfig(array('keepalive' => true))
                              ->setCookieJar();
         
+        // If Scripto/MediaWiki authentication cookies are being passed, get 
+        // them from the browser and add them to the HTTP client cookie jar. 
+        // Doing so maintains state between browser requests. 
         if ($this->_passCookies) {
-            // Set the cookie names with the namespace prefix.
-            $this->_cookieNames = array("{$dbName}_session", 
-                                        "{$dbName}UserID", 
-                                        "{$dbName}UserName", 
-                                        "{$dbName}Token");
-            
-            // Get the MediaWiki authentication cookies from the browser and add 
-            // them to the HTTP client cookie jar.
-            foreach ($this->_cookieNames as $name) {
-                if (array_key_exists($name, $_COOKIE)) {
-                    $cookie = new Zend_Http_Cookie($name, $_COOKIE[$name], 
+            foreach ($this->_cookieNames as $cookieName) {
+                if (array_key_exists($cookieName, $_COOKIE)) {
+                    $cookie = new Zend_Http_Cookie($cookieName, 
+                                                   $_COOKIE[$cookieName], 
                                                    self::getHttpClient()->getUri()->getHost());
                     self::getHttpClient()->getCookieJar()->addCookie($cookie);
                 }
@@ -68,23 +75,23 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('lgname', $username)
                              ->setParameterPost('lgpassword', $password);
         
-        $logInResponse = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
         self::getHttpClient()->resetParameters();
         
         // Confirm the login token.
         // See: http://www.mediawiki.org/wiki/API:Login#Confirm_token
-        if (self::LOGIN_ERROR_NEEDTOKEN == $logInResponse['login']['result']) {
+        if (self::LOGIN_ERROR_NEEDTOKEN == $response['login']['result']) {
             self::getHttpClient()->setParameterPost('format', 'json')
                                  ->setParameterPost('action', 'login')
                                  ->setParameterPost('lgname', $username)
                                  ->setParameterPost('lgpassword', $password)
-                                 ->setParameterPost('lgtoken', $logInResponse['login']['token']);
+                                 ->setParameterPost('lgtoken', $response['login']['token']);
             
-            $confirmTokenResponse = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+            $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
             self::getHttpClient()->resetParameters();
         }
         
-        switch ($confirmTokenResponse['login']['result']) {
+        switch ($response['login']['result']) {
             case self::LOGIN_SUCCESS:
                 if ($this->_passCookies) {
                     // Persist MediaWiki authentication cookies in the browser.
@@ -104,7 +111,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             case self::LOGIN_ERROR_NONAME:
                 throw new Scripto_Service_Exception('Username is empty.');
             default:
-                throw new Scripto_Service_Exception("Unknown login error: '{$confirmTokenResponse['login']['result']}'");
+                throw new Scripto_Service_Exception("Unknown login error: '{$response['login']['result']}'");
         }
     }
     
@@ -113,6 +120,9 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     public function logout()
     {
+        self::getHttpClient()->setParameterPost('action', 'logout');
+        self::getHttpClient()->request('POST');
+        
         // Reset the cookie jar.
         self::getHttpClient()->getCookieJar()->reset();
         
