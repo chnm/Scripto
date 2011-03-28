@@ -61,7 +61,7 @@ class Scripto
         }
         
         // Set the user information.
-        $this->_userInfo = $this->_mediawiki->getUserInfo();
+        $this->setUserInfo();
     }
     
     /**
@@ -100,7 +100,7 @@ class Scripto
     public function login($username, $password)
     {
         $this->_mediawiki->login($username, $password);
-        $this->_userInfo = $this->_mediawiki->getUserInfo();
+        $this->setUserInfo();
     }
     
     /**
@@ -109,7 +109,7 @@ class Scripto
     public function logout()
     {
         $this->_mediawiki->logout();
-        $this->_userInfo = $this->_mediawiki->getUserInfo();
+        $this->setUserInfo();
     }
     
     /**
@@ -151,6 +151,18 @@ class Scripto
         
         // Users with protect rights can protect pages.
         return true;
+    }
+    
+    /**
+     * Set the current user's information.
+     * 
+     * Under normal circumstances calling this method directly is unnecessary, 
+     * but is helpful when authenticating after construction and when a login is 
+     * not called, like when hijacking cookies for command line authentication.
+     */
+    public function setUserInfo()
+    {
+        $this->_userInfo = $this->_mediawiki->getUserInfo();
     }
     
     /**
