@@ -69,7 +69,7 @@ class Scripto_Document
      */
     public function __construct($id, 
                                 Scripto_Adapter_Interface $adapter, 
-                                $mediawiki)
+                                Scripto_Service_MediaWiki $mediawiki)
     {
         // Document IDs must not be empty strings, null, or false.
         if (!strlen($id) || is_null($id) || false === $id) {
@@ -83,7 +83,7 @@ class Scripto_Document
         
         $this->_id = $id;
         $this->_adapter = $adapter;
-        $this->_mediawiki = Scripto::mediawikiFactory($mediawiki);
+        $this->_mediawiki = $mediawiki;
         $this->_title = $this->_adapter->getDocumentTitle($id);
     }
     
@@ -166,6 +166,16 @@ class Scripto_Document
     }
     
     /**
+     * Get the first page ID of the document.
+     * 
+     * @return array
+     */
+    public function getFirstPageId()
+    {
+        return $this->_adapter->getDocumentFirstPageId($this->_id);
+    }
+    
+    /**
      * Get the page image URL.
      * 
      * @return string
@@ -176,16 +186,6 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before getting the page image URL.');
         }
         return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
-    }
-    
-    /**
-     * Get the first page ID of the document.
-     * 
-     * @return array
-     */
-    public function getFirstPageId()
-    {
-        return $this->_adapter->getDocumentFirstPageId($this->_id);
     }
     
     /**
@@ -327,28 +327,6 @@ class Scripto_Document
         }
         
         // Users with edit rights can edit pages that are not edit-protected.
-        return true;
-    }
-    
-    /**
-     * Determine if the current user can protect the MediaWiki page.
-     * 
-     * @return bool
-     */
-    public function canProtect()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before determining whether the user can protect it.');
-        }
-        
-        $userInfo = $this->_mediawiki->getUserInfo();
-        
-        // Users without protect rights cannot protect pages.
-        if (!in_array('protect', $userInfo['query']['userinfo']['rights'])) {
-            return false;
-        }
-        
-        // Users with protect rights can protect pages.
         return true;
     }
     

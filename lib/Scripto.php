@@ -24,47 +24,45 @@ class Scripto
     protected $_mediawiki;
     
     /**
+     * @var array
+     */
+    protected $_userInfo;
+    
+    /**
      * Construct the Scripto object.
      * 
      * @param Scripto_Adapter_Interface $adapter The adapter object.
-     * @param array|Scripto_Service_MediaWiki $mediawiki {@link Scripto::mediawikiFactory()}
-     */
-    public function __construct(Scripto_Adapter_Interface $adapter, $mediawiki)
-    {
-        $this->_adapter = $adapter;
-        $this->_mediawiki = self::mediawikiFactory($mediawiki);
-    }
-    
-    /**
-     * Build and return a MediaWiki service object.
-     * 
      * @param array|Scripto_Service_MediaWiki $mediawiki If an array:
      *     $mediawiki['api_url']: required; the MediaWiki API URL
      *     $mediawiki['db_name']: required; the MediaWiki database name
      *     $mediawiki['pass_cookies']: optional pass cookies to the web browser 
      *     via API client
-     * @return Scripto_Service_MediaWiki|false
      */
-    public static function mediawikiFactory($mediawiki)
+    public function __construct(Scripto_Adapter_Interface $adapter, $mediawiki)
     {
-        if ($mediawiki instanceof Scripto_Service_MediaWiki) {
-            return $mediawiki;
-        }
+        // Set the adapter.
+        $this->_adapter = $adapter;
         
-        if (is_array($mediawiki) 
-         && array_key_exists('api_url', $mediawiki) 
-         && array_key_exists('db_name', $mediawiki)) {
+        // Set the MediaWiki service.
+        if ($mediawiki instanceof Scripto_Service_MediaWiki) {
+            $this->_mediawiki = $mediawiki;
+        } else if (is_array($mediawiki) 
+                && array_key_exists('api_url', $mediawiki) 
+                && array_key_exists('db_name', $mediawiki)) {
             if (!isset($mediawiki['pass_cookies'])) {
                 $mediawiki['pass_cookies'] = true;
             }
             require_once 'Scripto/Service/MediaWiki.php';
-            return new Scripto_Service_MediaWiki($mediawiki['api_url'], 
-                                                 $mediawiki['db_name'], 
-                                                 (bool) $mediawiki['pass_cookies']);
+            $this->_mediawiki =  new Scripto_Service_MediaWiki($mediawiki['api_url'], 
+                                                               $mediawiki['db_name'], 
+                                                               (bool) $mediawiki['pass_cookies']);
+        } else {
+            throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
         }
         
-        throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
-   }
+        // Set the user information.
+        $this->_userInfo = $this->_mediawiki->getUserInfo();
+    }
     
     /**
      * Check whethe the specified document exists.
@@ -102,6 +100,7 @@ class Scripto
     public function login($username, $password)
     {
         $this->_mediawiki->login($username, $password);
+        $this->_userInfo = $this->_mediawiki->getUserInfo();
     }
     
     /**
@@ -110,6 +109,7 @@ class Scripto
     public function logout()
     {
         $this->_mediawiki->logout();
+        $this->_userInfo = $this->_mediawiki->getUserInfo();
     }
     
     /**
@@ -120,8 +120,7 @@ class Scripto
      */
     public function isLoggedIn()
     {
-        $userInfo = $this->_mediawiki->getUserInfo();
-        return (bool) $userInfo['query']['userinfo']['id'];
+        return (bool) $this->_userInfo['query']['userinfo']['id'];
     }
     
     /**
@@ -132,11 +131,26 @@ class Scripto
      */
     public function canExport()
     {
-        $userInfo = $this->_mediawiki->getUserInfo();
-        if (in_array('sysop', $userInfo['query']['userinfo']['groups'])) {
+        if (in_array('sysop', $this->_userInfo['query']['userinfo']['groups'])) {
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Determine if the current user can protect the MediaWiki page.
+     * 
+     * @return bool
+     */
+    public function canProtect()
+    {
+        // Users without protect rights cannot protect pages.
+        if (!in_array('protect', $this->_userInfo['query']['userinfo']['rights'])) {
+            return false;
+        }
+        
+        // Users with protect rights can protect pages.
+        return true;
     }
     
     /**
@@ -146,8 +160,7 @@ class Scripto
      */
     public function getUserName()
     {
-        $userInfo = $this->_mediawiki->getUserInfo();
-        return $userInfo['query']['userinfo']['name'];
+        return $this->_userInfo['query']['userinfo']['name'];
     }
     
     /**
@@ -161,14 +174,15 @@ class Scripto
         require_once 'Scripto/Document.php';
         
         $limit = (int) $limit;
-        $userInfo = $this->_mediawiki->getUserInfo();
         $userDocumentPages = array();
         $documentTitles = array();
         $start = null;
         do {
-            $userContribs = $this->_mediawiki->getUserContributions($userInfo['query']['userinfo']['name'], 
-                                                                    $start, 
-                                                                    100);
+            $userContribs = $this->_mediawiki->getUserContributions(
+                $this->_userInfo['query']['userinfo']['name'], 
+                $start, 
+                100
+            );
             foreach ($userContribs['query']['usercontribs'] as $value) {
                 
                 // Filter out duplicate pages.
@@ -194,14 +208,16 @@ class Scripto
                 }
                 
                 // Build the user document pages, newest properties first.
-                $userDocumentPages[$value['pageid']] = array('revision_id'      => $value['revid'], 
-                                                             'mediawiki_title'  => $value['title'], 
-                                                             'timestamp'        => $value['timestamp'], 
-                                                             'comment'          => $value['comment'], 
-                                                             'size'             => $value['size'], 
-                                                             'document_id'      => $document[0], 
-                                                             'document_page_id' => $document[1], 
-                                                             'document_title'   => $documentTitle);
+                $userDocumentPages[$value['pageid']] = array(
+                    'revision_id'      => $value['revid'], 
+                    'mediawiki_title'  => $value['title'], 
+                    'timestamp'        => $value['timestamp'], 
+                    'comment'          => $value['comment'], 
+                    'size'             => $value['size'], 
+                    'document_id'      => $document[0], 
+                    'document_page_id' => $document[1], 
+                    'document_title'   => $documentTitle
+                );
                 
                 // Break out of the loops if limit has been reached.
                 if ($limit == count($userDocumentPages)) {
