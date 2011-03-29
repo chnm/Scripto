@@ -385,7 +385,7 @@ class Scripto_Document
      * 
      * @return bool
      */
-    public function isProtected()
+    public function pageIsProtected()
     {
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before determining whether it is protected.');
@@ -486,6 +486,20 @@ class Scripto_Document
     public function isImported()
     {
         return $this->_adapter->documentTranscriptionIsImported($this->_id);
+    }
+    
+    /**
+     * Determine whether the document page transcription is already imported in 
+     * the external system.
+     * 
+     * @return bool
+     */
+    public function pageIsImported()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether it is imported.');
+        }
+        return $this->_adapter->documentPageTranscriptionIsImported($this->_id, $this->_pageId);
     }
     
     /**
