@@ -250,7 +250,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the transcription page plain text.');
         }
-        return strip_tags($this->_mediawiki->getPageHtml($this->_baseTitle));
+        return html_entity_decode(strip_tags($this->_mediawiki->getPageHtml($this->_baseTitle)));
     }
     
     /**
@@ -263,7 +263,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
         }
-        return strip_tags($this->_mediawiki->getPageHtml('Talk:' . $this->_baseTitle));
+        return html_entity_decode(strip_tags($this->_mediawiki->getPageHtml('Talk:' . $this->_baseTitle)));
     }
     
     /**
@@ -545,7 +545,7 @@ class Scripto_Document
             $baseTitle = self::encodeBaseTitle($this->_id, $pageId);
             switch ($type) {
                 case 'plain_text':
-                    $text[] = strip_tags($this->_mediawiki->getPageHtml($baseTitle));
+                    $text[] = html_entity_decode(strip_tags($this->_mediawiki->getPageHtml($baseTitle)));
                     break;
                 case 'html':
                     $text[] = $this->_mediawiki->getPageHtml($baseTitle);
