@@ -293,17 +293,48 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
+     * Determine whether a page is created.
+     * 
+     * @param string $title
+     * @return bool
+     */
+    public function pageCreated($title)
+    {
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('titles', $title);
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
+        self::getHttpClient()->resetParameters();
+        
+        $page = current($response['query']['pages']);
+        if (isset($page['missing'])) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
      * Protect a page.
+     * 
+     * If the page has not been created, protect it from creation. If the page 
+     * has been created, protect it from editing.
      * 
      * @param string $title
      * @param string $protectToken
      */
     public function protectPage($title, $protectToken)
     {
+        if ($this->pageCreated($title)) {
+            $protections = 'edit=sysop';
+        } else {
+            $protections = 'create=sysop';
+        }
+        
+        // Protect the page from editing and creation, depending 
         self::getHttpClient()->setParameterPost('action', 'protect')
                              ->setParameterPost('title', $title)
                              ->setParameterPost('token', $protectToken)
-                             ->setParameterPost('protections', 'edit=sysop');
+                             ->setParameterPost('protections', $protections);
         
         $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();
@@ -312,15 +343,24 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     /**
      * Unprotect a page.
      * 
+     * If the page has not been created, unprotect creation. If the page has 
+     * been created, unprotect editing.
+     * 
      * @param string $title
      * @param string $protectToken
      */
     public function unprotectPage($title, $protectToken)
     {
+        if ($this->pageCreated($title)) {
+            $protections = 'edit=all';
+        } else {
+            $protections = 'create=all';
+        }
+        
         self::getHttpClient()->setParameterPost('action', 'protect')
                              ->setParameterPost('title', $title)
                              ->setParameterPost('token', $protectToken)
-                             ->setParameterPost('protections', 'edit=all');
+                             ->setParameterPost('protections', $protections);
         
         $response = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();

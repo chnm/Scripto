@@ -401,7 +401,7 @@ class Scripto_Document
         // Iterate the page protections.
         foreach ($pageProtections as $pageProtection) {
             // The page is edit protected.
-            if ('edit' == $pageProtection['type']) {
+            if ('edit' == $pageProtection['type'] || 'create' == $pageProtection['type']) {
                 return true;
             }
         }
@@ -558,6 +558,6 @@ class Scripto_Document
             }
         }
         $text = implode($pageDelimiter, array_map('trim', $text));
-        $this->_adapter->importDocumentTranscription($this->_id, $text);
+        $this->_adapter->importDocumentTranscription($this->_id, trim($text));
     }
 }
