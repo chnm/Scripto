@@ -23,17 +23,17 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * @var string The MediaWiki database name, used to namespace Scripto/
      * MediaWiki cookies.
      */
-    private $_dbName;
+    protected $_dbName;
     
     /**
      * @var bool Pass Scripto cookies to the web browser.
      */
-    private $_passCookies;
+    protected $_passCookies;
     
     /**
      * @var array Scripto/MediaWiki cookie name suffixes.
      */
-    private $_cookieSuffixes = array('_session', 'UserID', 'UserName', 'Token');
+    protected $_cookieSuffixes = array('_session', 'UserID', 'UserName', 'Token');
     
     /**
      * @param string $apiUrl
