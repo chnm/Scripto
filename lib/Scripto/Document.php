@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright © 2010, Center for History and New Media
+ * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
@@ -8,7 +8,8 @@ require_once 'Scripto.php';
 require_once 'Scripto/Exception.php';
 
 /**
- * Represents a Scripto document and its pages.
+ * Represents a Scripto document. Serves as a connector object between the 
+ * external system API and MediaWiki API.
  */
 class Scripto_Document
 {
@@ -361,10 +362,6 @@ class Scripto_Document
      */
     public function protectPage()
     {
-        $protectToken = $this->_mediawiki->getProtectToken($this->_baseTitle);
-        if (is_null($protectToken)) {
-            throw new Scripto_Exception('The current user cannot protect the specified page.');
-        }
         $this->_mediawiki->protectPage($this->_baseTitle, $protectToken);
     }
     
@@ -373,10 +370,6 @@ class Scripto_Document
      */
     public function unprotectPage()
     {
-        $protectToken = $this->_mediawiki->getProtectToken($this->_baseTitle);
-        if (is_null($protectToken)) {
-            throw new Scripto_Exception('The current user cannot unprotect the specified page.');
-        }
         $this->_mediawiki->unprotectPage($this->_baseTitle, $protectToken);
     }
     
@@ -507,7 +500,7 @@ class Scripto_Document
      * the adapter.
      * 
      * @param string $type The type of text to set, valid options are 
-     *                     plain_text, html, and wikitext.
+     * plain_text, html, and wikitext.
      */
     public function exportPageTranscription($type = 'plain_text')
     {
@@ -534,7 +527,7 @@ class Scripto_Document
      * calling the adapter.
      * 
      * @param string $type The type of text to set, valid options are 
-     *                     plain_text, html, and wikitext.
+     * plain_text, html, and wikitext.
      * @param string $pageDelimiter The delimiter used to stitch pages together.
      */
     public function exportTranscription($type = 'plain_text', 

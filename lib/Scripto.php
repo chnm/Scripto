@@ -1,14 +1,14 @@
 <?php
 /**
- * @copyright © 2011, Center for History and New Media
+ * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
 require_once 'Scripto/Exception.php';
 
 /**
- * Base Scripto class. Serves as a connector object between the external system 
- * API and MediaWiki API.
+ * Represents a Scripto application. Serves as a connector object between the 
+ * external system API and MediaWiki API.
  */
 class Scripto
 {
