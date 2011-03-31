@@ -219,28 +219,28 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     public function getEditCredentials($title)
     {
         // Get credentials. See: http://www.mediawiki.org/wiki/API:Edit_-_Create%26Edit_pages
-        self::getHttpClient()->setParameterPost('format', 'xml')
+        self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('prop', 'info|revisions')
                              ->setParameterPost('intoken', 'edit')
                              ->setParameterPost('titles', $title);
         
-        $response = self::getHttpClient()->request('POST')->getBody();
+        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
         self::getHttpClient()->resetParameters();
         
-        // Extract the edittoken.
-        $xml = new SimpleXMLElement($response);
-        $edittoken = (string) $xml->query->pages->page['edittoken'];
+        $page = current($response['query']['pages']);
         
-        // Return NULL if edittoken doesn't exist.
-        if (!$edittoken) {
+        // Extract the edittoken. Return NULL if edittoken doesn't exist.
+        if (!isset($page['edittoken'])) {
             return null;
         }
+        $edittoken = $page['edittoken'];
         
-        // Extract the timestamp of the last revision to protect against edit conflicts.
+        // Extract the timestamp of the last revision to protect against edit 
+        // conflicts. This API call returns only the last revision.
         $basetimestamp = null;
-        if (isset($xml->query->pages->page->revisions)) {
-            $basetimestamp = (string) $xml->query->pages->page->revisions->rev['timestamp'];
+        if (!isset($page['revisions'])) {
+            $basetimestamp = $page['revisions']['timestamp'];
         }
         
         return array('edittoken' => $edittoken, 'basetimestamp' => $basetimestamp);
