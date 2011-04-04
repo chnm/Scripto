@@ -113,13 +113,13 @@ class Scripto
     }
     
     /**
-     * Determine if the current user is logged in by checking against the user 
-     * ID. An anonymous user has an ID of 0.
+     * Determine if the current user is logged in.
      * 
      * @return bool
      */
     public function isLoggedIn()
     {
+        // Check against the user ID. An anonymous user has an ID of 0.
         return (bool) $this->_userInfo['query']['userinfo']['id'];
     }
     
@@ -131,6 +131,7 @@ class Scripto
      */
     public function canExport()
     {
+        // Users in the sysop group can protect pages.
         if (in_array('sysop', $this->_userInfo['query']['userinfo']['groups'])) {
             return true;
         }
@@ -144,13 +145,11 @@ class Scripto
      */
     public function canProtect()
     {
-        // Users without protect rights cannot protect pages.
-        if (!in_array('protect', $this->_userInfo['query']['userinfo']['rights'])) {
-            return false;
-        }
-        
         // Users with protect rights can protect pages.
-        return true;
+        if (in_array('protect', $this->_userInfo['query']['userinfo']['rights'])) {
+            return true;
+        }
+        return false;
     }
     
     /**
