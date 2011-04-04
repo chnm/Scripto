@@ -127,13 +127,15 @@ class Scripto
      * Determine if the current user can export transcriptions to the external 
      * system.
      * 
+     * @param array $groups The MediaWiki groups allowed to export.
      * @return bool
      */
-    public function canExport()
+    public function canExport(array $groups = array('sysop', 'bureaucrat'))
     {
-        // Users in the sysop group can protect pages.
-        if (in_array('sysop', $this->_userInfo['query']['userinfo']['groups'])) {
-            return true;
+        foreach ($groups as $group) {
+            if (in_array($group, $this->_userInfo['query']['userinfo']['groups'])) {
+                return true;
+            }
         }
         return false;
     }
