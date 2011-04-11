@@ -439,6 +439,34 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
+     * Return revisions for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
+     * @param string $titles
+     * @param array $params
+     */
+    public function getRevisions($titles, array $params = array())
+    {
+        $paramNames = array('rvprop', 'rvcontinue', 'rvlimit', 'rvstartid', 
+                            'rvendid', 'rvstart', 'rvend', 'rvdir', 'rvuser', 
+                            'rvexcludeuser', 'rvexpandtemplates', 
+                            'rvgeneratexml', 'rvsection', 'rvtoken', 'rvdiffto', 
+                            'rvdifftotext');
+        foreach ($paramNames as $paramName) {
+            if (array_key_exists($paramName, $params)) {
+                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
+            }
+        }
+        
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('prop', 'revisions')
+                             ->setParameterPost('titles', $titles);
+        $response = $this->_getResponse('POST', 'json');
+        return $response;
+    }
+    
+    /**
     * Return the protection status of the specified page.
     * 
     * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in

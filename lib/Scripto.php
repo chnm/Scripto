@@ -320,4 +320,24 @@ class Scripto
         
         return $recentChanges;
     }
+    
+    /**
+     * Get the diff between two page revisions.
+     * 
+     * @param string $baseTitle
+     * @param string $revisionId The revision ID to diff.
+     * @param string $compareTo The revision to diff to: use the revision ID, 
+     * prev, next, or cur.
+     */
+    function getDiff($baseTitle, $revisionId, $diffTo = 'prev')
+    {
+        $revision = $this->_mediawiki->getRevisions(
+            $baseTitle, 
+            array('rvstartid' => $revisionId, 
+                  'rvdiffto'  => $diffTo, 
+                  'rvlimit'   => '1')
+        );
+        $page = current($revision['query']['pages']);
+        return '<table>' . $page['revisions'][0]['diff']['*'] . '</table>';
+    }
 }
