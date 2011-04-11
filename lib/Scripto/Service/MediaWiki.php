@@ -79,7 +79,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('action', 'login')
                              ->setParameterPost('lgname', $username)
                              ->setParameterPost('lgpassword', $password);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         
         // Confirm the login token.
         if ('NeedToken' == $response['login']['result']) {
@@ -89,7 +89,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                                  ->setParameterPost('lgpassword', $password)
                                  ->setParameterPost('lgtoken', $response['login']['token']);
             
-            $response = $this->_getResponse('POST', 'json');
+            $response = $this->_request('POST', 'json');
         }
         
         // Process a successful login.
@@ -162,7 +162,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('titles', $title)
                              ->setParameterPost('export', true)
                              ->setParameterPost('exportnowrap', true);
-        $response = $this->_getResponse('POST', 'xml');
+        $response = $this->_request('POST', 'xml');
         
         $text = null;
         if (isset($response->page->revision->text)) {
@@ -186,7 +186,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // To exclude [edit] links in the parsed wikitext, we must use the 
         // following hack.
                              ->setParameterPost('text', '__NOEDITSECTION__{{:' . $title . '}}');
-        $response = $this->_getResponse('POST', 'xml');
+        $response = $this->_request('POST', 'xml');
         
         // Return the text only if the document already exists. Otherwise, the 
         // returned HTML is a link to the document's MediaWiki edit page. The 
@@ -212,7 +212,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('action', 'parse')
                              ->setParameterPost('text', '__NOEDITSECTION__' . $wikitext);
         
-        $response = $this->_getResponse('POST', 'xml');
+        $response = $this->_request('POST', 'xml');
         return (string) $response->parse->text;
     }
     
@@ -269,7 +269,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('text', $text)
                              ->setParameterPost('token', $credentials['edittoken'])
                              ->setParameterPost('basetimestamp', $credentials['basetimestamp']);
-        $this->_getResponse('POST', 'json');
+        $this->_request('POST', 'json');
     }
     
     
@@ -287,7 +287,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('prop', 'info')
                              ->setParameterPost('intoken', 'protect')
                              ->setParameterPost('titles', $title);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         
         $page = current($response['query']['pages']);
         if (!isset($page['protecttoken'])) {
@@ -307,7 +307,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('titles', $title);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         
         $page = current($response['query']['pages']);
         if (isset($page['missing'])) {
@@ -343,7 +343,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('title', $title)
                              ->setParameterPost('token', $protectToken)
                              ->setParameterPost('protections', $protections);
-        $this->_getResponse('POST', 'json');
+        $this->_request('POST', 'json');
     }
     
     /**
@@ -373,7 +373,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('title', $title)
                              ->setParameterPost('token', $protectToken)
                              ->setParameterPost('protections', $protections);
-        $this->_getResponse('POST', 'json');
+        $this->_request('POST', 'json');
     }
     
     /**
@@ -388,7 +388,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('meta', 'userinfo')
                              ->setParameterPost('uiprop', 'rights|editcount|email|groups|blockinfo|hasmsg|changeablegroups|options|ratelimits');
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         return $response;
     }
     
@@ -409,7 +409,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('ucuser', $username)
                              ->setParameterPost('ucstart', $start)
                              ->setParameterPost('uclimit', $limit);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         return $response;
     }
     
@@ -434,7 +434,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         self::getHttpClient()->setParameterPost('format', 'json')
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('list', 'recentchanges');
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         return $response;
     }
     
@@ -462,7 +462,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('action', 'query')
                              ->setParameterPost('prop', 'revisions')
                              ->setParameterPost('titles', $titles);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
         return $response;
     }
     
@@ -480,7 +480,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('prop', 'info')
                              ->setParameterPost('inprop', 'protection')
                              ->setParameterPost('titles', $title);
-        $response = $this->_getResponse('POST', 'json');
+        $response = $this->_request('POST', 'json');
 
         $page = current($response['query']['pages']);
         return $page['protection'];
@@ -493,7 +493,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * @param string $method POST or GET
      * @return array|SimpleXMLElement
      */
-    protected function _getResponse($method, $format)
+    protected function _request($method, $format)
     {
         // Check for valid request method.
         if (!in_array($method, array('POST', 'GET'))) {
