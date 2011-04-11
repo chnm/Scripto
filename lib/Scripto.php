@@ -249,4 +249,75 @@ class Scripto
         
         return $userDocumentPages;
     }
+    
+    /**
+     * Get the recent changes.
+     * 
+     * @param int $limit
+     * @return array
+     */
+    public function getRecentChanges($limit = 10)
+    {
+        require_once 'Scripto/Document.php';
+        
+        $limit = (int) $limit;
+        $recentChanges = array();
+        $documentTitles = array();
+        $start = null;
+        do {
+            $changes = $this->_mediawiki->getRecentChanges(
+                array('rctype'      => 'edit|new', 
+                      'rcprop'      => 'user|timestamp|title|ids', 
+                      'rcnamespace' => '0', 
+                      'rcstart'     => $start)
+            );
+            foreach ($changes['query']['recentchanges'] as $value) {
+                
+                // Filter out changes that are not document pages. 
+                if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
+                    continue;
+                }
+                
+                // Set the document ID and page ID.
+                $document = Scripto_Document::decodeBaseTitle($value['title']);
+                
+                // Set the document title. Reduce calls to the adapter by 
+                // caching each title and checking if it already exists.
+                if (array_key_exists($document[0], $documentTitles)) {
+                    $documentTitle = $documentTitles[$document[0]];
+                } else {
+                    $documentTitle = $this->_adapter->getDocumentTitle($document[0]);
+                    $documentTitles[$document[0]] = $documentTitle;
+                }
+                
+                $recentChanges[] = array(
+                    'type'             => $value['type'], 
+                    'page_id'          => $value['pageid'], 
+                    'revision_id'      => $value['revid'], 
+                    'old_revision_id'  => $value['old_revid'], 
+                    'mediawiki_title'  => $value['title'], 
+                    'timestamp'        => $value['timestamp'], 
+                    'user'             => $value['user'], 
+                    'document_id'      => $document[0], 
+                    'document_page_id' => $document[1], 
+                    'document_title'   => $documentTitle
+                );
+                
+                // Break out of the loops if limit has been reached.
+                if ($limit == count($recentChanges)) {
+                    break 2;
+                }
+            }
+            
+            // Set the query continue, if any.
+            if (isset($changes['query-continue'])) {
+                $start = $changes['query-continue']['recentchanges']['rcstart'];
+            } else {
+                $start = null;
+            }
+            
+        } while ($start);
+        
+        return $recentChanges;
+    }
 }

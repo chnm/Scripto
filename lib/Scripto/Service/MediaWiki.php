@@ -414,6 +414,31 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
+     * Return recent changes to the wiki.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Recentchanges
+     * @param array $params
+     * @return array
+     */
+    public function getRecentChanges(array $params = array())
+    {
+        $paramNames = array('rcstart', 'rcend', 'rcdir', 'rclimit', 
+                            'rcnamespace', 'rcuser', 'rcexcludeuser', 'rctype', 
+                            'rcshow', 'rcprop');
+        foreach ($paramNames as $paramName) {
+            if (array_key_exists($paramName, $params)) {
+                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
+            }
+        }
+        
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'query')
+                             ->setParameterPost('list', 'recentchanges');
+        $response = $this->_getResponse('POST', 'json');
+        return $response;
+    }
+    
+    /**
     * Return the protection status of the specified page.
     * 
     * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in
