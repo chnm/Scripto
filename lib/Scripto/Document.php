@@ -189,6 +189,33 @@ class Scripto_Document
         return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
     }
     
+     /**
+     * Get the MediaWiki page HTML for specified title.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
+     * @link http://lists.wikimedia.org/pipermail/mediawiki-api/2010-April/001694.html
+     * @param string $title
+     * @return string|null
+     */
+    protected function _getPageHtml($title)
+    {
+        $parsedWikitext = $this->_mediawiki->getParse(
+            // To exclude [edit] links in the parsed wikitext, we must use the 
+            // following hack.
+            array('text' => '__NOEDITSECTION__{{:' . $title . '}}')
+        );
+        
+        // Return the text only if the document already exists. Otherwise, the 
+        // returned HTML is a link to the document's MediaWiki edit page. The 
+        // only indicator I found in the response XML is the "exists" attribute 
+        // in the templates node; but this may not be adequate.
+        $pageHtml = null;
+        if (isset($parsedWikitext['parse']['templates'][0]['exists'])) {
+            $pageHtml = $parsedWikitext['parse']['text']['*'];
+        }
+        return $pageHtml;
+    }
+    
     /**
      * Get the MediaWiki transcription page wikitext for the current page.
      * 
@@ -225,7 +252,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the transcription page HTML.');
         }
-        return $this->_mediawiki->getPageHtml($this->_baseTitle);
+        return $this->_getPageHtml($this->_baseTitle);
     }
     
     /**
@@ -238,7 +265,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the talk page HTML.');
         }
-        return $this->_mediawiki->getPageHtml('Talk:' . $this->_baseTitle);
+        return $this->_getPageHtml('Talk:' . $this->_baseTitle);
     }
     
     /**
@@ -251,7 +278,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the transcription page plain text.');
         }
-        return html_entity_decode(strip_tags($this->_mediawiki->getPageHtml($this->_baseTitle)));
+        return html_entity_decode(strip_tags($this->_getPageHtml($this->_baseTitle)));
     }
     
     /**
@@ -264,7 +291,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
         }
-        return html_entity_decode(strip_tags($this->_mediawiki->getPageHtml('Talk:' . $this->_baseTitle)));
+        return html_entity_decode(strip_tags($this->_getPageHtml('Talk:' . $this->_baseTitle)));
     }
     
     /**
@@ -538,10 +565,10 @@ class Scripto_Document
             $baseTitle = self::encodeBaseTitle($this->_id, $pageId);
             switch ($type) {
                 case 'plain_text':
-                    $text[] = html_entity_decode(strip_tags($this->_mediawiki->getPageHtml($baseTitle)));
+                    $text[] = html_entity_decode(strip_tags($this->_getPageHtml($baseTitle)));
                     break;
                 case 'html':
-                    $text[] = $this->_mediawiki->getPageHtml($baseTitle);
+                    $text[] = $this->_getPageHtml($baseTitle);
                     break;
                 case 'wikitext':
                     $text[] = $this->_mediawiki->getPageWikitext($baseTitle);

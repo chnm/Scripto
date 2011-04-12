@@ -172,31 +172,24 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Get the MediaWiki page HTML for a specified title.
+     * Get parsed wikitext.
      * 
-     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
-     * @link http://lists.wikimedia.org/pipermail/mediawiki-api/2010-April/001694.html
-     * @param string $title The title of the page.
-     * @return string The HTML of the page.
+     * @param array $params
+     * @return array
      */
-    public function getPageHtml($title)
+    public function getParse(array $params = array())
     {
-        self::getHttpClient()->setParameterPost('format', 'xml')
-                             ->setParameterPost('action', 'parse')
-        // To exclude [edit] links in the parsed wikitext, we must use the 
-        // following hack.
-                             ->setParameterPost('text', '__NOEDITSECTION__{{:' . $title . '}}');
-        $response = $this->_request('POST', 'xml');
-        
-        // Return the text only if the document already exists. Otherwise, the 
-        // returned HTML is a link to the document's MediaWiki edit page. The 
-        // only indicator I found in the response XML is the "exists" attribute 
-        // in the templates node; but this may not be adequate.
-        $text = null;
-        if (isset($response->parse->templates->tl['exists'])) {
-            $text = (string) $response->parse->text;
+        $paramNames = array('text', 'title', 'page', 'prop', 'pst', 'uselang');
+        foreach ($paramNames as $paramName) {
+            if (array_key_exists($paramName, $params)) {
+                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
+            }
         }
-        return $text;
+        
+        self::getHttpClient()->setParameterPost('format', 'json')
+                             ->setParameterPost('action', 'parse');
+        $response = $this->_request('POST', 'json');
+        return $response;
     }
     
     /**
@@ -450,6 +443,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
      * @param string $titles
      * @param array $params
+     * @return array
      */
     public function getRevisions($titles, array $params = array())
     {
