@@ -148,30 +148,6 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Get the MediaWiki page wikitext for a specified title.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Query#Exporting_pages
-     * @param string $title The title of the page.
-     * @return string The wikitext of the page.
-     */
-    public function getPageWikitext($title)
-    {
-        // Not available in JSON format.
-        self::getHttpClient()->setParameterPost('format', 'xml')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('titles', $title)
-                             ->setParameterPost('export', true)
-                             ->setParameterPost('exportnowrap', true);
-        $response = $this->_request('POST', 'xml');
-        
-        $text = null;
-        if (isset($response->page->revision->text)) {
-            $text = (string) $response->page->revision->text;
-        }
-        return $text;
-    }
-    
-    /**
      * Get parsed wikitext.
      * 
      * @param array $params

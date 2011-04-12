@@ -189,8 +189,32 @@ class Scripto_Document
         return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
     }
     
+    /**
+     * Get the MediaWiki page wikitext for the specified title.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Query#Exporting_pages
+     * @param string $title The title of the page.
+     * @return string The wikitext of the page.
+     */
+    protected function _getPageWikitext($title)
+    {
+        $revision = $this->_mediawiki->getRevisions(
+            $title, 
+            array('rvprop'  => 'content', 
+                  'rvlimit' => '1')
+        );
+        $page = current($revision['query']['pages']);
+        
+        // Return the wikitext only if the page already exists.
+        $pageWikitext = null;
+        if (isset($page['revisions'][0]['*'])) {
+            $pageWikitext = $page['revisions'][0]['*'];
+        }
+        return $pageWikitext;
+    }
+    
      /**
-     * Get the MediaWiki page HTML for specified title.
+     * Get the MediaWiki page HTML for the specified title.
      * 
      * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
      * @link http://lists.wikimedia.org/pipermail/mediawiki-api/2010-April/001694.html
@@ -199,19 +223,19 @@ class Scripto_Document
      */
     protected function _getPageHtml($title)
     {
-        $parsedWikitext = $this->_mediawiki->getParse(
+        $parse = $this->_mediawiki->getParse(
             // To exclude [edit] links in the parsed wikitext, we must use the 
             // following hack.
             array('text' => '__NOEDITSECTION__{{:' . $title . '}}')
         );
         
-        // Return the text only if the document already exists. Otherwise, the 
+        // Return the text only if the page already exists. Otherwise, the 
         // returned HTML is a link to the document's MediaWiki edit page. The 
         // only indicator I found in the response XML is the "exists" attribute 
         // in the templates node; but this may not be adequate.
         $pageHtml = null;
-        if (isset($parsedWikitext['parse']['templates'][0]['exists'])) {
-            $pageHtml = $parsedWikitext['parse']['text']['*'];
+        if (isset($parse['parse']['templates'][0]['exists'])) {
+            $pageHtml = $parse['parse']['text']['*'];
         }
         return $pageHtml;
     }
@@ -226,7 +250,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the transcription page wikitext.');
         }
-        return $this->_mediawiki->getPageWikitext($this->_baseTitle);
+        return $this->_getPageWikitext($this->_baseTitle);
     }
     
     /**
@@ -239,7 +263,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before getting the talk page wikitext.');
         }
-        return $this->_mediawiki->getPageWikitext('Talk:' . $this->_baseTitle);
+        return $this->_getPageWikitext('Talk:' . $this->_baseTitle);
     }
     
     /**
@@ -571,7 +595,7 @@ class Scripto_Document
                     $text[] = $this->_getPageHtml($baseTitle);
                     break;
                 case 'wikitext':
-                    $text[] = $this->_mediawiki->getPageWikitext($baseTitle);
+                    $text[] = $this->_getPageWikitext($baseTitle);
                     break;
                 default:
                     throw new Scripto_Exception('The provided import type is invalid.');
