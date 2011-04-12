@@ -169,23 +169,6 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Get an HTML preview of the provided wikitext.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
-     * @param string $wikitext The wikitext.
-     * @return string The wikitext parsed as HTML.
-     */
-    public function getPreview($wikitext)
-    {
-        self::getHttpClient()->setParameterPost('format', 'xml')
-                             ->setParameterPost('action', 'parse')
-                             ->setParameterPost('text', '__NOEDITSECTION__' . $wikitext);
-        
-        $response = $this->_request('POST', 'xml');
-        return (string) $response->parse->text;
-    }
-    
-    /**
      * Get the necessary credentials to edit the current MediaWiki page.
      * 
      * @link http://www.mediawiki.org/wiki/API:Edit
@@ -240,7 +223,6 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setParameterPost('basetimestamp', $credentials['basetimestamp']);
         $this->_request('POST', 'json');
     }
-    
     
     /**
      * Return a protect token.

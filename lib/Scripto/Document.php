@@ -326,7 +326,10 @@ class Scripto_Document
      */
     public function getPreview($wikitext)
     {
-        return $this->_mediawiki->getPreview($wikitext);
+        $parse = $this->_mediawiki->getParse(
+            array('text' => '__NOEDITSECTION__' . $wikitext)
+        );
+        return $parse['parse']['text']['*'];
     }
     
     /**
