@@ -193,8 +193,8 @@ class Scripto
         do {
             $userContribs = $this->_mediawiki->getUserContributions(
                 $this->_userInfo['query']['userinfo']['name'], 
-                $start, 
-                100
+                array('ucstart' => $start, 
+                      'uclimit' => 100)
             );
             foreach ($userContribs['query']['usercontribs'] as $value) {
                 
