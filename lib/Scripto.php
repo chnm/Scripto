@@ -163,7 +163,7 @@ class Scripto
      */
     public function setUserInfo()
     {
-        $this->_userInfo = $this->_mediawiki->getUserInfo();
+        $this->_userInfo = $this->_mediawiki->getUserInfo('groups|rights');
     }
     
     /**
@@ -191,12 +191,12 @@ class Scripto
         $documentTitles = array();
         $start = null;
         do {
-            $userContribs = $this->_mediawiki->getUserContributions(
+            $response = $this->_mediawiki->getUserContributions(
                 $this->_userInfo['query']['userinfo']['name'], 
                 array('ucstart' => $start, 
                       'uclimit' => 100)
             );
-            foreach ($userContribs['query']['usercontribs'] as $value) {
+            foreach ($response['query']['usercontribs'] as $value) {
                 
                 // Filter out duplicate pages.
                 if (array_key_exists($value['pageid'], $userDocumentPages)) {
@@ -239,8 +239,8 @@ class Scripto
             }
             
             // Set the query continue, if any.
-            if (isset($userContribs['query-continue'])) {
-                $start = $userContribs['query-continue']['usercontribs']['ucstart'];
+            if (isset($response['query-continue'])) {
+                $start = $response['query-continue']['usercontribs']['ucstart'];
             } else {
                 $start = null;
             }
@@ -265,13 +265,13 @@ class Scripto
         $documentTitles = array();
         $start = null;
         do {
-            $changes = $this->_mediawiki->getRecentChanges(
+            $response = $this->_mediawiki->getRecentChanges(
                 array('rctype'      => 'edit|new', 
                       'rcprop'      => 'user|timestamp|title|ids', 
                       'rcnamespace' => '0', 
                       'rcstart'     => $start)
             );
-            foreach ($changes['query']['recentchanges'] as $value) {
+            foreach ($response['query']['recentchanges'] as $value) {
                 
                 // Filter out changes that are not document pages. 
                 if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
@@ -310,8 +310,8 @@ class Scripto
             }
             
             // Set the query continue, if any.
-            if (isset($changes['query-continue'])) {
-                $start = $changes['query-continue']['recentchanges']['rcstart'];
+            if (isset($response['query-continue'])) {
+                $start = $response['query-continue']['recentchanges']['rcstart'];
             } else {
                 $start = null;
             }

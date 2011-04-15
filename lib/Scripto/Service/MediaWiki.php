@@ -36,6 +36,49 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     protected $_cookieSuffixes = array('_session', 'UserID', 'UserName', 'Token');
     
     /**
+     * @var array Valid MediaWiki API actions and their valid parameters.
+     */
+    protected $_actions = array(
+        'parse' => array(
+            'text', 'title', 'page', 'prop', 'pst', 'uselang'
+        ), 
+        'edit' => array(
+            'title', 'section', 'text', 'token', 'summary', 'minor', 'notminor', 
+            'bot', 'basetimestamp', 'starttimestamp', 'recreate', 'createonly', 
+            'nocreate', 'watchlist', 'md5', 'captchaid', 'captchaword', 'undo', 
+            'undoafter'
+        ), 
+        'protect' => array(
+            'title', 'token', 'protections', 'expiry', 'reason', 'cascade'
+        ), 
+        'query' => array(
+            'titles', 
+            // submodules
+            'meta', 'prop', 'list', 
+            // meta submodule
+            'siprop', 'sifilteriw', 'sishowalldb', 'sinumberingroup',
+            'uiprop', 
+            // prop submodule
+            'inprop', 'intoken', 'indexpageids', 'incontinue', 
+            'rvprop', 'rvcontinue', 'rvlimit', 'rvstartid', 'rvendid', 
+            'rvstart', 'rvend', 'rvdir', 'rvuser', 'rvexcludeuser', 
+            'rvexpandtemplates', 'rvgeneratexml', 'rvsection', 'rvtoken', 
+            'rvdiffto', 'rvdifftotext', 
+            // list submodule
+            'ucprop', 'ucuser', 'ucuserprefix', 'ucstart', 'ucend', 
+            'uccontinue', 'ucdir', 'uclimit', 'ucnamespace', 'ucshow', 
+            'rcprop', 'rcstart', 'rcend', 'rcdir', 'rclimit', 'rcnamespace', 
+            'rcuser', 'rcexcludeuser', 'rctype', 'rcshow', 
+        ), 
+        'login' => array(
+            'lgname', 'lgpassword', 'lgtoken'
+        ), 
+        'logout' => array()
+    );
+    
+    /**
+     * Constructs the MediaWiki API client.
+     * 
      * @param string $apiUrl
      * @param string $dbName The name of the MediaWiki database.
      * @param bool $passCookies Pass cookies to the web browser.
@@ -67,29 +110,326 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Log into MediaWiki to access protected API actions.
+     * Gets information about the currently logged-in user.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Meta#userinfo_.2F_ui
+     * @param string $uiprop
+     * @return array
+     */
+    public function getUserInfo($uiprop = '')
+    {
+        $params = array('meta'   => 'userinfo', 
+                        'uiprop' => $uiprop);
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets overall site information.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Meta#siteinfo_.2F_si
+     * @param string $siprop
+     * @return array
+     */
+    public function getSiteInfo($siprop = 'general')
+    {
+        $params = array('meta'   => 'siteinfo', 
+                        'siprop' => $siprop);
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets a list of contributions made by a given user.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Usercontribs
+     * @param string $ucuser
+     * @param array $params
+     * @return array
+     */
+    public function getUserContributions($ucuser, array $params = array())
+    {
+        $params['ucuser'] = $ucuser;
+        $params['list'] = 'usercontribs';
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets all recent changes to the wiki.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Recentchanges
+     * @param array $params
+     * @return array
+     */
+    public function getRecentChanges(array $params = array())
+    {
+        $params['list'] = 'recentchanges';
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets basic page information.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in
+     * @param string $titles
+     * @param array $params
+     * @return array
+     */
+    public function getInfo($titles, array $params = array())
+    {
+        $params['titles'] = $titles;
+        $params['prop'] = 'info';
+        return $this->query($params);
+    }
+    
+    /**
+     * Returns revisions for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
+     * @param string $titles
+     * @param array $params
+     * @return array
+     */
+    public function getRevisions($titles, array $params = array())
+    {
+        $params['titles'] = $titles;
+        $params['prop'] = 'revisions';
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets the edit token for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Edit#Token
+     * @param string $title
+     * @return string
+     */
+    public function getEditToken($title)
+    {
+        $response = $this->getInfo($title, array('intoken' => 'edit'));
+        $page = current($response['query']['pages']);
+        
+        $edittoken = null;
+        if (isset($page['edittoken'])) {
+            $edittoken = $page['edittoken'];
+        }
+        return $edittoken;
+    }
+    
+    /**
+     * Gets the protect token for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Protect#Token
+     * @param string $title
+     * @return string
+     */
+    public function getProtectToken($title)
+    {
+        $response = $this->getInfo($title, array('intoken' => 'protect'));
+        $page = current($response['query']['pages']);
+        
+        $protecttoken = null;
+        if (isset($page['protecttoken'])) {
+            $protecttoken = $page['protecttoken'];
+        }
+        return $protecttoken;
+    }
+    
+    /**
+     * Gets the protections for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in
+     * @param string $title
+     * @return array
+     */
+    public function getPageProtections($title)
+    {
+        $response = $this->getInfo($title, array('inprop' => 'protection'));
+        $page = current($response['query']['pages']);
+        return $page['protection'];
+    }
+    
+    /**
+     * Gets the wikitext of the latest revision of a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
+     * @param string $title
+     * @return string|null
+     */
+    public function getLatestRevisionWikitext($title)
+    {
+        $response = $this->getRevisions($title, array('rvprop'  => 'content', 
+                                                      'rvlimit' => '1'));
+        $page = current($response['query']['pages']);
+        
+        // Return the wikitext only if the page already exists.
+        $wikitext = null;
+        if (isset($page['revisions'][0]['*'])) {
+            $wikitext = $page['revisions'][0]['*'];
+        }
+        return $wikitext;
+    }
+    
+    /**
+     * Gets the HTML of the latest revision of a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
+     * @param string $title
+     * @return string|null
+     */
+    public function getLatestRevisionHtml($title)
+    {
+        // To exclude [edit] links in the parsed wikitext, we must use the 
+        // following hack.
+        $response = $this->parse(array('text' => '__NOEDITSECTION__{{:' . $title . '}}'));
+        
+        // Return the text only if the page already exists. Otherwise, the 
+        // returned HTML is a link to the document's MediaWiki edit page. The 
+        // only indicator I found in the response XML is the "exists" attribute 
+        // in the templates node; but this may not be adequate.
+        $html = null;
+        if (isset($response['parse']['templates'][0]['exists'])) {
+            $html = $response['parse']['text']['*'];
+        }
+        return $html;
+    }
+    
+    /**
+     * Get the HTML preview of the given text.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
+     * @param string $text
+     * @return string
+     */
+    public function getPreview($text)
+    {
+        $response = $this->parse(array('text' => '__NOEDITSECTION__' . $text));
+        return $parse['parse']['text']['*'];
+    }
+    
+    /**
+     * Returns whether a given page is created.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Query#Missing_and_invalid_titles
+     * @param string $title
+     * @return bool
+     */
+    public function pageCreated($title)
+    {
+        $response = $this->query(array('titles' => $title));
+        $page = current($response['query']['pages']);
+        if (isset($page['missing']) || isset($page['invalid'])) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Returns parsed wikitext.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Parsing_wikitext#parse
+     * @param array $params
+     * @return array
+     */
+    public function parse(array $params = array())
+    {
+        return $this->_request('parse', $params);
+    }
+    
+    /**
+     * Returns data.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Query
+     * @param array $params
+     * @return array
+     */
+    public function query(array $params = array())
+    {
+        return $this->_request('query', $params);
+    }
+    
+    /**
+     * Applies protections to a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Protect
+     * @param string $title
+     * @param string $protections
+     * @param string|null $protecttokens
+     * @param array $params
+     * @return array
+     */
+    public function protect($title, 
+                            $protections, 
+                            $protecttoken = null, 
+                            array $params = array())
+    {
+        // Get the protect token if not passed.
+        if (is_null($protecttoken)) {
+            $protecttoken = $this->getProtectToken($title);
+        }
+        
+        // Apply protections.
+        $params['title']       = $title;
+        $params['protections'] = $protections;
+        $params['token']       = $protecttoken;
+        
+        return $this->_request('protect', $params);
+    }
+    
+    /**
+     * Create or edit a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Edit
+     * @param string $title
+     * @param string $text
+     * @param string|null $edittoken
+     * @param array $params
+     * @return array
+     */
+    public function edit($title, 
+                         $text, 
+                         $edittoken = null, 
+                         array $params = array())
+    {
+        // Get the edit token if not passed.
+        if (is_null($edittoken)) {
+            $edittoken = $this->getEditToken($title);
+        }
+        
+        // Protect against edit conflicts by getting the timestamp of the last 
+        // revision.
+        $response = $this->getRevisions($title);
+        $page = current($response['query']['pages']);
+        
+        $basetimestamp = null;
+        if (isset($page['revisions'])) {
+            $basetimestamp = $page['revisions'][0]['timestamp'];
+        }
+        
+        // Edit the page.
+        $params['title']         = $title;
+        $params['text']          = $text;
+        $params['token']         = $edittoken;
+        $params['basetimestamp'] = $basetimestamp;
+        
+        return $this->_request('edit', $params);
+    }
+    
+    /**
+     * Login to MediaWiki.
      * 
      * @link http://www.mediawiki.org/wiki/API:Login
-     * @param string $username The user's username.
-     * @param string $password The user's password.
+     * @param string $lgname
+     * @param string $lgpassword
      */
-    public function login($username, $password)
+    public function login($lgname, $lgpassword)
     {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'login')
-                             ->setParameterPost('lgname', $username)
-                             ->setParameterPost('lgpassword', $password);
-        $response = $this->_request('POST', 'json');
+        // Log in or get the login token.
+        $params = array('lgname' => $lgname, 'lgpassword' => $lgpassword);
+        $response = $this->_request('login', $params);
         
         // Confirm the login token.
         if ('NeedToken' == $response['login']['result']) {
-            self::getHttpClient()->setParameterPost('format', 'json')
-                                 ->setParameterPost('action', 'login')
-                                 ->setParameterPost('lgname', $username)
-                                 ->setParameterPost('lgpassword', $password)
-                                 ->setParameterPost('lgtoken', $response['login']['token']);
-            
-            $response = $this->_request('POST', 'json');
+            $params['lgtoken'] = $response['login']['token'];
+            $response = $this->_request('login', $params);
         }
         
         // Process a successful login.
@@ -115,23 +455,22 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                         'CreateBlocked'   => 'IP address is blocked for account creation.', 
                         'Throttled'       => 'Login attempt limit surpassed.', 
                         'Blocked'         => 'User is blocked.');
-        
         $error = $response['login']['result'];
         if (array_key_exists($error, $errors)) {
             throw new Scripto_Service_Exception($errors[$error]);
         }
-        throw new Scripto_Service_Exception("Unknown login error: '{$response['login']['result']}'");
+        throw new Scripto_Service_Exception('Unknown login error: ' . $response['login']['result']);
     }
     
     /**
-     * Log out of MediaWiki.
+     * Logout of MediaWiki.
      * 
      * @link http://www.mediawiki.org/wiki/API:Logout
      */
     public function logout()
     {
-        self::getHttpClient()->setParameterPost('action', 'logout');
-        self::getHttpClient()->request('POST');
+        // Log out.
+        $this->_request('logout');
         
         // Reset the cookie jar.
         self::getHttpClient()->getCookieJar()->reset();
@@ -148,336 +487,41 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Get parsed wikitext.
+     * Makes a MediaWiki API request and returns the response.
      * 
+     * @param string $action
      * @param array $params
      * @return array
      */
-    public function getParse(array $params = array())
+    protected function _request($action, array $params = array())
     {
-        $paramNames = array('text', 'title', 'page', 'prop', 'pst', 'uselang');
-        foreach ($paramNames as $paramName) {
-            if (array_key_exists($paramName, $params)) {
-                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
+        //echo "<pre>$action:\n";print_r($params);echo '</pre>';
+        
+        // Check if this action is a valid MediaWiki API action.
+        if (!array_key_exists($action, $this->_actions)) {
+            throw new Scripto_Service_Exception('Invalid MediaWiki API action.');
+        }
+        
+        // Set valid parameters for this action.
+        foreach ($params as $paramName => $paramValue) {
+            if (in_array($paramName, $this->_actions[$action])) {
+                self::getHttpClient()->setParameterPost($paramName, $paramValue);
             }
         }
         
+        // Set default parameters.
         self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'parse');
-        $response = $this->_request('POST', 'json');
-        return $response;
-    }
-    
-    /**
-     * Get the necessary credentials to edit the current MediaWiki page.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Edit
-     * @param string $title
-     * @return array|null An array containing the edittoken and basetimestamp
-     */
-    public function getEditCredentials($title)
-    {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('prop', 'info|revisions')
-                             ->setParameterPost('intoken', 'edit')
-                             ->setParameterPost('titles', $title);
-        
-        $response = json_decode(self::getHttpClient()->request('POST')->getBody(), true);
-        self::getHttpClient()->resetParameters();
-        
-        $page = current($response['query']['pages']);
-        
-        // Extract the edittoken. Return NULL if edittoken doesn't exist.
-        if (!isset($page['edittoken'])) {
-            return null;
-        }
-        $edittoken = $page['edittoken'];
-        
-        // Extract the timestamp of the last revision to protect against edit 
-        // conflicts. This API call returns only the last revision.
-        $basetimestamp = null;
-        if (!isset($page['revisions'])) {
-            $basetimestamp = $page['revisions']['timestamp'];
-        }
-        return array('edittoken' => $edittoken, 'basetimestamp' => $basetimestamp);
-    }
-    
-    /**
-     * Edit the MediaWiki page for the current document page.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Edit
-     * @param string $title The title of the page to edit
-     * @param string $text The wikitext of the page
-     */
-    public function editPage($title, $text)
-    {
-        // Get the edit token and base timestamp.
-        $credentials = $this->getEditCredentials($title);
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'edit')
-                             ->setParameterPost('title', $title)
-                             ->setParameterPost('text', $text)
-                             ->setParameterPost('token', $credentials['edittoken'])
-                             ->setParameterPost('basetimestamp', $credentials['basetimestamp']);
-        $this->_request('POST', 'json');
-    }
-    
-    /**
-     * Return a protect token.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Protect
-     * @param string $title
-     * @return string|null
-     */
-    public function getProtectToken($title)
-    {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('prop', 'info')
-                             ->setParameterPost('intoken', 'protect')
-                             ->setParameterPost('titles', $title);
-        $response = $this->_request('POST', 'json');
-        
-        $page = current($response['query']['pages']);
-        if (!isset($page['protecttoken'])) {
-            return null;
-        }
-        return $page['protecttoken'];
-    }
-    
-    /**
-     * Determine whether a page is created.
-     * 
-     * @param string $title
-     * @return bool
-     */
-    public function pageCreated($title)
-    {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('titles', $title);
-        $response = $this->_request('POST', 'json');
-        
-        $page = current($response['query']['pages']);
-        if (isset($page['missing'])) {
-            return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Protect a page.
-     * 
-     * If the page has not been created, protect it from creation. If the page 
-     * has been created, protect it from editing.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Protect
-     * @param string $title
-     * @param string $protectToken
-     */
-    public function protectPage($title, $protectToken)
-    {
-        // Get the protect token.
-        $protectToken = $this->getProtectToken($title);
-        
-        // Set the protections depending on whether the page has been created.
-        if ($this->pageCreated($title)) {
-            $protections = 'edit=sysop';
-        } else {
-            $protections = 'create=sysop';
-        }
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'protect')
-                             ->setParameterPost('title', $title)
-                             ->setParameterPost('token', $protectToken)
-                             ->setParameterPost('protections', $protections);
-        $this->_request('POST', 'json');
-    }
-    
-    /**
-     * Unprotect a page.
-     * 
-     * If the page has not been created, unprotect creation. If the page has 
-     * been created, unprotect editing.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Protect
-     * @param string $title
-     * @param string $protectToken
-     */
-    public function unprotectPage($title, $protectToken)
-    {
-        // Get the protect token.
-        $protectToken = $this->getProtectToken($title);
-        
-        // Set the protections depending on whether the page has been created.
-        if ($this->pageCreated($title)) {
-            $protections = 'edit=all';
-        } else {
-            $protections = 'create=all';
-        }
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'protect')
-                             ->setParameterPost('title', $title)
-                             ->setParameterPost('token', $protectToken)
-                             ->setParameterPost('protections', $protections);
-        $this->_request('POST', 'json');
-    }
-    
-    /**
-     * Return information about the currently logged-in user.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Meta#userinfo_.2F_ui
-     * @return array
-     */
-    public function getUserInfo()
-    {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('meta', 'userinfo')
-                             ->setParameterPost('uiprop', 'rights|editcount|email|groups|blockinfo|hasmsg|changeablegroups|options|ratelimits');
-        $response = $this->_request('POST', 'json');
-        return $response;
-    }
-    
-    /**
-     * Return the specified user's contributions.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Usercontribs
-     * @param null|string $ucuser
-     * @param array $params
-     * @return array
-     */
-    public function getUserContributions($ucuser, array $params = array())
-    {
-        $paramNames = array('ucuser', 'ucuserprefix', 'ucstart', 'ucend', 
-                            'uccontinue', 'ucdir', 'uclimit', 'ucnamespace', 
-                            'ucshow', 'ucprop');
-        foreach ($paramNames as $paramName) {
-            if (array_key_exists($paramName, $params)) {
-                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
-            }
-        }
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('list', 'usercontribs')
-                             ->setParameterPost('ucuser', $ucuser);
-        $response = $this->_request('POST', 'json');
-        return $response;
-    }
-    
-    /**
-     * Return recent changes to the wiki.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Recentchanges
-     * @param array $params
-     * @return array
-     */
-    public function getRecentChanges(array $params = array())
-    {
-        $paramNames = array('rcstart', 'rcend', 'rcdir', 'rclimit', 
-                            'rcnamespace', 'rcuser', 'rcexcludeuser', 'rctype', 
-                            'rcshow', 'rcprop');
-        foreach ($paramNames as $paramName) {
-            if (array_key_exists($paramName, $params)) {
-                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
-            }
-        }
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('list', 'recentchanges');
-        $response = $this->_request('POST', 'json');
-        return $response;
-    }
-    
-    /**
-     * Return revisions for a given page.
-     * 
-     * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
-     * @param string $titles
-     * @param array $params
-     * @return array
-     */
-    public function getRevisions($titles, array $params = array())
-    {
-        $paramNames = array('rvprop', 'rvcontinue', 'rvlimit', 'rvstartid', 
-                            'rvendid', 'rvstart', 'rvend', 'rvdir', 'rvuser', 
-                            'rvexcludeuser', 'rvexpandtemplates', 
-                            'rvgeneratexml', 'rvsection', 'rvtoken', 'rvdiffto', 
-                            'rvdifftotext');
-        foreach ($paramNames as $paramName) {
-            if (array_key_exists($paramName, $params)) {
-                self::getHttpClient()->setParameterPost($paramName, $params[$paramName]);
-            }
-        }
-        
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('prop', 'revisions')
-                             ->setParameterPost('titles', $titles);
-        $response = $this->_request('POST', 'json');
-        return $response;
-    }
-    
-    /**
-    * Return the protection status of the specified page.
-    * 
-    * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in
-    * @param string $title
-    * @return array
-    */
-    public function getPageProtections($title)
-    {
-        self::getHttpClient()->setParameterPost('format', 'json')
-                             ->setParameterPost('action', 'query')
-                             ->setParameterPost('prop', 'info')
-                             ->setParameterPost('inprop', 'protection')
-                             ->setParameterPost('titles', $title);
-        $response = $this->_request('POST', 'json');
-
-        $page = current($response['query']['pages']);
-        return $page['protection'];
-    }
-    
-    /**
-     * Make a request, check for errors, and return parsed response.
-     * 
-     * @param string $format The expected format.
-     * @param string $method POST or GET
-     * @return array|SimpleXMLElement
-     */
-    protected function _request($method, $format)
-    {
-        // Check for valid request method.
-        if (!in_array($method, array('POST', 'GET'))) {
-            throw new Scripto_Service_Exception('Invalid method.');
-        }
+                             ->setParameterPost('action', $action);
         
         // Get the response body and reset the request.
-        $body = self::getHttpClient()->request($method)->getBody();
+        $body = self::getHttpClient()->request('POST')->getBody();
         self::getHttpClient()->resetParameters();
         
         // Parse the response body, throwing errors when encountered.
-        switch ($format) {
-            case 'json':
-                $response = json_decode($body, true);
-                if (isset($response['error'])) {
-                    throw new Scripto_Service_Exception($response['error']['info']);
-                }
-                return $response;
-            case 'xml':
-                $response = new SimpleXMLElement($body);
-                if (isset($response->error)) {
-                    throw new Scripto_Service_Exception($response->error['info']);
-                }
-                return $response;
-            default:
-                throw new Scripto_Service_Exception('Cannot parse provided response format.');
+        $response = json_decode($body, true);
+        if (isset($response['error'])) {
+            throw new Scripto_Service_Exception($response['error']['info']);
         }
+        return $response;
     }
 }
