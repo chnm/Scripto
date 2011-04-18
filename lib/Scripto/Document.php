@@ -268,6 +268,63 @@ class Scripto_Document
     }
     
     /**
+     * Get the revisions for the current page.
+     * 
+     * @param int $limit
+     * @return array
+     */
+    public function getRevisions($limit = 10)
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
+        }
+        
+        $revisions = array();
+        $startId = null;
+        do {
+            $response = $this->_mediawiki->getRevisions(
+                $this->_baseTitle, 
+                array('rvstartid' => $startId, 
+                      'rvlimit'   => 100, 
+                      'rvprop'    => 'ids|flags|timestamp|user|comment|size')
+            );
+            $page = current($response['query']['pages']);
+            foreach ($page['revisions'] as $revision) {
+                
+                // Filter out minor edits.
+                if (isset($revision['minor'])) {
+                    continue;
+                }
+                
+                // Build the revisions.
+                $revisions[] = array(
+                    'revision_id' => $revision['revid'], 
+                    'parent_id'   => $revision['parentid'], 
+                    'user'        => $revision['user'], 
+                    'timestamp'   => $revision['timestamp'], 
+                    'comment'     => $revision['comment'], 
+                    'size'        => $revision['size'], 
+                );
+                
+                // Break out of the loops if limit has been reached.
+                if ($limit == count($revisions)) {
+                    break 2;
+                }
+            }
+            
+            // Set the query continue, if any.
+            if (isset($response['query-continue'])) {
+                $startId = $response['query-continue']['revisions']['rvstartid'];
+            } else {
+                $startId = null;
+            }
+            
+        } while ($startId);
+        
+        return $revisions;
+    }
+    
+    /**
     * Determine if the current user can edit the MediaWiki page.
     * 
     * It is possible to restrict anonymous editing in MediaWiki.
