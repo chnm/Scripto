@@ -342,22 +342,26 @@ class Scripto
     }
     
     /**
-     * Get the diff between two page revisions.
+     * Get the difference between two page revisions.
      * 
      * @param string $title
-     * @param int $revisionId The revision ID to diff.
-     * @param int|string $diffTo The revision to diff to: use the revision ID, 
+     * @param int $from The revision ID to diff.
+     * @param int|string $to The revision to diff to: use the revision ID, 
      * prev, next, or cur.
      */
-    function getDiff($title, $revisionId, $diffTo = 'prev')
+    public function getRevisionDiff($fromRevisionId, $toRevisionId = 'prev')
     {
-        $revision = $this->_mediawiki->getRevisions(
-            $title, 
-            array('rvstartid' => $revisionId, 
-                  'rvdiffto'  => $diffTo, 
-                  'rvlimit'   => '1')
-        );
-        $page = current($revision['query']['pages']);
-        return '<table>' . $page['revisions'][0]['diff']['*'] . '</table>';
+        return $this->_mediawiki->getRevisionDiff($fromRevisionId, $toRevisionId);
+    }
+    
+    /**
+     * Get the HTML of a specified revision of a given page.
+     * 
+     * @param int $revisionId
+     * @return string
+     */
+    public function getRevisionHtml($revisionId)
+    {
+        return $this->_mediawiki->getRevisionHtml($revisionId);
     }
 }

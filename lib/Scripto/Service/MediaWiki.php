@@ -52,7 +52,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             'title', 'token', 'protections', 'expiry', 'reason', 'cascade'
         ), 
         'query' => array(
-            'titles', 
+            // title specifications
+            'titles', 'revids', 'pageids', 
             // submodules
             'meta', 'prop', 'list', 
             // meta submodule
@@ -181,7 +182,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Returns revisions for a given page.
+     * Gets revisions for a given page.
      * 
      * @link http://www.mediawiki.org/wiki/API:Properties#revisions_.2F_rv
      * @param string $titles
@@ -193,6 +194,42 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         $params['titles'] = $titles;
         $params['prop'] = 'revisions';
         return $this->query($params);
+    }
+    
+    /**
+     * Gets the HTML of a specified revision of a given page.
+     * 
+     * @param int $revisionId
+     * @return string
+     */
+    public function getRevisionHtml($revisionId)
+    {
+        // Get the revision wikitext.
+        $response = $this->getRevisions(null, array('revids' => $revisionId, 
+                                                    'rvprop' => 'content'));
+        $page = current($response['query']['pages']);
+        
+        // Parse the wikitext into HTML.
+        $response = $this->parse(
+            array('text' => '__NOEDITSECTION__' . $page['revisions'][0]['*'])
+        );
+        return $response['parse']['text']['*'];
+    }
+    
+    /**
+     * Gets the difference between two revisions.
+     * 
+     * @param int $from The revision ID to diff.
+     * @param int|string $to The revision to diff to: use the revision ID, 
+     * prev, next, or cur.
+     * @return string
+     */
+    public function getRevisionDiff($fromRevisionId, $toRevisionId = 'prev')
+    {
+        $response = $this->getRevisions(null, array('revids'   => $fromRevisionId, 
+                                                    'rvdiffto' => $toRevisionId));
+        $page = current($response['query']['pages']);
+        return '<table>' . $page['revisions'][0]['diff']['*'] . '</table>';
     }
     
     /**

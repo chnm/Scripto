@@ -266,64 +266,7 @@ class Scripto_Document
         }
         return html_entity_decode(strip_tags($this->_mediawiki->getLatestRevisionHtml('Talk:' . $this->_baseTitle)));
     }
-    
-    /**
-     * Get the revisions for the current page.
-     * 
-     * @param int $limit
-     * @return array
-     */
-    public function getRevisions($limit = 10)
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
-        }
         
-        $revisions = array();
-        $startId = null;
-        do {
-            $response = $this->_mediawiki->getRevisions(
-                $this->_baseTitle, 
-                array('rvstartid' => $startId, 
-                      'rvlimit'   => 100, 
-                      'rvprop'    => 'ids|flags|timestamp|user|comment|size')
-            );
-            $page = current($response['query']['pages']);
-            foreach ($page['revisions'] as $revision) {
-                
-                // Filter out minor edits.
-                if (isset($revision['minor'])) {
-                    continue;
-                }
-                
-                // Build the revisions.
-                $revisions[] = array(
-                    'revision_id' => $revision['revid'], 
-                    'parent_id'   => $revision['parentid'], 
-                    'user'        => $revision['user'], 
-                    'timestamp'   => $revision['timestamp'], 
-                    'comment'     => $revision['comment'], 
-                    'size'        => $revision['size'], 
-                );
-                
-                // Break out of the loops if limit has been reached.
-                if ($limit == count($revisions)) {
-                    break 2;
-                }
-            }
-            
-            // Set the query continue, if any.
-            if (isset($response['query-continue'])) {
-                $startId = $response['query-continue']['revisions']['rvstartid'];
-            } else {
-                $startId = null;
-            }
-            
-        } while ($startId);
-        
-        return $revisions;
-    }
-    
     /**
     * Determine if the current user can edit the MediaWiki page.
     * 
@@ -458,73 +401,6 @@ class Scripto_Document
     }
     
     /**
-     * Encode a base title that enables fail-safe document page transport 
-     * between the external system, Scripto, and MediaWiki.
-     * 
-     * The base title is the base MediaWiki page title that corresponds to the 
-     * document page. Encoding is necessary to allow all Unicode characters in 
-     * document and page IDs, even those not allowed in URL syntax and MediaWiki 
-     * naming conventions. Encoding in Base64 allows the title to be decoded.
-     * 
-     * The base title has four parts:
-     *   1) A title prefix to keep MediaWiki from capitalizing the first character
-     *   2) A URL-safe Base64 encoded document ID
-     *   3) A delimiter between the encoded document ID and page ID
-     *   4) A URL-safe Base64 encoded page ID
-     * 
-     * @link http://en.wikipedia.org/wiki/Base64#URL_applications
-     * @link http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
-     * @param string|int $documentId The document ID
-     * @param string|int $pageId The page ID
-     * @return string The encoded base title
-     */
-    static public function encodeBaseTitle($documentId, $pageId)
-    {
-        return self::BASE_TITLE_PREFIX
-             . Scripto_Document::base64UrlEncode($documentId)
-             . self::BASE_TITLE_DELIMITER
-             . Scripto_Document::base64UrlEncode($pageId);
-    }
-    
-    /**
-     * Decode the base title.
-     * 
-     * @param string|int $baseTitle
-     * @return array An array containing the document ID and page ID
-     */
-    static public function decodeBaseTitle($baseTitle)
-    {
-        // First remove the title prefix.
-        $baseTitle = ltrim($baseTitle, self::BASE_TITLE_PREFIX);
-        // Create an array containing the document ID and page ID.
-        $baseTitle = explode(self::BASE_TITLE_DELIMITER, $baseTitle);
-        // URL-safe Base64 decode the array and return it.
-        return array_map('Scripto_Document::base64UrlDecode', $baseTitle);
-    }
-    
-    /**
-     * Encode a string to URL-safe Base64.
-     * 
-     * @param string $str
-     * @return string
-     */
-    static public function base64UrlEncode($str)
-    {
-        return strtr(rtrim(base64_encode($str), '='), '+/', '-_');
-    }
-    
-    /**
-     * Decode a string from a URL-safe Base64.
-     * 
-     * @param string $str
-     * @return string
-     */
-    static public function base64UrlDecode($str)
-    {
-        return base64_decode(strtr($str, '-_', '+/'));
-    }
-    
-    /**
      * Determine whether the document transcription is already imported in the 
      * external system.
      * 
@@ -606,5 +482,129 @@ class Scripto_Document
         }
         $text = implode($pageDelimiter, array_map('trim', $text));
         $this->_adapter->importDocumentTranscription($this->_id, trim($text));
+    }
+    
+    /**
+     * Get the revisions for the current page.
+     * 
+     * @param int $limit
+     * @return array
+     */
+    public function getRevisions($limit = 10)
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
+        }
+        
+        $revisions = array();
+        $startId = null;
+        do {
+            $response = $this->_mediawiki->getRevisions(
+                $this->_baseTitle, 
+                array('rvstartid' => $startId, 
+                      'rvlimit'   => 100, 
+                      'rvprop'    => 'ids|flags|timestamp|user|comment|size')
+            );
+            $page = current($response['query']['pages']);
+            foreach ($page['revisions'] as $revision) {
+                
+                // Filter out minor edits.
+                if (isset($revision['minor'])) {
+                    continue;
+                }
+                
+                // Build the revisions.
+                $revisions[] = array(
+                    'revision_id' => $revision['revid'], 
+                    'parent_id'   => $revision['parentid'], 
+                    'user'        => $revision['user'], 
+                    'timestamp'   => $revision['timestamp'], 
+                    'comment'     => $revision['comment'], 
+                    'size'        => $revision['size'], 
+                );
+                
+                // Break out of the loops if limit has been reached.
+                if ($limit == count($revisions)) {
+                    break 2;
+                }
+            }
+            
+            // Set the query continue, if any.
+            if (isset($response['query-continue'])) {
+                $startId = $response['query-continue']['revisions']['rvstartid'];
+            } else {
+                $startId = null;
+            }
+            
+        } while ($startId);
+        
+        return $revisions;
+    }
+    
+    /**
+     * Encode a base title that enables fail-safe document page transport 
+     * between the external system, Scripto, and MediaWiki.
+     * 
+     * The base title is the base MediaWiki page title that corresponds to the 
+     * document page. Encoding is necessary to allow all Unicode characters in 
+     * document and page IDs, even those not allowed in URL syntax and MediaWiki 
+     * naming conventions. Encoding in Base64 allows the title to be decoded.
+     * 
+     * The base title has four parts:
+     *   1) A title prefix to keep MediaWiki from capitalizing the first character
+     *   2) A URL-safe Base64 encoded document ID
+     *   3) A delimiter between the encoded document ID and page ID
+     *   4) A URL-safe Base64 encoded page ID
+     * 
+     * @link http://en.wikipedia.org/wiki/Base64#URL_applications
+     * @link http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29
+     * @param string|int $documentId The document ID
+     * @param string|int $pageId The page ID
+     * @return string The encoded base title
+     */
+    static public function encodeBaseTitle($documentId, $pageId)
+    {
+        return self::BASE_TITLE_PREFIX
+             . Scripto_Document::base64UrlEncode($documentId)
+             . self::BASE_TITLE_DELIMITER
+             . Scripto_Document::base64UrlEncode($pageId);
+    }
+    
+    /**
+     * Decode the base title.
+     * 
+     * @param string|int $baseTitle
+     * @return array An array containing the document ID and page ID
+     */
+    static public function decodeBaseTitle($baseTitle)
+    {
+        // First remove the title prefix.
+        $baseTitle = ltrim($baseTitle, self::BASE_TITLE_PREFIX);
+        // Create an array containing the document ID and page ID.
+        $baseTitle = explode(self::BASE_TITLE_DELIMITER, $baseTitle);
+        // URL-safe Base64 decode the array and return it.
+        return array_map('Scripto_Document::base64UrlDecode', $baseTitle);
+    }
+    
+    /**
+     * Encode a string to URL-safe Base64.
+     * 
+     * @param string $str
+     * @return string
+     */
+    static public function base64UrlEncode($str)
+    {
+        return strtr(rtrim(base64_encode($str), '='), '+/', '-_');
+    }
+    
+    /**
+     * Decode a string from a URL-safe Base64.
+     * 
+     * @param string $str
+     * @return string
+     */
+    static public function base64UrlDecode($str)
+    {
+        return base64_decode(strtr($str, '-_', '+/'));
     }
 }
