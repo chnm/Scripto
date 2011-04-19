@@ -253,6 +253,7 @@ class Scripto
     /**
      * Get the recent changes.
      * 
+     * @link http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
      * @param int $limit
      * @return array
      */
@@ -260,47 +261,66 @@ class Scripto
     {
         require_once 'Scripto/Document.php';
         
-        $limit = (int) $limit;
+        $start = null;
         $recentChanges = array();
         $documentTitles = array();
-        $start = null;
+        
+        // Namespaces to get: ns_index => ns_name
+        // See http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
+        $namespaces = array('0' => 'Main', '1' => 'Talk');
+        
         do {
             $response = $this->_mediawiki->getRecentChanges(
-                array('rctype'      => 'edit|new', 
-                      'rcprop'      => 'user|timestamp|title|ids', 
-                      'rcnamespace' => '0', 
+                array('rcprop'      => 'user|comment|timestamp|title|ids|sizes|loginfo|flags', 
+                      'rclimit'     => '100', 
+                      'rcnamespace' => implode('|', array_keys($namespaces)), 
                       'rcstart'     => $start)
             );
+        
             foreach ($response['query']['recentchanges'] as $value) {
                 
-                // Filter out changes that are not document pages. 
-                if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
+                // Extract the title, removing the namespace if any.
+                $title = preg_replace('/^(.+:)?(.+)$/', '$2', $value['title']);
+                
+                // Filter out contributions that are not document pages. 
+                if (Scripto_Document::BASE_TITLE_PREFIX != $title[0]) {
                     continue;
                 }
                 
                 // Set the document ID and page ID.
-                $document = Scripto_Document::decodeBaseTitle($value['title']);
+                $documentIds = Scripto_Document::decodeBaseTitle($title);
                 
                 // Set the document title. Reduce calls to the adapter by 
                 // caching each title and checking if it already exists.
-                if (array_key_exists($document[0], $documentTitles)) {
-                    $documentTitle = $documentTitles[$document[0]];
+                if (array_key_exists($documentIds[0], $documentTitles)) {
+                    $documentTitle = $documentTitles[$documentIds[0]];
                 } else {
-                    $documentTitle = $this->_adapter->getDocumentTitle($document[0]);
-                    $documentTitles[$document[0]] = $documentTitle;
+                    $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
+                    $documentTitles[$documentIds[0]] = $documentTitle;
                 }
                 
                 $recentChanges[] = array(
                     'type'             => $value['type'], 
+                    'namespace_index'  => $value['ns'], 
+                    'namespace_name'   => $namespaces[$value['ns']], 
+                    'mediawiki_title'  => $value['title'], 
+                    'rcid'             => $value['rcid'], 
                     'page_id'          => $value['pageid'], 
                     'revision_id'      => $value['revid'], 
                     'old_revision_id'  => $value['old_revid'], 
-                    'mediawiki_title'  => $value['title'], 
-                    'timestamp'        => $value['timestamp'], 
                     'user'             => $value['user'], 
-                    'document_id'      => $document[0], 
-                    'document_page_id' => $document[1], 
-                    'document_title'   => $documentTitle
+                    'old_length'       => $value['oldlen'], 
+                    'new_length'       => $value['newlen'], 
+                    'timestamp'        => $value['timestamp'], 
+                    'comment'          => $value['comment'], 
+                    'log_id'           => isset($value['logid']) ? $value['logid']: null, 
+                    'log_type'         => isset($value['logtype']) ? $value['logtype']: null, 
+                    'log_action'       => isset($value['logaction']) ? $value['logaction']: null, 
+                    'new'              => isset($value['new']) ? true: false, 
+                    'minor'            => isset($value['minor']) ? true: false, 
+                    'document_id'      => $documentIds[0], 
+                    'document_page_id' => $documentIds[1], 
+                    'document_title'   => $documentTitle, 
                 );
                 
                 // Break out of the loops if limit has been reached.
@@ -325,8 +345,8 @@ class Scripto
      * Get the diff between two page revisions.
      * 
      * @param string $title
-     * @param string $revisionId The revision ID to diff.
-     * @param string $compareTo The revision to diff to: use the revision ID, 
+     * @param int $revisionId The revision ID to diff.
+     * @param int|string $diffTo The revision to diff to: use the revision ID, 
      * prev, next, or cur.
      */
     function getDiff($title, $revisionId, $diffTo = 'prev')
