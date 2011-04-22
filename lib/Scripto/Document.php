@@ -268,6 +268,36 @@ class Scripto_Document
     }
         
     /**
+     * Get the MediaWiki transcription page revision history for the current page.
+     * 
+     * @param int $limit
+     * @param int $startRevisionId Revision ID from which to start.
+     * @return array
+     */
+    public function getTranscriptionPageHistory($limit = 10, $startRevisionId = null)
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the transcription page history.');
+        }
+        return $this->_getPageHistory($this->_baseTitle, $limit, $startRevisionId);
+    }
+    
+    /**
+     * Get the MediaWiki talk page revision history for the current page.
+     * 
+     * @param int $limit
+     * @param int $startRevisionId Revision ID from which to start.
+     * @return array
+     */
+    public function getTalkPageHistory($limit = 10, $startRevisionId = null)
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the talk page history.');
+        }
+        return $this->_getPageHistory('Talk:' . $this->_baseTitle, $limit, $startRevisionId);
+    }
+    
+    /**
     * Determine if the current user can edit the MediaWiki page.
     * 
     * It is possible to restrict anonymous editing in MediaWiki.
@@ -487,31 +517,27 @@ class Scripto_Document
     /**
      * Get the revisions for the current page.
      * 
+     * @param string $title
      * @param int $limit
+     * @param int $startRevisionId
      * @return array
      */
-    public function getRevisions($limit = 10)
+    protected function _getPageHistory($title, $limit = 10, $startRevisionId = null)
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the talk page plain text.');
+            throw new Scripto_Exception('The document page must be set before getting the page history.');
         }
         
         $revisions = array();
-        $startId = null;
         do {
             $response = $this->_mediawiki->getRevisions(
-                $this->_baseTitle, 
-                array('rvstartid' => $startId, 
+                $title, 
+                array('rvstartid' => $startRevisionId, 
                       'rvlimit'   => 100, 
                       'rvprop'    => 'ids|flags|timestamp|user|comment|size')
             );
             $page = current($response['query']['pages']);
             foreach ($page['revisions'] as $revision) {
-                
-                // Filter out minor edits.
-                if (isset($revision['minor'])) {
-                    continue;
-                }
                 
                 // Build the revisions.
                 $revisions[] = array(
