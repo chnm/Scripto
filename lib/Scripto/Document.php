@@ -124,8 +124,8 @@ class Scripto_Document
         }
         
         // Set information about the transcription and talk pages.
-        $this->_transcriptionPageInfo = $this->_getPageInfo($this->_baseTitle);
-        $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $this->_baseTitle);
+        $this->_transcriptionPageInfo = $this->_getPageInfo($baseTitle);
+        $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $baseTitle);
         
         $this->_pageId = $pageId;
         $this->_baseTitle = $baseTitle;
@@ -608,6 +608,10 @@ class Scripto_Document
      */
     protected function _getPageHistory($title, $limit = 10, $startRevisionId = null)
     {
+        $actions = array('Replaced content', 
+                         'Unprotected', 
+                         'Protected', 
+                         'Created page');
         $revisions = array();
         do {
             $response = $this->_mediawiki->getRevisions(
@@ -619,6 +623,13 @@ class Scripto_Document
             $page = current($response['query']['pages']);
             foreach ($page['revisions'] as $revision) {
                 
+                $actionPattern = '/^(' . implode('|', $actions) . ').+$/';
+                if (preg_match($actionPattern, $revision['comment'])) {
+                    $action = preg_replace($actionPattern, '$1', $revision['comment']);
+                } else {
+                    $action = '';
+                }
+                
                 // Build the revisions.
                 $revisions[] = array(
                     'revision_id' => $revision['revid'], 
@@ -627,6 +638,7 @@ class Scripto_Document
                     'timestamp'   => $revision['timestamp'], 
                     'comment'     => $revision['comment'], 
                     'size'        => $revision['size'], 
+                    'action'      => $action, 
                 );
                 
                 // Break out of the loops if limit has been reached.
@@ -637,12 +649,12 @@ class Scripto_Document
             
             // Set the query continue, if any.
             if (isset($response['query-continue'])) {
-                $startId = $response['query-continue']['revisions']['rvstartid'];
+                $startRevisionId = $response['query-continue']['revisions']['rvstartid'];
             } else {
-                $startId = null;
+                $startRevisionId = null;
             }
             
-        } while ($startId);
+        } while ($startRevisionId);
         
         return $revisions;
     }
