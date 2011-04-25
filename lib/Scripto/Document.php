@@ -62,6 +62,16 @@ class Scripto_Document
     protected $_baseTitle;
     
     /**
+     * @var array Information about the current transcription page.
+     */
+    protected $_transcriptionPageInfo;
+    
+    /**
+     * @var array Information about the current talk page.
+     */
+    protected $_talkPageInfo;
+    
+    /**
      * Construct the Scripto document object.
      * 
      * @param string|int $id The unique document identifier.
@@ -113,6 +123,10 @@ class Scripto_Document
             throw new Scripto_Exception('The document ID and/or page ID are too long to set the provided page.');
         }
         
+        // Set information about the transcription and talk pages.
+        $this->_transcriptionPageInfo = $this->_getPageInfo($this->_baseTitle);
+        $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $this->_baseTitle);
+        
         $this->_pageId = $pageId;
         $this->_baseTitle = $baseTitle;
     }
@@ -153,6 +167,32 @@ class Scripto_Document
     public function getBaseTitle()
     {
         return $this->_baseTitle;
+    }
+    
+    /**
+     * Get information about the current transcription page.
+     * 
+     * @return array
+     */
+    public function getTranscriptionPageInfo()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting information about the transcription page.');
+        }
+        return $this->_transcriptionPageInfo;
+    }
+    
+    /**
+     * Get information about the current talk page.
+     * 
+     * @return array
+     */
+    public function getTalkPageInfo()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting information about the talk page.');
+        }
+        return $this->_talkPageInfo;
     }
     
     /**
@@ -266,32 +306,6 @@ class Scripto_Document
         }
         return html_entity_decode(strip_tags($this->_mediawiki->getLatestRevisionHtml('Talk:' . $this->_baseTitle)));
     }
-        
-    /**
-     * Get information for the current transcription page'.
-     * 
-     * @return array
-     */
-    public function getTranscriptionPageInfo()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the transcription page information.');
-        }
-        return $this->_getPageInfo($this->_baseTitle);
-    }
-    
-    /**
-     * Get information for the current talk page.
-     * 
-     * @return array
-     */
-    public function getTalkPageInfo()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the transcription page information.');
-        }
-        return $this->_getPageInfo('Talk:' . $this->_baseTitle);
-    }
     
     /**
      * Get the MediaWiki transcription page revision history for the current page.
@@ -347,7 +361,7 @@ class Scripto_Document
             return false;
         }
         
-        $pageProtections = $this->_mediawiki->getPageProtections($this->_baseTitle);
+        $pageProtections = $this->_transcriptionPageInfo['protections'];
         
         // Users with edit rights can edit unprotected pages.
         if (empty($pageProtections)) {
@@ -386,7 +400,9 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before editing the transcription page.');
         }
-        $this->_mediawiki->edit($this->_baseTitle, $text);
+        $this->_mediawiki->edit($this->_baseTitle, 
+                                $text, 
+                                $this->_transcriptionPageInfo['edit_token']);
     }
     
     /**
@@ -399,7 +415,9 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before editing the talk page.');
         }
-        $this->_mediawiki->edit('Talk:' . $this->_baseTitle, $text);
+        $this->_mediawiki->edit('Talk:' . $this->_baseTitle, 
+                                $text, 
+                                $this->_talkPageInfo['edit_token']);
     }
     
     /**
@@ -408,9 +426,13 @@ class Scripto_Document
     public function protectPage()
     {
         if ($this->_mediawiki->pageCreated($this->_baseTitle)) {
-            $this->_mediawiki->protect($this->_baseTitle, 'edit=sysop');
+            $this->_mediawiki->protect($this->_baseTitle, 
+                                       'edit=sysop', 
+                                       $this->_transcriptionPageInfo['protect_token']);
         } else {
-            $this->_mediawiki->protect($this->_baseTitle, 'create=sysop');
+            $this->_mediawiki->protect($this->_baseTitle, 
+                                       'create=sysop', 
+                                       $this->_transcriptionPageInfo['protect_token']);
         }
     }
     
@@ -420,9 +442,13 @@ class Scripto_Document
     public function unprotectPage()
     {
         if ($this->_mediawiki->pageCreated($this->_baseTitle)) {
-            $this->_mediawiki->protect($this->_baseTitle, 'edit=all');
+            $this->_mediawiki->protect($this->_baseTitle, 
+                                       'edit=all', 
+                                       $this->_transcriptionPageInfo['protect_token']);
         } else {
-            $this->_mediawiki->protect($this->_baseTitle, 'create=all');
+            $this->_mediawiki->protect($this->_baseTitle, 
+                                       'create=all', 
+                                       $this->_transcriptionPageInfo['protect_token']);
         }
     }
     
@@ -437,7 +463,7 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before determining whether it is protected.');
         }
         
-        $pageProtections = $this->_mediawiki->getPageProtections($this->_baseTitle);
+        $pageProtections = $this->_transcriptionPageInfo['protections'];
         
         // There are no protections.
         if (empty($pageProtections)) {
@@ -548,15 +574,27 @@ class Scripto_Document
      */
     protected function _getPageInfo($title)
     {
-        $response = $this->_mediawiki->getInfo($title);
+        $params = array('inprop' => 'protection|talkid|subjectid|url', 
+                        'intoken' => 'edit|move|delete|protect');
+        $response = $this->_mediawiki->getInfo($title, $params);
         $page = current($response['query']['pages']);
-        $pageInfo = array('page_id'          => $page['pageid'], 
-                          'namespace_index'  => $page['ns'], 
-                          'mediawiki_title'  => $page['title'], 
-                          'last_revision_id' => $page['lastrevid'], 
-                          'counter'          => $page['counter'], 
-                          'length'           => $page['length'], 
-                          'new'              => isset($page['new']) ? true: false);
+        $pageInfo = array('page_id'            => $page['pageid'], 
+                          'namespace_index'    => $page['ns'], 
+                          'mediawiki_title'    => $page['title'], 
+                          'last_revision_id'   => $page['lastrevid'], 
+                          'counter'            => $page['counter'], 
+                          'length'             => $page['length'], 
+                          'start_timestamp'    => $page['starttimestamp'], 
+                          'edit_token'         => $page['edittoken'], 
+                          'move_token'         => $page['movetoken'], 
+                          'delete_token'       => $page['deletetoken'], 
+                          'protect_token'      => $page['protecttoken'], 
+                          'protections'        => $page['protection'], 
+                          'talk_id'            => $page['talkid'], 
+                          'mediawiki_full_url' => $page['fullurl'], 
+                          'mediawiki_edit_url' => $page['editurl'], 
+                          'redirect'           => isset($page['redirect']) ? true: false, 
+                          'new'                => isset($page['new']) ? true: false);
         return $pageInfo;
     }
     
