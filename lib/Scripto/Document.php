@@ -268,6 +268,32 @@ class Scripto_Document
     }
         
     /**
+     * Get information for the current transcription page'.
+     * 
+     * @return array
+     */
+    public function getTranscriptionPageInfo()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the transcription page information.');
+        }
+        return $this->_getPageInfo($this->_baseTitle);
+    }
+    
+    /**
+     * Get information for the current talk page.
+     * 
+     * @return array
+     */
+    public function getTalkPageInfo()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the transcription page information.');
+        }
+        return $this->_getPageInfo('Talk:' . $this->_baseTitle);
+    }
+    
+    /**
      * Get the MediaWiki transcription page revision history for the current page.
      * 
      * @param int $limit
@@ -515,7 +541,27 @@ class Scripto_Document
     }
     
     /**
-     * Get the revisions for the current page.
+     * Get information for the specified page.
+     * 
+     * @param string $title
+     * @return array
+     */
+    protected function _getPageInfo($title)
+    {
+        $response = $this->_mediawiki->getInfo($title);
+        $page = current($response['query']['pages']);
+        $pageInfo = array('page_id'          => $page['pageid'], 
+                          'namespace_index'  => $page['ns'], 
+                          'mediawiki_title'  => $page['title'], 
+                          'last_revision_id' => $page['lastrevid'], 
+                          'counter'          => $page['counter'], 
+                          'length'           => $page['length'], 
+                          'new'              => isset($page['new']) ? true: false);
+        return $pageInfo;
+    }
+    
+    /**
+     * Get the revisions for the specified page.
      * 
      * @param string $title
      * @param int $limit
@@ -524,10 +570,6 @@ class Scripto_Document
      */
     protected function _getPageHistory($title, $limit = 10, $startRevisionId = null)
     {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the page history.');
-        }
-        
         $revisions = array();
         do {
             $response = $this->_mediawiki->getRevisions(

@@ -532,8 +532,6 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     protected function _request($action, array $params = array())
     {
-        //echo "<pre>$action:\n";print_r($params);echo '</pre>';
-        
         // Check if this action is a valid MediaWiki API action.
         if (!array_key_exists($action, $this->_actions)) {
             throw new Scripto_Service_Exception('Invalid MediaWiki API action.');
