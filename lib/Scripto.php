@@ -355,13 +355,34 @@ class Scripto
     }
     
     /**
-     * Get the HTML of a specified revision of a given page.
+     * Get properties of the specified page revision.
      * 
      * @param int $revisionId
-     * @return string
+     * @return array
      */
-    public function getRevisionHtml($revisionId)
+    public function getRevision($revisionId)
     {
-        return $this->_mediawiki->getRevisionHtml($revisionId);
-    }
+        // Get the revision properties.
+        $response = $this->_mediawiki->getRevisions(
+            null, 
+            array('revids' => $revisionId, 
+                  'rvprop' => 'ids|flags|timestamp|user|comment|size|content')
+        );
+        $page = current($response['query']['pages']);
+        
+        // Parse the wikitext into HTML.
+        $response = $this->_mediawiki->parse(
+            array('text' => '__NOEDITSECTION__' . $page['revisions'][0]['*'])
+        );
+        
+        $revision = array('revision_id' => $page['revisions'][0]['revid'], 
+                          'parent_id'   => $page['revisions'][0]['parentid'], 
+                          'user'        => $page['revisions'][0]['user'], 
+                          'timestamp'   => $page['revisions'][0]['timestamp'], 
+                          'comment'     => $page['revisions'][0]['comment'], 
+                          'size'        => $page['revisions'][0]['size'], 
+                          'wikitext'    => $page['revisions'][0]['*'], 
+                          'html'        => $response['parse']['text']['*']);
+        return $revision;
+   }
 }
