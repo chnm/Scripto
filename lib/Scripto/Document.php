@@ -431,33 +431,29 @@ class Scripto_Document
     }
     
     /**
-     * Determine whether the current page is edit protected.
+     * Determine whether the current transcription page is edit protected.
      * 
      * @return bool
      */
-    public function pageIsProtected()
+    public function isProtectedTranscriptionPage()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before determining whether it is protected.');
+            throw new Scripto_Exception('The document page must be set before determining whether the transcription page is protected.');
         }
-        
-        $pageProtections = $this->_transcriptionPageInfo['protections'];
-        
-        // There are no protections.
-        if (empty($pageProtections)) {
-            return false;
+        return $this->_isProtectedPage($this->_transcriptionPageInfo['protections']);
+    }
+    
+    /**
+     * Determine whether the current talk page is edit protected.
+     * 
+     * @return bool
+     */
+    public function isProtectedTalkPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether the talk page is protected.');
         }
-        
-        // Iterate the page protections.
-        foreach ($pageProtections as $pageProtection) {
-            // The page is edit protected.
-            if ('edit' == $pageProtection['type'] || 'create' == $pageProtection['type']) {
-                return true;
-            }
-        }
-        
-        // There are no edit protections.
-        return false;
+        return $this->_isProtectedPage($this->_talkPageInfo['protections']);
     }
     
     /**
@@ -587,6 +583,30 @@ class Scripto_Document
         
         // Users with edit rights can edit pages that are not edit-protected.
         return true;
+    }
+    
+    /**
+     * Determine whether the current page is edit protected.
+     * 
+     * @return bool
+     */
+    protected function _isProtectedPage(array $pageProtections)
+    {
+        // There are no protections.
+        if (empty($pageProtections)) {
+            return false;
+        }
+        
+        // Iterate the page protections.
+        foreach ($pageProtections as $pageProtection) {
+            // The page is edit protected.
+            if ('edit' == $pageProtection['type'] || 'create' == $pageProtection['type']) {
+                return true;
+            }
+        }
+        
+        // There are no edit protections.
+        return false;
     }
     
     /**
