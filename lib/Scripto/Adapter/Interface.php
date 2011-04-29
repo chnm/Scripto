@@ -21,9 +21,9 @@ interface Scripto_Adapter_Interface
     /**
      * Indicate whether the document page exists in the external system.
      * 
-     * Implementers must provide a unique identifier for every document page. We 
-     * highly recommend using unique keys from the external database whenever 
-     * possible (e.g. the page ID).
+     * Implementers must provide a unique identifier for every document page per 
+     * document. We highly recommend using unique keys from the external 
+     * database whenever possible (e.g. the page ID).
      * 
      * @param int|string $documentId The unique document ID
      * @param int|string $pageId The unique page ID
@@ -34,10 +34,10 @@ interface Scripto_Adapter_Interface
     /**
      * Get all the pages belonging to the document.
      * 
-     * Implementers must provide a unique identifier for every page. These IDs 
-     * must have corresponding page names, and must be in sequential page order. 
-     * Page IDs must be unique but do not have to be in natural order. Page 
-     * names do not have to be unique.
+     * Implementers must provide a unique identifier for every page per 
+     * document. These IDs must have corresponding page names, and must be in 
+     * sequential page order. Page IDs must be unique but do not have to be in 
+     * natural order. Page names do not have to be unique.
      * 
      * For the page IDs we highly recommend using unique keys from the external 
      * database whenever possible (e.g. the file ID). This page ID will be used 
@@ -57,7 +57,7 @@ interface Scripto_Adapter_Interface
      * 
      * @param int|string $documentId The unique document ID
      * @return array An array containing page identifiers as keys and page names 
-     *               as values, in sequential page order.
+     * as values, in sequential page order.
      */
     public function getDocumentPages($documentId);
     
@@ -73,7 +73,7 @@ interface Scripto_Adapter_Interface
     /**
      * Get the first page of the document.
      * 
-     * @param int|string $documentId
+     * @param int|string $documentId The document ID
      * @return int|string
      */
     public function getDocumentFirstPageId($documentId);
@@ -81,7 +81,7 @@ interface Scripto_Adapter_Interface
     /**
      * Get the title of the document.
      * 
-     * @param int|string $documentId
+     * @param int|string $documentId The document ID
      * @return string
      */
     public function getDocumentTitle($documentId);
@@ -98,7 +98,7 @@ interface Scripto_Adapter_Interface
      * Indicate whether the document page transcription has been imported.
      * 
      * @param int|string $documentId The document ID
-     * @param int|string $pageId Ithe page ID
+     * @param int|string $pageId The page ID
      */
     public function documentPageTranscriptionIsImported($documentId, $pageId);
     

@@ -47,15 +47,15 @@ class Scripto
         if ($mediawiki instanceof Scripto_Service_MediaWiki) {
             $this->_mediawiki = $mediawiki;
         } else if (is_array($mediawiki) 
-                && array_key_exists('api_url', $mediawiki) 
-                && array_key_exists('db_name', $mediawiki)) {
+                   && array_key_exists('api_url', $mediawiki) 
+                   && array_key_exists('db_name', $mediawiki)) {
             if (!isset($mediawiki['pass_cookies'])) {
                 $mediawiki['pass_cookies'] = true;
             }
             require_once 'Scripto/Service/MediaWiki.php';
-            $this->_mediawiki =  new Scripto_Service_MediaWiki($mediawiki['api_url'], 
-                                                               $mediawiki['db_name'], 
-                                                               (bool) $mediawiki['pass_cookies']);
+            $this->_mediawiki = new Scripto_Service_MediaWiki($mediawiki['api_url'], 
+                                                              $mediawiki['db_name'], 
+                                                              (bool) $mediawiki['pass_cookies']);
         } else {
             throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
         }
@@ -65,7 +65,7 @@ class Scripto
     }
     
     /**
-     * Check whethe the specified document exists.
+     * Check whether the specified document exists in the external system.
      * 
      * @param string|int $id The unique document identifier.
      * @return bool
@@ -93,6 +93,9 @@ class Scripto
     
     /**
      * Login via the MediaWiki service.
+     * 
+     * It is possible to restrict account creation in MediaWiki.
+     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_account_creation
      * 
      * @param string $username
      * @param string $password
@@ -179,7 +182,7 @@ class Scripto
     /**
      * Get the current user's most recently contributed document pages.
      * 
-     * @param int $limit
+     * @param int $limit The number of document pages to return.
      * @return array
      */
     public function getUserDocumentPages($limit = 10)
@@ -254,7 +257,7 @@ class Scripto
      * Get the recent changes.
      * 
      * @link http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
-     * @param int $limit
+     * @param int $limit The number of recent changes to return.
      * @return array
      */
     public function getRecentChanges($limit = 10)
@@ -344,10 +347,10 @@ class Scripto
     /**
      * Get the difference between two page revisions.
      * 
-     * @param string $title
-     * @param int $from The revision ID to diff.
-     * @param int|string $to The revision to diff to: use the revision ID, 
-     * prev, next, or cur.
+     * @param int $from The revision ID from which to diff.
+     * @param int|string $to The revision to which to diff. Use the revision ID, 
+     * "prev", "next", or "cur".
+     * @return string
      */
     public function getRevisionDiff($fromRevisionId, $toRevisionId = 'prev')
     {

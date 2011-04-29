@@ -47,7 +47,7 @@ class Scripto_Document
     protected $_mediawiki;
     
     /**
-     * @var string This document's title.
+     * @var string The document title provided by the external system.
      */
     protected $_title;
     
@@ -99,7 +99,10 @@ class Scripto_Document
     }
     
     /**
-     * Set the current page ID and the base title used by MediaWiki.
+     * Set the current document page.
+     * 
+     * Sets the current page ID, the base title used by MediaWiki, and 
+     * information about the MediaWiki transcription and talk pages.
      * 
      * @param string|null $pageId The unique page identifier.
      */
@@ -166,11 +169,14 @@ class Scripto_Document
      */
     public function getBaseTitle()
     {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the base title.');
+        }
         return $this->_baseTitle;
     }
     
     /**
-     * Get information about the current transcription page.
+     * Get information about the current MediaWiki transcription page.
      * 
      * @return array
      */
@@ -183,7 +189,7 @@ class Scripto_Document
     }
     
     /**
-     * Get information about the current talk page.
+     * Get information about the current MediaWiki talk page.
      * 
      * @return array
      */
@@ -196,18 +202,17 @@ class Scripto_Document
     }
     
     /**
-     * Get the structured pages from the adapter.
+     * Get all of this document's pages from the adapter.
      * 
      * @return array
      */
     public function getPages()
     {
-        // Get the structured pages from the adapter.
         return (array) $this->_adapter->getDocumentPages($this->_id);
     }
     
     /**
-     * Get the first page ID of the document.
+     * Get this document's first page ID from the adapter.
      * 
      * @return array
      */
@@ -217,7 +222,7 @@ class Scripto_Document
     }
     
     /**
-     * Get the page image URL.
+     * Get this document's current page image URL from the adapter.
      * 
      * @return string
      */
@@ -310,8 +315,8 @@ class Scripto_Document
     /**
      * Get the MediaWiki transcription page revision history for the current page.
      * 
-     * @param int $limit
-     * @param int $startRevisionId Revision ID from which to start.
+     * @param int $limit The number of revisions to return.
+     * @param int $startRevisionId The revision ID from which to start.
      * @return array
      */
     public function getTranscriptionPageHistory($limit = 10, $startRevisionId = null)
@@ -325,8 +330,8 @@ class Scripto_Document
     /**
      * Get the MediaWiki talk page revision history for the current page.
      * 
-     * @param int $limit
-     * @param int $startRevisionId Revision ID from which to start.
+     * @param int $limit The number of revisions to return.
+     * @param int $startRevisionId The revision ID from which to start.
      * @return array
      */
     public function getTalkPageHistory($limit = 10, $startRevisionId = null)
@@ -342,9 +347,6 @@ class Scripto_Document
     * 
     * It is possible to restrict anonymous editing in MediaWiki.
     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
-    * 
-    * It is possible to restrict account creation in MediaWiki.
-    * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_account_creation
     * 
     * @return bool
     */
@@ -393,7 +395,7 @@ class Scripto_Document
     /**
      * Edit the MediaWiki transcription page for the current document.
      * 
-     * @param string $text The wikitext of the transcription
+     * @param string $text The wikitext of the transcription.
      */
     public function editTranscriptionPage($text)
     {
@@ -408,7 +410,7 @@ class Scripto_Document
     /**
      * Edit the MediaWiki talk page for the current document.
      * 
-     * @param string $text The wikitext of the transcription
+     * @param string $text The wikitext of the transcription.
      */
     public function editTalkPage($text)
     {

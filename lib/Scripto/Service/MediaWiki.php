@@ -80,7 +80,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     /**
      * Constructs the MediaWiki API client.
      * 
-     * @param string $apiUrl
+     * @param string $apiUrl The URL to the MediaWiki API.
      * @param string $dbName The name of the MediaWiki database.
      * @param bool $passCookies Pass cookies to the web browser.
      */
