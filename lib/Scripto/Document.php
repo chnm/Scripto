@@ -343,53 +343,29 @@ class Scripto_Document
     }
     
     /**
-    * Determine if the current user can edit the MediaWiki page.
-    * 
-    * It is possible to restrict anonymous editing in MediaWiki.
-    * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
-    * 
-    * @return bool
-    */
-    public function canEdit()
+     * Determine if the current user can edit the MediaWiki transcription page.
+     * 
+     * @return bool
+     */
+    public function canEditTranscriptionPage()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before determining whether the user can edit it.');
+            throw new Scripto_Exception('The document page must be set before determining whether the user can edit the transcription page.');
         }
-        
-        $userInfo = $this->_mediawiki->getUserInfo('rights');
-        
-        // Users without edit rights cannot edit pages.
-        if (!in_array('edit', $userInfo['query']['userinfo']['rights'])) {
-            return false;
+        return $this->_canEdit($this->_transcriptionPageInfo['protections']);
+    }
+    
+    /**
+     * Determine if the current user can edit the MediaWiki talk page.
+     * 
+     * @return bool
+     */
+    public function canEditTalkPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether the user can edit the talk page.');
         }
-        
-        $pageProtections = $this->_transcriptionPageInfo['protections'];
-        
-        // Users with edit rights can edit unprotected pages.
-        if (empty($pageProtections)) {
-            return true;
-        }
-        
-        // Iterate the page protections.
-        foreach ($pageProtections as $pageProtection) {
-            
-            // The page is edit-protected.
-            if ('edit' == $pageProtection['type']) {
-                
-                // Users with edit and protect rights can edit protected pages.
-                if (in_array('protect', $userInfo['query']['userinfo']['rights'])) {
-                    return true;
-                
-                // Users with edit but without protect rights cannot edit 
-                // protected pages.
-                } else {
-                    return false;
-                }
-            }
-        }
-        
-        // Users with edit rights can edit pages that are not edit-protected.
-        return true;
+        return $this->_canEdit($this->_talkPageInfo['protections']);
     }
     
     /**
@@ -566,6 +542,51 @@ class Scripto_Document
         }
         $text = implode($pageDelimiter, array_map('trim', $text));
         $this->_adapter->importDocumentTranscription($this->_id, trim($text));
+    }
+    
+    /**
+     * Determine if the current user can edit the specified MediaWiki page.
+     * 
+     * It is possible to restrict anonymous editing in MediaWiki.
+     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
+     * 
+     * @param array $pageProtections
+     * @return bool
+     */
+    protected function _canEdit(array $pageProtections)
+    {
+        $userInfo = $this->_mediawiki->getUserInfo('rights');
+        
+        // Users without edit rights cannot edit pages.
+        if (!in_array('edit', $userInfo['query']['userinfo']['rights'])) {
+            return false;
+        }
+        
+        // Users with edit rights can edit unprotected pages.
+        if (empty($pageProtections)) {
+            return true;
+        }
+        
+        // Iterate the page protections.
+        foreach ($pageProtections as $pageProtection) {
+            
+            // The page is edit-protected.
+            if ('edit' == $pageProtection['type']) {
+                
+                // Users with edit and protect rights can edit protected pages.
+                if (in_array('protect', $userInfo['query']['userinfo']['rights'])) {
+                    return true;
+                
+                // Users with edit but without protect rights cannot edit 
+                // protected pages.
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        // Users with edit rights can edit pages that are not edit-protected.
+        return true;
     }
     
     /**
