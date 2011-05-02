@@ -399,35 +399,35 @@ class Scripto_Document
     }
     
     /**
-     * Protect the current page.
+     * Protect the current transcription page.
      */
-    public function protectPage()
+    public function protectTranscriptionPage()
     {
-        if ($this->_mediawiki->pageCreated($this->_baseTitle)) {
-            $this->_mediawiki->protect($this->_baseTitle, 
-                                       'edit=sysop', 
-                                       $this->_transcriptionPageInfo['protect_token']);
-        } else {
-            $this->_mediawiki->protect($this->_baseTitle, 
-                                       'create=sysop', 
-                                       $this->_transcriptionPageInfo['protect_token']);
-        }
+        $this->_protectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
     }
     
     /**
-     * Unprotect the current page.
+     * Protect the current talk page.
      */
-    public function unprotectPage()
+    public function protectTalkPage()
     {
-        if ($this->_mediawiki->pageCreated($this->_baseTitle)) {
-            $this->_mediawiki->protect($this->_baseTitle, 
-                                       'edit=all', 
-                                       $this->_transcriptionPageInfo['protect_token']);
-        } else {
-            $this->_mediawiki->protect($this->_baseTitle, 
-                                       'create=all', 
-                                       $this->_transcriptionPageInfo['protect_token']);
-        }
+        $this->_protectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
+    }
+    
+    /**
+     * Unprotect the current transcription page.
+     */
+    public function unprotectTranscriptionPage()
+    {
+        $this->_unprotectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
+    }
+    
+    /**
+     * Unprotect the current talk page.
+     */
+    public function unprotectTalkPage()
+    {
+        $this->_unprotectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
     }
     
     /**
@@ -588,6 +588,7 @@ class Scripto_Document
     /**
      * Determine whether the current page is edit protected.
      * 
+     * @param array $pageProtections The page protections from the page info.
      * @return bool
      */
     protected function _isProtectedPage(array $pageProtections)
@@ -607,6 +608,38 @@ class Scripto_Document
         
         // There are no edit protections.
         return false;
+    }
+    
+    /**
+     * Protect the specified page.
+     * 
+     * @param string $title
+     * @param string $protectToken
+     */
+    protected function _protectPage($title, $protectToken)
+    {
+        if ($this->_mediawiki->pageCreated($title)) {
+            $protections = 'edit=sysop';
+        } else {
+            $protections = 'create=sysop';
+        }
+        $this->_mediawiki->protect($title, $protections, $protectToken);
+    }
+    
+    /**
+     * Unprotect the specified page.
+     * 
+     * @param string $title
+     * @param string $protectToken
+     */
+    protected function _unprotectPage($title, $protectToken)
+    {
+        if ($this->_mediawiki->pageCreated($title)) {
+            $protections = 'edit=all';
+        } else {
+            $protections = 'create=all';
+        }
+        $this->_mediawiki->protect($title, $protections, $protectToken);
     }
     
     /**
