@@ -782,6 +782,7 @@ class Scripto_Document
     /**
      * Encode a string to URL-safe Base64.
      * 
+     * @link http://en.wikipedia.org/wiki/Base64#URL_applications
      * @param string $str
      * @return string
      */
