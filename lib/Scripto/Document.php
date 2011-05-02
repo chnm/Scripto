@@ -457,8 +457,8 @@ class Scripto_Document
     }
     
     /**
-     * Determine whether the document transcription was already exported to the 
-     * external system.
+     * Determine whether all of this document's transcription pages were already 
+     * exported to the external system.
      * 
      * @return bool
      */
@@ -468,7 +468,7 @@ class Scripto_Document
     }
     
     /**
-     * Determine whether the document page transcription was already exported to 
+     * Determine whether the current transcription page was already exported to 
      * the external system.
      * 
      * @return bool
@@ -488,7 +488,7 @@ class Scripto_Document
      * @param string $type The type of text to set, valid options are 
      * plain_text, html, and wikitext.
      */
-    public function exportPageTranscription($type = 'plain_text')
+    public function exportPage($type = 'plain_text')
     {
         switch ($type) {
             case 'plain_text':
@@ -516,8 +516,7 @@ class Scripto_Document
      * plain_text, html, and wikitext.
      * @param string $pageDelimiter The delimiter used to stitch pages together.
      */
-    public function exportTranscription($type = 'plain_text', 
-                                        $pageDelimiter = "\n")
+    public function export($type = 'plain_text', $pageDelimiter = "\n")
     {
         $text = array();
         foreach ($this->getPages() as $pageId => $pageName) {
@@ -586,7 +585,7 @@ class Scripto_Document
     }
     
     /**
-     * Determine whether the current page is edit protected.
+     * Determine whether the provided protections contain an edit protection.
      * 
      * @param array $pageProtections The page protections from the page info.
      * @return bool
