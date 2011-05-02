@@ -457,23 +457,23 @@ class Scripto_Document
     }
     
     /**
-     * Determine whether the document transcription is already imported in the 
+     * Determine whether the document transcription was already exported to the 
      * external system.
      * 
      * @return bool
      */
-    public function isImported()
+    public function isExported()
     {
         return $this->_adapter->documentTranscriptionIsImported($this->_id);
     }
     
     /**
-     * Determine whether the document page transcription is already imported in 
+     * Determine whether the document page transcription was already exported to 
      * the external system.
      * 
      * @return bool
      */
-    public function pageIsImported()
+    public function isExportedPage()
     {
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before determining whether it is imported.');
