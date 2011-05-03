@@ -1,9 +1,15 @@
 <?php
 /**
+ * @package Scripto
  * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+/**
+ * Interface for Scripto adapter classes.
+ * 
+ * @package Scripto
+ */
 interface Scripto_Adapter_Interface
 {
     /**

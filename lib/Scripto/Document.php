@@ -1,15 +1,25 @@
 <?php
 /**
+ * @package Scripto
  * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+/**
+ * Require the base Scripto class.
+ */
 require_once 'Scripto.php';
+
+/**
+ * Require the base Scripto exception.
+ */
 require_once 'Scripto/Exception.php';
 
 /**
  * Represents a Scripto document. Serves as a connector object between the 
  * external system API and MediaWiki API.
+ * 
+ * @package Scripto
  */
 class Scripto_Document
 {

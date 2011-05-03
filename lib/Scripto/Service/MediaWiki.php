@@ -1,15 +1,24 @@
 <?php
 /**
+ * @package Scripto
  * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+/**
+ * Require Zend_Service_Abstract.
+ */
 require_once 'Zend/Service/Abstract.php';
-require_once 'Zend/Http/Cookie.php';
+
+/**
+ * Require the Scripto service exception.
+ */
 require_once 'Scripto/Service/Exception.php';
 
 /**
  * MediaWIki API client.
+ * 
+ * @package Scripto
  */
 class Scripto_Service_MediaWiki extends Zend_Service_Abstract
 {
@@ -86,6 +95,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      */
     public function __construct($apiUrl, $dbName, $passCookies = true)
     {
+        require_once 'Zend/Http/Cookie.php';
+        
         $this->_dbName = (string) $dbName;
         $this->_passCookies = (bool) $passCookies;
         

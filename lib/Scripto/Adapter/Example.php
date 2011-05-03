@@ -1,15 +1,19 @@
 <?php
 /**
+ * @package Scripto
  * @copyright © 2010-2011, Center for History and New Media
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  */
 
+/**
+ * Require the adapter interface.
+ */
 require_once 'Scripto/Adapter/Interface.php';
 
 /**
  * An example adapter for a hypothetical CMS.
  * 
- * @see Scripto_Adapter_Interface
+ * @package Scripto
  */
 class Scripto_Adapter_Example implements Scripto_Adapter_Interface
 {
