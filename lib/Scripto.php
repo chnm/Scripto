@@ -212,21 +212,27 @@ class Scripto
                     continue;
                 }
                 
-                // Filter out contributions that are not document pages. 
+                // Preempt further processing on contributions with an invalid 
+                // prefix.
                 if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
                     continue;
                 }
                 
                 // Set the document ID and page ID.
-                $document = Scripto_Document::decodeBaseTitle($value['title']);
+                $documentIds = Scripto_Document::decodeBaseTitle($value['title']);
                 
                 // Set the document title. Reduce calls to the adapter by 
                 // caching each title and checking if it already exists.
-                if (array_key_exists($document[0], $documentTitles)) {
-                    $documentTitle = $documentTitles[$document[0]];
+                if (array_key_exists($documentIds[0], $documentTitles)) {
+                    $documentTitle = $documentTitles[$documentIds[0]];
                 } else {
-                    $documentTitle = $this->_adapter->getDocumentTitle($document[0]);
-                    $documentTitles[$document[0]] = $documentTitle;
+                    // Before getting the title, filter out contributions that 
+                    // are not valid document pages.
+                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                        continue;
+                    }
+                    $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
+                    $documentTitles[$documentIds[0]] = $documentTitle;
                 }
                 
                 // Build the user document pages, newest properties first.
@@ -236,8 +242,8 @@ class Scripto
                     'timestamp'        => $value['timestamp'], 
                     'comment'          => $value['comment'], 
                     'size'             => $value['size'], 
-                    'document_id'      => $document[0], 
-                    'document_page_id' => $document[1], 
+                    'document_id'      => $documentIds[0], 
+                    'document_page_id' => $documentIds[1], 
                     'document_title'   => $documentTitle
                 );
                 
@@ -291,7 +297,8 @@ class Scripto
                 // Extract the title, removing the namespace if any.
                 $title = preg_replace('/^(.+:)?(.+)$/', '$2', $value['title']);
                 
-                // Filter out contributions that are not document pages. 
+                // Preempt further processing on contributions with an invalid 
+                // prefix.
                 if (Scripto_Document::BASE_TITLE_PREFIX != $title[0]) {
                     continue;
                 }
@@ -304,6 +311,11 @@ class Scripto
                 if (array_key_exists($documentIds[0], $documentTitles)) {
                     $documentTitle = $documentTitles[$documentIds[0]];
                 } else {
+                    // Before getting the title, filter out contributions that 
+                    // are not valid document pages.
+                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                        continue;
+                    }
                     $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
                     $documentTitles[$documentIds[0]] = $documentTitle;
                 }
