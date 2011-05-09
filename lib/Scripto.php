@@ -11,6 +11,11 @@
 require_once 'Scripto/Exception.php';
 
 /**
+ * Require Scripto_Service_MediaWiki.
+ */
+require_once 'Scripto/Service/MediaWiki.php';
+
+/**
  * Represents a Scripto application. Serves as a connector object between the 
  * external system API and MediaWiki API.
  * 
@@ -58,7 +63,7 @@ class Scripto
             if (!isset($mediawiki['pass_cookies'])) {
                 $mediawiki['pass_cookies'] = true;
             }
-            require_once 'Scripto/Service/MediaWiki.php';
+            
             $this->_mediawiki = new Scripto_Service_MediaWiki($mediawiki['api_url'], 
                                                               $mediawiki['db_name'], 
                                                               (bool) $mediawiki['pass_cookies']);
@@ -405,5 +410,5 @@ class Scripto
                           'wikitext'    => $page['revisions'][0]['*'], 
                           'html'        => $response['parse']['text']['*']);
         return $revision;
-   }
+    }
 }

@@ -89,14 +89,13 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     /**
      * Constructs the MediaWiki API client.
      * 
+     * @link http://www.mediawiki.org/wiki/API:Main_page
      * @param string $apiUrl The URL to the MediaWiki API.
      * @param string $dbName The name of the MediaWiki database.
      * @param bool $passCookies Pass cookies to the web browser.
      */
     public function __construct($apiUrl, $dbName, $passCookies = true)
     {
-        require_once 'Zend/Http/Cookie.php';
-        
         $this->_dbName = (string) $dbName;
         $this->_passCookies = (bool) $passCookies;
         
@@ -109,6 +108,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // from the browser and add them to the HTTP client cookie jar. Doing so 
         // maintains state between browser requests. 
         if ($this->_passCookies) {
+            require_once 'Zend/Http/Cookie.php';
             foreach ($this->_cookieSuffixes as $cookieSuffix) {
                 $cookieName = self::COOKIE_PREFIX . $this->_dbName . $cookieSuffix;
                 if (array_key_exists($cookieName, $_COOKIE)) {
@@ -122,7 +122,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
-     * Gets information about the currently logged-in user.
+     * Gets information about the current user.
      * 
      * @link http://www.mediawiki.org/wiki/API:Meta#userinfo_.2F_ui
      * @param string $uiprop
@@ -569,5 +569,33 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             throw new Scripto_Service_Exception($response['error']['info']);
         }
         return $response;
+    }
+    
+    /**
+     * Determine whether the provided MediaWiki API URL is valid.
+     * 
+     * @param string $apiUrl
+     * @return bool
+     */
+    static public function isValidApiUrl($apiUrl)
+    {
+        // Check for valid API URL string.
+        if (!Zend_Uri::check($apiUrl) || !preg_match('#/api\.php$#', $apiUrl)) {
+            return false;
+        }
+        
+        // Ping the API endpoint for a valid response.
+        $response = self::getHttpClient()->setUri($apiUrl)
+                                         ->setParameterPost('action', 'query')
+                                         ->setParameterPost('meta', 'siteinfo')
+                                         ->setParameterPost('format', 'json')
+                                         ->request('POST')->getBody();
+        
+        $response = json_decode($response, true);
+        if (!is_array($response) || !isset($response['query']['general'])) {
+            return false;
+        }
+        
+        return true;
     }
 }
