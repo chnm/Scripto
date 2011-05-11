@@ -6,12 +6,12 @@
  */
 
 /**
- * Require the base Scripto exception.
+ * @see Scripto_Exception
  */
 require_once 'Scripto/Exception.php';
 
 /**
- * Require Scripto_Service_MediaWiki.
+ * @see Scripto_Service_MediaWiki
  */
 require_once 'Scripto/Service/MediaWiki.php';
 

@@ -6,12 +6,12 @@
  */
 
 /**
- * Require Zend_Service_Abstract.
+ * @see Zend_Service_Abstract
  */
 require_once 'Zend/Service/Abstract.php';
 
 /**
- * Require the Scripto service exception.
+ * @see Scripto_Service_Exception
  */
 require_once 'Scripto/Service/Exception.php';
 

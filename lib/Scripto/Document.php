@@ -6,12 +6,12 @@
  */
 
 /**
- * Require the base Scripto class.
+ * @see Scripto
  */
 require_once 'Scripto.php';
 
 /**
- * Require the base Scripto exception.
+ * R@see Scripto_Exception.
  */
 require_once 'Scripto/Exception.php';
 

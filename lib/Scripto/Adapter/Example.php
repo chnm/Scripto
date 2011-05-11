@@ -6,7 +6,7 @@
  */
 
 /**
- * Require the adapter interface.
+ * @see Scripto_Adapter_Interface
  */
 require_once 'Scripto/Adapter/Interface.php';
 

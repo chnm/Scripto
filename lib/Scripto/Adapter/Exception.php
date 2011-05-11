@@ -6,7 +6,7 @@
  */
 
 /**
- * Require the base Scripto exception.
+ * @see Scripto_Exception
  */
 require_once 'Scripto/Exception.php';
 
