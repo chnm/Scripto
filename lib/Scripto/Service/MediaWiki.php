@@ -233,14 +233,15 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * @param int $from The revision ID to diff.
      * @param int|string $to The revision to diff to: use the revision ID, 
      * prev, next, or cur.
-     * @return string
+     * @return string The API returns preformatted table rows without a wrapping 
+     * <table>. Presumably this is so implementers can wrap a custom <table>.
      */
     public function getRevisionDiff($fromRevisionId, $toRevisionId = 'prev')
     {
         $response = $this->getRevisions(null, array('revids'   => $fromRevisionId, 
                                                     'rvdiffto' => $toRevisionId));
         $page = current($response['query']['pages']);
-        return '<table>' . $page['revisions'][0]['diff']['*'] . '</table>';
+        return $page['revisions'][0]['diff']['*'];
     }
     
     /**
