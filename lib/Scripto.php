@@ -78,6 +78,7 @@ class Scripto
     /**
      * Check whether the specified document exists in the external system.
      * 
+     * @uses Scripto_Adapter_Interface::documentExists()
      * @param string|int $id The unique document identifier.
      * @return bool
      */
@@ -93,6 +94,7 @@ class Scripto
     /**
      * Get a Scripto_Document object.
      * 
+     * @see Scripto_Document
      * @param string|int $id The unique document identifier.
      * @return Scripto_Document
      */
@@ -108,6 +110,7 @@ class Scripto
      * It is possible to restrict account creation in MediaWiki.
      * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_account_creation
      * 
+     * @uses Scripto_Service_MediaWiki::login()
      * @param string $username
      * @param string $password
      */
@@ -119,6 +122,8 @@ class Scripto
     
     /**
      * Logout via the MediaWiki service.
+     * 
+     * @uses Scripto_Service_MediaWiki::logout()
      */
     public function logout()
     {
@@ -174,6 +179,8 @@ class Scripto
      * Under normal circumstances calling this method directly is unnecessary, 
      * but is helpful when authenticating after construction and when a login is 
      * not called, like when hijacking cookies for command line authentication.
+     * 
+     * @uses Scripto_Service_MediaWiki::getUserInfo()
      */
     public function setUserInfo()
     {
@@ -193,6 +200,7 @@ class Scripto
     /**
      * Get the current user's most recently contributed document pages.
      * 
+     * @uses Scripto_Service_MediaWiki::getUserContributions()
      * @param int $limit The number of document pages to return.
      * @return array
      */
@@ -274,6 +282,7 @@ class Scripto
      * Get the recent changes.
      * 
      * @link http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
+     * @uses Scripto_Service_MediaWiki::getRecentChanges()
      * @param int $limit The number of recent changes to return.
      * @return array
      */
@@ -370,6 +379,7 @@ class Scripto
     /**
      * Get the difference between two page revisions.
      * 
+     * @uses Scripto_Service_MediaWiki::getRevisionDiff()
      * @param int $from The revision ID from which to diff.
      * @param int|string $to The revision to which to diff. Use the revision ID, 
      * "prev", "next", or "cur".
@@ -383,6 +393,7 @@ class Scripto
     /**
      * Get properties of the specified page revision.
      * 
+     * @uses Scripto_Service_MediaWiki::getRevisions()
      * @param int $revisionId
      * @return array
      */
@@ -415,6 +426,7 @@ class Scripto
     /**
      * Determine whether the provided MediaWiki API URL is valid.
      * 
+     * @uses Scripto_Service_MediaWiki::isValidApiUrl()
      * @param string $apiUrl
      * @return bool
      */

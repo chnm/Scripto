@@ -11,7 +11,7 @@
 require_once 'Scripto.php';
 
 /**
- * R@see Scripto_Exception.
+ * @see Scripto_Exception.
  */
 require_once 'Scripto/Exception.php';
 
@@ -214,6 +214,7 @@ class Scripto_Document
     /**
      * Get all of this document's pages from the adapter.
      * 
+     * @uses Scripto_Adapter_Interface::getDocumentPages()
      * @return array
      */
     public function getPages()
@@ -224,6 +225,7 @@ class Scripto_Document
     /**
      * Get this document's first page ID from the adapter.
      * 
+     * @uses Scripto_Adapter_Interface::getDocumentFirstPageId()
      * @return array
      */
     public function getFirstPageId()
@@ -234,6 +236,7 @@ class Scripto_Document
     /**
      * Get this document's current page image URL from the adapter.
      * 
+     * @uses Scripto_Adapter_Interface::getDocumentPageImageUrl()
      * @return string
      */
     public function getPageImageUrl()
@@ -247,6 +250,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki transcription page wikitext for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionWikitext()
      * @return string The transcription wikitext.
      */
     public function getTranscriptionPageWikitext()
@@ -260,6 +264,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki talk page wikitext for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionWikitext()
      * @return string The talk wikitext.
      */
     public function getTalkPageWikitext()
@@ -273,6 +278,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki transcription page HTML for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionHtml()
      * @return string The transcription HTML.
      */
     public function getTranscriptionPageHtml()
@@ -286,6 +292,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki talk page HTML for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionHtml()
      * @return string The talk HTML.
      */
     public function getTalkPageHtml()
@@ -299,6 +306,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki transcription page plain text for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionHtml()
      * @return string The transcription page plain text.
      */
     public function getTranscriptionPagePlainText()
@@ -312,6 +320,7 @@ class Scripto_Document
     /**
      * Get the MediaWiki talk plain text for the current page.
      * 
+     * @uses Scripto_Service_MediaWiki::getLatestRevisionHtml()
      * @return string The talk plain text.
      */
     public function getTalkPagePlainText()
@@ -381,6 +390,7 @@ class Scripto_Document
     /**
      * Edit the MediaWiki transcription page for the current document.
      * 
+     * @uses Scripto_Service_MediaWiki::edit()
      * @param string $text The wikitext of the transcription.
      */
     public function editTranscriptionPage($text)
@@ -396,6 +406,7 @@ class Scripto_Document
     /**
      * Edit the MediaWiki talk page for the current document.
      * 
+     * @uses Scripto_Service_MediaWiki::edit()
      * @param string $text The wikitext of the transcription.
      */
     public function editTalkPage($text)
@@ -470,6 +481,7 @@ class Scripto_Document
      * Determine whether all of this document's transcription pages were already 
      * exported to the external system.
      * 
+     * @uses Scripto_Adapter_Interface::documentTranscriptionIsImported()
      * @return bool
      */
     public function isExported()
@@ -481,6 +493,7 @@ class Scripto_Document
      * Determine whether the current transcription page was already exported to 
      * the external system.
      * 
+     * @uses Scripto_Adapter_Interface::documentPageTranscriptionIsImported()
      * @return bool
      */
     public function isExportedPage()
@@ -495,6 +508,7 @@ class Scripto_Document
      * Export the document page transcription to the external system by calling 
      * the adapter.
      * 
+     * @uses Scripto_Adapter_Interface::importDocumentPageTranscription()
      * @param string $type The type of text to set, valid options are 
      * plain_text, html, and wikitext.
      */
@@ -522,6 +536,7 @@ class Scripto_Document
      * Export the entire document transcription to the external system by 
      * calling the adapter.
      * 
+     * @uses Scripto_Adapter_Interface::importDocumentTranscription()
      * @param string $type The type of text to set, valid options are 
      * plain_text, html, and wikitext.
      * @param string $pageDelimiter The delimiter used to stitch pages together.
@@ -555,6 +570,7 @@ class Scripto_Document
      * It is possible to restrict anonymous editing in MediaWiki.
      * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
      * 
+     * @uses Scripto_Service_MediaWiki::getUserInfo()
      * @param array $pageProtections
      * @return bool
      */
@@ -622,6 +638,7 @@ class Scripto_Document
     /**
      * Protect the specified page.
      * 
+     * @uses Scripto_Service_MediaWiki::protect()
      * @param string $title
      * @param string $protectToken
      */
@@ -638,6 +655,7 @@ class Scripto_Document
     /**
      * Unprotect the specified page.
      * 
+     * @uses Scripto_Service_MediaWiki::protect()
      * @param string $title
      * @param string $protectToken
      */
@@ -654,6 +672,7 @@ class Scripto_Document
     /**
      * Get information for the specified page.
      * 
+     * @uses Scripto_Service_MediaWiki::getInfo()
      * @param string $title
      * @return array
      */
@@ -686,6 +705,7 @@ class Scripto_Document
     /**
      * Get the revisions for the specified page.
      * 
+     * @uses Scripto_Service_MediaWiki::getRevisions()
      * @param string $title
      * @param int $limit
      * @param int $startRevisionId
