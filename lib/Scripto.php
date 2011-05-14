@@ -411,4 +411,15 @@ class Scripto
                           'html'        => $response['parse']['text']['*']);
         return $revision;
     }
+    
+    /**
+     * Determine whether the provided MediaWiki API URL is valid.
+     * 
+     * @param string $apiUrl
+     * @return bool
+     */
+    static public function isValidApiUrl($apiUrl)
+    {
+        return Scripto_Service_MediaWiki::isValidApiUrl($apiUrl);
+    }
 }

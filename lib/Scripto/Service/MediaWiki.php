@@ -586,13 +586,14 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         }
         
         // Ping the API endpoint for a valid response.
-        $response = self::getHttpClient()->setUri($apiUrl)
-                                         ->setParameterPost('action', 'query')
-                                         ->setParameterPost('meta', 'siteinfo')
-                                         ->setParameterPost('format', 'json')
-                                         ->request('POST')->getBody();
+        $body = self::getHttpClient()->setUri($apiUrl)
+                                     ->setParameterPost('action', 'query')
+                                     ->setParameterPost('meta', 'siteinfo')
+                                     ->setParameterPost('format', 'json')
+                                     ->request('POST')->getBody();
+        self::getHttpClient()->resetParameters(true);
         
-        $response = json_decode($response, true);
+        $response = json_decode($body, true);
         if (!is_array($response) || !isset($response['query']['general'])) {
             return false;
         }
