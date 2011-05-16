@@ -79,6 +79,9 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             'uccontinue', 'ucdir', 'uclimit', 'ucnamespace', 'ucshow', 
             'rcprop', 'rcstart', 'rcend', 'rcdir', 'rclimit', 'rcnamespace', 
             'rcuser', 'rcexcludeuser', 'rctype', 'rcshow', 
+            'aplimit', 'apminsize', 'apmaxsize', 'apprefix', 'apfrom', 
+            'apnamespace', 'apfilterredir', 'apfilterlanglinks', 'apprtype', 
+            'apprlevel', 'apdir', 
         ), 
         'login' => array(
             'lgname', 'lgpassword', 'lgtoken'
@@ -174,6 +177,19 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     public function getRecentChanges(array $params = array())
     {
         $params['list'] = 'recentchanges';
+        return $this->query($params);
+    }
+    
+    /**
+     * Gets a list of pages.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Allpages
+     * @param array $params
+     * @return array
+     */
+    public function getAllPages(array $params = array())
+    {
+        $params['list'] = 'allpages';
         return $this->query($params);
     }
     

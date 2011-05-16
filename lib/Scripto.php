@@ -11,6 +11,11 @@
 require_once 'Scripto/Exception.php';
 
 /**
+ * @see Scripto_Document
+ */
+require_once 'Scripto/Document.php';
+
+/**
  * @see Scripto_Service_MediaWiki
  */
 require_once 'Scripto/Service/MediaWiki.php';
@@ -100,7 +105,6 @@ class Scripto
      */
     public function getDocument($id)
     {
-        require_once 'Scripto/Document.php';
         return new Scripto_Document($id, $this->_adapter, $this->_mediawiki);
     }
     
@@ -206,8 +210,6 @@ class Scripto
      */
     public function getUserDocumentPages($limit = 10)
     {
-        require_once 'Scripto/Document.php';
-        
         $limit = (int) $limit;
         $userDocumentPages = array();
         $documentTitles = array();
@@ -288,8 +290,6 @@ class Scripto
      */
     public function getRecentChanges($limit = 10)
     {
-        require_once 'Scripto/Document.php';
-        
         $start = null;
         $recentChanges = array();
         $documentTitles = array();
@@ -374,6 +374,63 @@ class Scripto
         } while ($start);
         
         return $recentChanges;
+    }
+    
+    /**
+     * Get all documents from MediaWiki that have at least one page with text.
+     * 
+     * @uses Scripto_Service_MediaWiki::getAllDocuments()
+     * @return array
+     */
+    public function getAllDocuments()
+    {
+        $from = null;
+        $documentTitles = array();
+        $allDocuments = array();
+        do {
+            $response = $this->_mediawiki->getAllPages(
+                array('aplimit'   => 500, 
+                      'apminsize' => 1, 
+                      'apprefix'  => Scripto_Document::BASE_TITLE_PREFIX, 
+                      'apfrom'    => $from)
+            );
+            
+            foreach ($response['query']['allpages'] as $value) {
+                
+                // Set the document ID and page ID.
+                $documentIds = Scripto_Document::decodeBaseTitle($value['title']);
+                
+                // Set the document title. Continue if it was already set.
+                if (array_key_exists($documentIds[0], $documentTitles)) {
+                    continue;
+                } else {
+                    // Before getting the title, filter out pages that are not 
+                    // valid documents.
+                    if (!$this->_adapter->documentExists($documentIds[0])) {
+                        continue;
+                    }
+                    $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
+                    $documentTitles[$documentIds[0]] = $documentTitle;
+                }
+                
+                $allDocuments[] = array(
+                    'mediawiki_title_prefix' => Scripto_Document::BASE_TITLE_PREFIX 
+                                              . Scripto_Document::base64UrlEncode($documentIds[0]), 
+                    'document_id'    => $documentIds[0], 
+                    'document_title' => $documentTitle, 
+                );
+            }
+            
+            // Set the query continue, if any.
+            if (isset($response['query-continue'])) {
+                $from = $response['query-continue']['allpages']['apfrom'];
+            } else {
+                $from = null;
+            }
+            
+        } while ($from);
+        
+        return $allDocuments;
     }
     
     /**
