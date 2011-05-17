@@ -81,6 +81,26 @@ class Scripto
     }
     
     /**
+     * Provide a transparent interface for calling custom adapter methods.
+     * 
+     * This makes it possible to call custom adapter methods (those not required 
+     * by Scripto_Adapter_Interface) directly from the Scripto object.
+     * 
+     * @see Scripto_Adapter_Interface
+     * @param string $name
+     * @param array $args
+     * @return mixed
+     */
+    public function __call($name, $args)
+    {
+        if (!method_exists($this->_adapter, $name)) {
+            require_once 'Scripto/Adapter/Exception.php';
+            throw new Scripto_Adapter_Exception('The provided adapter method "' . $name . '" does not exist.');
+        }
+        return call_user_func_array(array($this->_adapter, $name), $args);
+    }
+    
+    /**
      * Check whether the specified document exists in the external system.
      * 
      * @uses Scripto_Adapter_Interface::documentExists()
