@@ -435,7 +435,8 @@ class Scripto
                 
                 $allDocuments[] = array(
                     'mediawiki_title_prefix' => Scripto_Document::BASE_TITLE_PREFIX 
-                                              . Scripto_Document::base64UrlEncode($documentIds[0]), 
+                                              . Scripto_Document::base64UrlEncode($documentIds[0]) 
+                                              . Scripto_Document::BASE_TITLE_DELIMITER, 
                     'document_id'    => $documentIds[0], 
                     'document_title' => $documentTitle, 
                 );
