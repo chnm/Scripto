@@ -399,6 +399,18 @@ class Scripto
     /**
      * Get all documents from MediaWiki that have at least one page with text.
      * 
+     * Returns an array with the following format:
+     * array(
+     *     [document ID] => array(
+     *         ["mediawiki_titles"] => array(
+     *             [page ID] => [mediawiki title], 
+     *             [...]
+     *         ), 
+     *         ["document_title"] => [document title]
+     *     ), 
+     *     [...]
+     * )
+     * 
      * @uses Scripto_Service_MediaWiki::getAllDocuments()
      * @return array
      */
@@ -420,12 +432,14 @@ class Scripto
                 // Set the document ID and page ID.
                 $documentIds = Scripto_Document::decodeBaseTitle($value['title']);
                 
-                // Set the document title. Continue if it was already set.
+                // Set the page and continue if the document was already set.
                 if (array_key_exists($documentIds[0], $documentTitles)) {
+                    $allDocuments[$documentIds[0]]['mediawiki_titles'][$documentIds[1]] = $value['title'];
                     continue;
+                
+                // Set the document. Before getting the title, filter out pages 
+                // that are not valid documents.
                 } else {
-                    // Before getting the title, filter out pages that are not 
-                    // valid documents.
                     if (!$this->_adapter->documentExists($documentIds[0])) {
                         continue;
                     }
@@ -433,12 +447,9 @@ class Scripto
                     $documentTitles[$documentIds[0]] = $documentTitle;
                 }
                 
-                $allDocuments[] = array(
-                    'mediawiki_title_prefix' => Scripto_Document::BASE_TITLE_PREFIX 
-                                              . Scripto_Document::base64UrlEncode($documentIds[0]) 
-                                              . Scripto_Document::BASE_TITLE_DELIMITER, 
-                    'document_id'    => $documentIds[0], 
-                    'document_title' => $documentTitle, 
+                $allDocuments[$documentIds[0]] = array(
+                    'mediawiki_titles' => array($documentIds[1] => $value['title']), 
+                    'document_title'   => $documentTitle, 
                 );
             }
             
