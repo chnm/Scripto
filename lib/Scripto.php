@@ -40,7 +40,7 @@ class Scripto
     protected $_mediawiki;
     
     /**
-     * @var array
+     * @var array Cached information about the current user.
      */
     protected $_userInfo;
     
@@ -49,10 +49,12 @@ class Scripto
      * 
      * @param Scripto_Adapter_Interface $adapter The adapter object.
      * @param array|Scripto_Service_MediaWiki $mediawiki If an array:
-     *     $mediawiki['api_url']: required; the MediaWiki API URL
-     *     $mediawiki['db_name']: required; the MediaWiki database name
-     *     $mediawiki['pass_cookies']: optional pass cookies to the web browser 
-     *     via API client
+     * <ul>
+     *     <li>$mediawiki['api_url']: required; the MediaWiki API URL</li>
+     *     <li>$mediawiki['db_name']: required; the MediaWiki database name</li>
+     *     <li>$mediawiki['pass_cookies']: optional pass cookies to the web 
+     *     browser via API client</li>
+     * </ul>
      */
     public function __construct(Scripto_Adapter_Interface $adapter, $mediawiki)
     {
@@ -135,8 +137,8 @@ class Scripto
      * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_account_creation
      * 
      * @uses Scripto_Service_MediaWiki::login()
-     * @param string $username
-     * @param string $password
+     * @param string $username The MediaWiki user's username.
+     * @param string $password The MediaWiki user's password.
      */
     public function login($username, $password)
     {
@@ -184,7 +186,7 @@ class Scripto
     }
     
     /**
-     * Determine if the current user can protect the MediaWiki page.
+     * Determine if the current user can protect MediaWiki pages.
      * 
      * @return bool
      */
@@ -399,20 +401,20 @@ class Scripto
     /**
      * Get all documents from MediaWiki that have at least one page with text.
      * 
-     * Returns an array with the following format:
+     * @uses Scripto_Service_MediaWiki::getAllPages()
+     * @return array An array following this format:
+     * <code>
      * array(
-     *     [document ID] => array(
-     *         ["mediawiki_titles"] => array(
-     *             [page ID] => [mediawiki title], 
-     *             [...]
+     *     {document ID} => array(
+     *         ['mediawiki_titles'] => array(
+     *             {page ID} => {mediawiki title}, 
+     *             {...}
      *         ), 
-     *         ["document_title"] => [document title]
+     *         ['document_title'] => {document title}
      *     ), 
-     *     [...]
+     *     {...}
      * )
-     * 
-     * @uses Scripto_Service_MediaWiki::getAllDocuments()
-     * @return array
+     * </code>
      */
     public function getAllDocuments()
     {
@@ -469,10 +471,12 @@ class Scripto
      * Get the difference between two page revisions.
      * 
      * @uses Scripto_Service_MediaWiki::getRevisionDiff()
-     * @param int $from The revision ID from which to diff.
-     * @param int|string $to The revision to which to diff. Use the revision ID, 
-     * "prev", "next", or "cur".
-     * @return string
+     * @param int $fromRevisionId The revision ID from which to diff.
+     * @param int|string $toRevisionId The revision to which to diff. Use the 
+     * revision ID, "prev", "next", or "cur".
+     * @return string An HTML table without the wrapping <table> tag containing 
+     * difference markup, pre-formatted by MediaWiki. It is the responsibility 
+     * of implementers to wrap the result with table tags.
      */
     public function getRevisionDiff($fromRevisionId, $toRevisionId = 'prev')
     {
@@ -483,7 +487,7 @@ class Scripto
      * Get properties of the specified page revision.
      * 
      * @uses Scripto_Service_MediaWiki::getRevisions()
-     * @param int $revisionId
+     * @param int $revisionId The ID of the rpage evision.
      * @return array
      */
     public function getRevision($revisionId)
@@ -516,7 +520,7 @@ class Scripto
      * Determine whether the provided MediaWiki API URL is valid.
      * 
      * @uses Scripto_Service_MediaWiki::isValidApiUrl()
-     * @param string $apiUrl
+     * @param string $apiUrl The MediaWiki API URL to validate.
      * @return bool
      */
     static public function isValidApiUrl($apiUrl)

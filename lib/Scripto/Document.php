@@ -67,7 +67,8 @@ class Scripto_Document
     protected $_pageId;
     
     /**
-     * @var string The base title of the corresponding MediaWiki page.
+     * @var string The base title (i.e. without a namespace) of the 
+     * corresponding MediaWiki page.
      */
     protected $_baseTitle;
     
@@ -567,9 +568,6 @@ class Scripto_Document
     /**
      * Determine if the current user can edit the specified MediaWiki page.
      * 
-     * It is possible to restrict anonymous editing in MediaWiki.
-     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
-     * 
      * @uses Scripto_Service_MediaWiki::getUserInfo()
      * @param array $pageProtections
      * @return bool
@@ -613,7 +611,9 @@ class Scripto_Document
     /**
      * Determine whether the provided protections contain an edit protection.
      * 
-     * @param array $pageProtections The page protections from the page info.
+     * @param array $pageProtections The page protections from the page info:
+     * {@link Scripto_Document::$_transcriptionPageInfo} or 
+     * {@link Scripto_Document::$_talkPageInfo}.
      * @return bool
      */
     protected function _isProtectedPage(array $pageProtections)
@@ -774,10 +774,13 @@ class Scripto_Document
      * naming conventions. Encoding in Base64 allows the title to be decoded.
      * 
      * The base title has four parts:
-     *   1) A title prefix to keep MediaWiki from capitalizing the first character
-     *   2) A URL-safe Base64 encoded document ID
-     *   3) A delimiter between the encoded document ID and page ID
-     *   4) A URL-safe Base64 encoded page ID
+     * <ol>
+     *     <li>A title prefix to keep MediaWiki from capitalizing the first 
+     *     character</li>
+     *     <li>A URL-safe Base64 encoded document ID</li>
+     *     <li>A delimiter between the encoded document ID and page ID</li>
+     *     <li>A URL-safe Base64 encoded page ID</li>
+     * </ol>
      * 
      * @link http://en.wikipedia.org/wiki/Base64#URL_applications
      * @link http://en.wikipedia.org/wiki/Wikipedia:Naming_conventions_%28technical_restrictions%29

@@ -45,7 +45,11 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     protected $_cookieSuffixes = array('_session', 'UserID', 'UserName', 'Token');
     
     /**
-     * @var array Valid MediaWiki API actions and their valid parameters.
+     * @var array Valid MediaWiki API actions and their valid parameters. This 
+     * whitelist is used to prohibit invalid actions and parameters from being 
+     * set to API requests.
+     * @todo Remember to add relevant actions and parameters when adding new API 
+     * functionality.
      */
     protected $_actions = array(
         'parse' => array(
@@ -443,6 +447,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * Create or edit a given page.
      * 
      * @link http://www.mediawiki.org/wiki/API:Edit
+     * @link http://www.mediawiki.org/wiki/Manual:Preventing_access#Restrict_editing_of_all_pages
      * @param string $title
      * @param string $text
      * @param string|null $edittoken
