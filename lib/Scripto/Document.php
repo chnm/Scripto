@@ -425,6 +425,9 @@ class Scripto_Document
      */
     public function protectTranscriptionPage()
     {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before protecting the transcription page.');
+        }
         $this->_protectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
     }
     
@@ -433,6 +436,9 @@ class Scripto_Document
      */
     public function protectTalkPage()
     {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before protecting the talk page.');
+        }
         $this->_protectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
     }
     
@@ -441,6 +447,9 @@ class Scripto_Document
      */
     public function unprotectTranscriptionPage()
     {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before unprotecting the transcription page.');
+        }
         $this->_unprotectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
     }
     
@@ -449,7 +458,54 @@ class Scripto_Document
      */
     public function unprotectTalkPage()
     {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before unprotecting the talk page.');
+        }
         $this->_unprotectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
+    }
+    
+    /**
+     * Watch the current transcription page.
+     */
+    public function watchTranscriptionPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before watching the transcription page.');
+        }
+        $this->_watchPage($this->_baseTitle);
+    }
+    
+    /**
+     * Watch the current talk page.
+     */
+    public function watchTalkPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before watching the talk page.');
+        }
+        $this->_watchPage('Talk:' . $this->_baseTitle);
+    }
+    
+    /**
+     * Unatch the current transcription page.
+     */
+    public function unwatchTranscriptionPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before unwatching the transcription page.');
+        }
+        $this->_unwatchPage($this->_baseTitle);
+    }
+    
+    /**
+     * Unwatch the current talk page.
+     */
+    public function unwatchTalkPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before unwatching the talk page.');
+        }
+        $this->_unwatchPage('Talk:' . $this->_baseTitle);
     }
     
     /**
@@ -667,6 +723,28 @@ class Scripto_Document
             $protections = 'create=all';
         }
         $this->_mediawiki->protect($title, $protections, $protectToken);
+    }
+    
+    /**
+     * Watch the specified page.
+     * 
+     * @uses Scripto_Service_MediaWiki::watch()
+     * @param string $title
+     */
+    protected function _watchPage($title)
+    {
+        $this->_mediawiki->watch($title);
+    }
+    
+    /**
+     * Unwatch the specified page.
+     * 
+     * @uses Scripto_Service_MediaWiki::watch()
+     * @param string $title
+     */
+    protected function _unwatchPage($title)
+    {
+        $this->_mediawiki->watch($title, array('unwatch' => true));
     }
     
     /**

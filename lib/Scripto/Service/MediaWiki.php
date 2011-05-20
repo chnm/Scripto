@@ -64,6 +64,9 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         'protect' => array(
             'title', 'token', 'protections', 'expiry', 'reason', 'cascade'
         ), 
+        'watch' => array(
+            'title', 'unwatch'
+        ), 
         'query' => array(
             // title specifications
             'titles', 'revids', 'pageids', 
@@ -413,6 +416,20 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     public function query(array $params = array())
     {
         return $this->_request('query', $params);
+    }
+    
+    /**
+     * Watch or unwatch pages.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Watch
+     * @param string $title
+     * @param array $params
+     * @return array
+     */
+    public function watch($title, array $params = array())
+    {
+        $params['title'] = $title;
+        return $this->_request('watch', $params);
     }
     
     /**
