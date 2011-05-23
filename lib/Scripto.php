@@ -399,6 +399,97 @@ class Scripto
     }
     
     /**
+     * Get the current user's watchlist.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Watchlist
+     * @uses Scripto_Service_MediaWiki::getWatchlist()
+     * @param int $limit The number of recent changes to return.
+     * @return array
+     */
+    public function getWatchlist($limit = 10)
+    {
+        $start = null;
+        $watchlist = array();
+        $documentTitles = array();
+        
+        // Namespaces to get: ns_index => ns_name
+        // See http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
+        $namespaces = array('0' => 'Main', '1' => 'Talk');
+        
+        do {
+            $response = $this->_mediawiki->getWatchlist(
+                array('wlprop'      => 'user|comment|timestamp|title|ids|sizes|flags', 
+                      'wllimit'     => '100', 
+                      'wlnamespace' => implode('|', array_keys($namespaces)), 
+                      'wlstart'     => $start)
+            );
+            
+            foreach ($response['query']['watchlist'] as $value) {
+                
+                // Extract the title, removing the namespace if any.
+                $title = preg_replace('/^(.+:)?(.+)$/', '$2', $value['title']);
+                
+                // Preempt further processing on contributions with an invalid 
+                // prefix.
+                if (Scripto_Document::BASE_TITLE_PREFIX != $title[0]) {
+                    continue;
+                }
+                
+                // Set the document ID and page ID.
+                $documentIds = Scripto_Document::decodeBaseTitle($title);
+                
+                // Set the document title. Reduce calls to the adapter by 
+                // caching each title and checking if it already exists.
+                if (array_key_exists($documentIds[0], $documentTitles)) {
+                    $documentTitle = $documentTitles[$documentIds[0]];
+                } else {
+                    // Before getting the title, filter out contributions that 
+                    // are not valid document pages.
+                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                        continue;
+                    }
+                    $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
+                    $documentTitles[$documentIds[0]] = $documentTitle;
+                }
+                
+                $watchlist[] = array(
+                    'namespace_index'  => $value['ns'], 
+                    'namespace_name'   => $namespaces[$value['ns']], 
+                    'mediawiki_title'  => $value['title'], 
+                    'page_id'          => $value['pageid'], 
+                    'revision_id'      => $value['revid'], 
+                    'user'             => $value['user'], 
+                    'old_length'       => $value['oldlen'], 
+                    'new_length'       => $value['newlen'], 
+                    'timestamp'        => $value['timestamp'], 
+                    'comment'          => $value['comment'], 
+                    'new'              => isset($value['new']) ? true: false, 
+                    'minor'            => isset($value['minor']) ? true: false, 
+                    'anonymous'        => isset($value['anon']) ? true: false, 
+                    'document_id'      => $documentIds[0], 
+                    'document_page_id' => $documentIds[1], 
+                    'document_title'   => $documentTitle, 
+                );
+                
+                // Break out of the loops if limit has been reached.
+                if ($limit == count($watchlist)) {
+                    break 2;
+                }
+            }
+            
+            // Set the query continue, if any.
+            if (isset($response['query-continue'])) {
+                $start = $response['query-continue']['watchlist']['wlstart'];
+            } else {
+                $start = null;
+            }
+            
+        } while ($start);
+        
+        return $watchlist;
+    }
+    
+    /**
      * Get all documents from MediaWiki that have at least one page with text.
      * 
      * @uses Scripto_Service_MediaWiki::getAllPages()
