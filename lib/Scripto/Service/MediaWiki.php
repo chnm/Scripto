@@ -542,7 +542,8 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                 foreach (self::getHttpClient()->getCookieJar()->getAllCookies() as $cookie) {
                     setcookie(self::COOKIE_PREFIX . $cookie->getName(), 
                               $cookie->getValue(), 
-                              $cookie->getExpiryTime());
+                              $cookie->getExpiryTime(), 
+                              '/');
                 }
             }
             return;
