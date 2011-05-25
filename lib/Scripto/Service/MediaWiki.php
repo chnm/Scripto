@@ -584,7 +584,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             foreach ($this->_cookieSuffixes as $cookieSuffix) {
                 $cookieName = self::COOKIE_PREFIX . $this->_dbName . $cookieSuffix;
                 if (array_key_exists($cookieName, $_COOKIE)) {
-                    setcookie($cookieName, false);
+                    setcookie($cookieName, false, 0, '/');
                 }
             }
         }
