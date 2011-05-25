@@ -640,12 +640,17 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             return false;
         }
         
-        // Ping the API endpoint for a valid response.
-        $body = self::getHttpClient()->setUri($apiUrl)
-                                     ->setParameterPost('action', 'query')
-                                     ->setParameterPost('meta', 'siteinfo')
-                                     ->setParameterPost('format', 'json')
-                                     ->request('POST')->getBody();
+        try {
+            // Ping the API endpoint for a valid response.
+            $body = self::getHttpClient()->setUri($apiUrl)
+                                         ->setParameterPost('action', 'query')
+                                         ->setParameterPost('meta', 'siteinfo')
+                                         ->setParameterPost('format', 'json')
+                                         ->request('POST')->getBody();
+        // Prevent "Unable to Connect" errors.
+        } catch (Zend_Http_Client_Exception $e) {
+            return false;
+        }
         self::getHttpClient()->resetParameters(true);
         
         $response = json_decode($body, true);
