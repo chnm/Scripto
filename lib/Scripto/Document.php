@@ -804,6 +804,12 @@ class Scripto_Document
                       'rvprop'    => 'ids|flags|timestamp|user|comment|size')
             );
             $page = current($response['query']['pages']);
+            
+            // Return if the page has not been created.
+            if (array_key_exists('missing', $page)) {
+                return $revisions;
+            }
+            
             foreach ($page['revisions'] as $revision) {
                 
                 $actionPattern = '/^(' . implode('|', $actions) . ').+$/';
