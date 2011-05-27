@@ -618,4 +618,35 @@ class Scripto
     {
         return Scripto_Service_MediaWiki::isValidApiUrl($apiUrl);
     }
+    
+    /**
+     * Remove all HTML attributes from the provided markup.
+     * 
+     * This filter is useful after getting HTML from the MediaWiki API, which 
+     * often contains MediaWiki-specific attributes that may conflict with local 
+     * settings.
+     * 
+     * @param string $html
+     * @return string
+     */
+    static public function removeHtmlAttributes($html)
+    {
+        // Check for an empty string.
+        $html = trim($html);
+        if (empty($html)) {
+            return $html;
+        }
+        
+        // Load the HTML into DOM.
+        $doc = new DOMDocument();
+        $doc->loadHTML($html);
+        $xpath = new DOMXPath($doc);
+        
+        // Iterate over and remove all attributes.
+        foreach ($xpath->evaluate('//@*') as $attribute) {
+            $attribute->ownerElement->removeAttributeNode($attribute);
+        }
+        
+        return $doc->saveHTML();
+    }
 }
