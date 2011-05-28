@@ -420,6 +420,7 @@ class Scripto
             $response = $this->_mediawiki->getWatchlist(
                 array('wlprop'      => 'user|comment|timestamp|title|ids|sizes|flags', 
                       'wllimit'     => '100', 
+                      'wlallrev'    => true, 
                       'wlnamespace' => implode('|', array_keys($namespaces)), 
                       'wlstart'     => $start)
             );
