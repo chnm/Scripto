@@ -27,7 +27,7 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
      *     'document_pages' => array(
      *         {pageId} => array(
      *             'page_name' => {pageName}, 
-     *             'page_image_url' => {pageImageUrl}
+     *             'page_file_url' => {pageFileUrl}
      *         )
      *     )
      * ) 
@@ -53,36 +53,36 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
             'document_pages' => array(
                 67799 => array(
                     'page_name' => 'Letter Outside', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07001.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07001.jpg'
                 ), 
                 67800 => array(
                     'page_name' => 'Letter Body', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07002.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07002.jpg'
                 ), 
                 67801 => array(
                     'page_name' => 'Worksheet 1, Outside', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07003.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07003.jpg'
                 ), 
                 67802 => array(
                     'page_name' => 'Worksheet 1, Page 1', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07004.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07004.jpg'
                 ), 
                 67803 => array(
                     'page_name' => 'Worksheet 1, Page 2', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07005.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07005.jpg'
                 ), 
                 67804 => array(
                     'page_name' => 'Worksheet 2, Outside', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07006.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07006.jpg'
                 ), 
                 67805 => array(
                     'page_name' => 'Worksheet 2, Page 1', 
-                    'page_image_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07007.jpg'
+                    'page_file_url' => 'http://wardepartmentpapers.org/images/medium/zto/ZTO07007.jpg'
                 )
             )
         ), 
         // An alternate way to set the document using a document title as the 
-        // document ID and the image file path as the page ID. See: http://books.google.com/books?id=eAuOQMmGEYIC&lpg=PA515&ots=PtWRBKDZbf&pg=PA515
+        // document ID and the file path as the page ID. See: http://books.google.com/books?id=eAuOQMmGEYIC&lpg=PA515&ots=PtWRBKDZbf&pg=PA515
         // %5BFacsimile%20of%5D%20letter%20to%20Messrs.%20O.%20P.%20Hall%20et%20al%20from%20Lincoln.
         '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.' => array(
             'document_title' => '[Facsimile of] letter to Messrs. O. P. Hall et al from Lincoln.', 
@@ -90,19 +90,19 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
                 // rbc%2Flprbscsm%2Fscsm0455%2F001r.jpg
                 'rbc/lprbscsm/scsm0455/001r.jpg' => array(
                     'page_name' => '001r', 
-                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/001r.jpg'
+                    'page_file_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/001r.jpg'
                 ), 
                 'rbc/lprbscsm/scsm0455/002r.jpg' => array(
                     'page_name' => '002r', 
-                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/002r.jpg'
+                    'page_file_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/002r.jpg'
                 ), 
                 'rbc/lprbscsm/scsm0455/003r.jpg' => array(
                     'page_name' => '003r', 
-                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/003r.jpg'
+                    'page_file_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/003r.jpg'
                 ), 
                 'rbc/lprbscsm/scsm0455/004r.jpg' => array(
                     'page_name' => '004r', 
-                    'page_image_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/004r.jpg'
+                    'page_file_url' => 'http://memory.loc.gov/service/rbc/lprbscsm/scsm0455/004r.jpg'
                 )
             )
         )
@@ -127,9 +127,9 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
         return $pages;
     }
     
-    public function getDocumentPageImageUrl($documentId, $pageId)
+    public function getDocumentPageFileUrl($documentId, $pageId)
     {
-        return $this->_documents[$documentId]['document_pages'][$pageId]['page_image_url'];
+        return $this->_documents[$documentId]['document_pages'][$pageId]['page_file_url'];
     }
     
     public function getDocumentFirstPageId($documentId)

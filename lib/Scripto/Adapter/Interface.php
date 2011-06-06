@@ -47,7 +47,7 @@ interface Scripto_Adapter_Interface
      * 
      * For the page IDs we highly recommend using unique keys from the external 
      * database whenever possible (e.g. the file ID). This page ID will be used 
-     * to query the adapter for page image URLs, so they must be no ambiguity.
+     * to query the adapter for page file URLs, so they must be no ambiguity.
      * 
      * The return value must follow this format:
      * array([pageId] => [pageName], [...])
@@ -68,13 +68,13 @@ interface Scripto_Adapter_Interface
     public function getDocumentPages($documentId);
     
     /**
-     * Get the URL of the specified document page image.
+     * Get the URL of the specified document page file.
      * 
      * @param int|string $documentId The unique document ID
      * @param int|string $pageId The unique page ID
-     * @return string The page image URL
+     * @return string The page file URL
      */
-    public function getDocumentPageImageUrl($documentId, $pageId);
+    public function getDocumentPageFileUrl($documentId, $pageId);
     
     /**
      * Get the first page of the document.

@@ -235,17 +235,17 @@ class Scripto_Document
     }
     
     /**
-     * Get this document's current page image URL from the adapter.
+     * Get this document's current page file URL from the adapter.
      * 
-     * @uses Scripto_Adapter_Interface::getDocumentPageImageUrl()
+     * @uses Scripto_Adapter_Interface::getDocumentPageFileUrl()
      * @return string
      */
-    public function getPageImageUrl()
+    public function getPageFileUrl()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before getting the page image URL.');
+            throw new Scripto_Exception('The document page must be set before getting the page file URL.');
         }
-        return $this->_adapter->getDocumentPageImageUrl($this->_id, $this->_pageId);
+        return $this->_adapter->getDocumentPageFileUrl($this->_id, $this->_pageId);
     }
     
     /**

@@ -6,7 +6,7 @@ License: [GNU GPL v3](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 Scripto is an open source documentary transcription tool written in PHP. It 
 features a lightweight library that interfaces MediaWiki and potentially any 
-content management system that serves document images. MediaWiki is a good 
+content management system that serves document files. MediaWiki is a good 
 choice for the transcription database for several reasons:
 
 * It is the most popular wiki application and has a sizable and active developer 
