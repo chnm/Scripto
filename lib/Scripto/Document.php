@@ -534,6 +534,33 @@ class Scripto_Document
         return $this->_isProtectedPage($this->_talkPageInfo['protections']);
     }
     
+     /**
+     * Determine whether the current user is watching the current transcription 
+     * page.
+     * 
+     * @return bool
+     */
+    public function isWatchedTranscriptionPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether the current user is watching the transcription page.');
+        }
+        return $this->_transcriptionPageInfo['watched'];
+    }
+    
+    /**
+     * Determine whether the current user is watching the current talk page.
+     * 
+     * @return bool
+     */
+    public function isWatchedTalkPage()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before determining whether the current user is watching the talk page.');
+        }
+        return $this->_talkPageInfo['watched'];
+    }
+    
     /**
      * Determine whether all of this document's transcription pages were already 
      * exported to the external system.
@@ -756,7 +783,7 @@ class Scripto_Document
      */
     protected function _getPageInfo($title)
     {
-        $params = array('inprop' => 'protection|talkid|subjectid|url', 
+        $params = array('inprop' => 'protection|talkid|subjectid|url|watched', 
                         'intoken' => 'edit|move|delete|protect');
         $response = $this->_mediawiki->getInfo($title, $params);
         $page = current($response['query']['pages']);
@@ -775,6 +802,7 @@ class Scripto_Document
                           'talk_id'            => $page['talkid'], 
                           'mediawiki_full_url' => $page['fullurl'], 
                           'mediawiki_edit_url' => $page['editurl'], 
+                          'watched'            => isset($page['watched']) ? true: false, 
                           'redirect'           => isset($page['redirect']) ? true: false, 
                           'new'                => isset($page['new']) ? true: false);
         return $pageInfo;
