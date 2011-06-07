@@ -236,10 +236,16 @@ class Scripto
         $userDocumentPages = array();
         $documentTitles = array();
         $start = null;
+        
+        // Namespaces to get: ns_index => ns_name
+        // See http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
+        $namespaces = array('0' => 'Main', '1' => 'Talk');
+        
         do {
             $response = $this->_mediawiki->getUserContributions(
                 $this->_userInfo['query']['userinfo']['name'], 
                 array('ucstart' => $start, 
+                      'ucnamespace' => implode('|', array_keys($namespaces)), 
                       'uclimit' => 100)
             );
             foreach ($response['query']['usercontribs'] as $value) {
@@ -249,14 +255,17 @@ class Scripto
                     continue;
                 }
                 
+                // Extract the title, removing the namespace if any.
+                $title = preg_replace('/^(.+:)?(.+)$/', '$2', $value['title']);
+                
                 // Preempt further processing on contributions with an invalid 
                 // prefix.
-                if (Scripto_Document::BASE_TITLE_PREFIX != $value['title'][0]) {
+                if (Scripto_Document::BASE_TITLE_PREFIX != $title[0]) {
                     continue;
                 }
                 
                 // Set the document ID and page ID.
-                $documentIds = Scripto_Document::decodeBaseTitle($value['title']);
+                $documentIds = Scripto_Document::decodeBaseTitle($title);
                 
                 // Set the document title. Reduce calls to the adapter by 
                 // caching each title and checking if it already exists.
@@ -275,6 +284,8 @@ class Scripto
                 // Build the user document pages, newest properties first.
                 $userDocumentPages[$value['pageid']] = array(
                     'revision_id'      => $value['revid'], 
+                    'namespace_index'  => $value['ns'], 
+                    'namespace_name'   => $namespaces[$value['ns']], 
                     'mediawiki_title'  => $value['title'], 
                     'timestamp'        => $value['timestamp'], 
                     'comment'          => $value['comment'], 
