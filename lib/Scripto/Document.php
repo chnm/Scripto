@@ -62,6 +62,11 @@ class Scripto_Document
     protected $_title;
     
     /**
+     * @var string The document page title provided by the external system.
+     */
+    protected $_pageTitle;
+    
+    /**
      * @var string The document page ID provided by the external system.
      */
     protected $_pageId;
@@ -142,6 +147,7 @@ class Scripto_Document
         $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $baseTitle);
         
         $this->_pageId = $pageId;
+        $this->_pageTitle = $this->_adapter->getDocumentPageTitle($pageId);
         $this->_baseTitle = $baseTitle;
     }
     
@@ -161,6 +167,14 @@ class Scripto_Document
     public function getTitle()
     {
         return $this->_title;
+    }
+    
+    /**
+     * Get this document's page title.
+     */
+    public function getPageTitle()
+    {
+        return $this->_pageTitle;
     }
     
     /**
