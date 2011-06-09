@@ -267,32 +267,38 @@ class Scripto
                 // Set the document ID and page ID.
                 $documentIds = Scripto_Document::decodeBaseTitle($title);
                 
-                // Set the document title. Reduce calls to the adapter by 
-                // caching each title and checking if it already exists.
+                // Filter out contributions that are not valid document pages.
+                if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                    continue;
+                }
+                
+                // Set the document title and document page name. Reduce calls 
+                // to the adapter by caching each document title, and checking 
+                // if they exist.
                 if (array_key_exists($documentIds[0], $documentTitles)) {
                     $documentTitle = $documentTitles[$documentIds[0]];
                 } else {
-                    // Before getting the title, filter out contributions that 
-                    // are not valid document pages.
-                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
-                        continue;
-                    }
                     $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
                     $documentTitles[$documentIds[0]] = $documentTitle;
                 }
                 
+                // Duplicate pages have already been filtered out, so there is 
+                // no need to cache document page names.
+                $documentPageName = $this->_adapter->getDocumentPageName($documentIds[0], $documentIds[1]);
+                
                 // Build the user document pages, newest properties first.
                 $userDocumentPages[$value['pageid']] = array(
-                    'revision_id'      => $value['revid'], 
-                    'namespace_index'  => $value['ns'], 
-                    'namespace_name'   => $namespaces[$value['ns']], 
-                    'mediawiki_title'  => $value['title'], 
-                    'timestamp'        => $value['timestamp'], 
-                    'comment'          => $value['comment'], 
-                    'size'             => $value['size'], 
-                    'document_id'      => $documentIds[0], 
-                    'document_page_id' => $documentIds[1], 
-                    'document_title'   => $documentTitle
+                    'revision_id'        => $value['revid'], 
+                    'namespace_index'    => $value['ns'], 
+                    'namespace_name'     => $namespaces[$value['ns']], 
+                    'mediawiki_title'    => $value['title'], 
+                    'timestamp'          => $value['timestamp'], 
+                    'comment'            => $value['comment'], 
+                    'size'               => $value['size'], 
+                    'document_id'        => $documentIds[0], 
+                    'document_page_id'   => $documentIds[1], 
+                    'document_title'     => $documentTitle, 
+                    'document_page_name' => $documentPageName, 
                 );
                 
                 // Break out of the loops if limit has been reached.
@@ -326,6 +332,7 @@ class Scripto
         $start = null;
         $recentChanges = array();
         $documentTitles = array();
+        $documentPageNames = array();
         
         // Namespaces to get: ns_index => ns_name
         // See http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
@@ -353,42 +360,62 @@ class Scripto
                 // Set the document ID and page ID.
                 $documentIds = Scripto_Document::decodeBaseTitle($title);
                 
-                // Set the document title. Reduce calls to the adapter by 
-                // caching each title and checking if it already exists.
-                if (array_key_exists($documentIds[0], $documentTitles)) {
+                // Set the document title and document page name. Reduce calls 
+                // to the adapter by caching each document title and page name, 
+                // and checking if they exist.
+                $cachedDocument = array_key_exists($documentIds[0], $documentTitles);
+                $cachedDocumentPage = array_key_exists($documentIds[1], $documentPageNames);
+                
+                // The document title and page name have been cached.
+                if ($cachedDocument && $cachedDocumentPage) {
                     $documentTitle = $documentTitles[$documentIds[0]];
+                    $documentPageName = $documentPageNames[$documentIds[1]];
+                
+                // The document title has been cached, but not the page name.
+                } else if ($cachedDocument && !$cachedDocumentPage) {
+                    // Filter out invalid document pages.
+                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                        continue;
+                    }
+                    $documentTitle = $documentTitles[$documentIds[0]];
+                    $documentPageName = $this->_adapter->getDocumentPageName($documentIds[0], $documentIds[1]);
+                    $documentPageNames[$documentIds[1]] = $documentPageName;
+                
+                // The document title and page name have not been cached.
                 } else {
-                    // Before getting the title, filter out contributions that 
-                    // are not valid document pages.
+                    // Filter out invalid document pages.
                     if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
                         continue;
                     }
                     $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
                     $documentTitles[$documentIds[0]] = $documentTitle;
+                    $documentPageName = $this->_adapter->getDocumentPageName($documentIds[0], $documentIds[1]);
+                    $documentPageNames[$documentIds[1]] = $documentPageName;
                 }
                 
                 $recentChanges[] = array(
-                    'type'             => $value['type'], 
-                    'namespace_index'  => $value['ns'], 
-                    'namespace_name'   => $namespaces[$value['ns']], 
-                    'mediawiki_title'  => $value['title'], 
-                    'rcid'             => $value['rcid'], 
-                    'page_id'          => $value['pageid'], 
-                    'revision_id'      => $value['revid'], 
-                    'old_revision_id'  => $value['old_revid'], 
-                    'user'             => $value['user'], 
-                    'old_length'       => $value['oldlen'], 
-                    'new_length'       => $value['newlen'], 
-                    'timestamp'        => $value['timestamp'], 
-                    'comment'          => $value['comment'], 
-                    'log_id'           => isset($value['logid']) ? $value['logid']: null, 
-                    'log_type'         => isset($value['logtype']) ? $value['logtype']: null, 
-                    'log_action'       => isset($value['logaction']) ? $value['logaction']: null, 
-                    'new'              => isset($value['new']) ? true: false, 
-                    'minor'            => isset($value['minor']) ? true: false, 
-                    'document_id'      => $documentIds[0], 
-                    'document_page_id' => $documentIds[1], 
-                    'document_title'   => $documentTitle, 
+                    'type'               => $value['type'], 
+                    'namespace_index'    => $value['ns'], 
+                    'namespace_name'     => $namespaces[$value['ns']], 
+                    'mediawiki_title'    => $value['title'], 
+                    'rcid'               => $value['rcid'], 
+                    'page_id'            => $value['pageid'], 
+                    'revision_id'        => $value['revid'], 
+                    'old_revision_id'    => $value['old_revid'], 
+                    'user'               => $value['user'], 
+                    'old_length'         => $value['oldlen'], 
+                    'new_length'         => $value['newlen'], 
+                    'timestamp'          => $value['timestamp'], 
+                    'comment'            => $value['comment'], 
+                    'log_id'             => isset($value['logid']) ? $value['logid']: null, 
+                    'log_type'           => isset($value['logtype']) ? $value['logtype']: null, 
+                    'log_action'         => isset($value['logaction']) ? $value['logaction']: null, 
+                    'new'                => isset($value['new']) ? true: false, 
+                    'minor'              => isset($value['minor']) ? true: false, 
+                    'document_id'        => $documentIds[0], 
+                    'document_page_id'   => $documentIds[1], 
+                    'document_title'     => $documentTitle, 
+                    'document_page_name' => $documentPageName, 
                 );
                 
                 // Break out of the loops if limit has been reached.
@@ -450,37 +477,57 @@ class Scripto
                 // Set the document ID and page ID.
                 $documentIds = Scripto_Document::decodeBaseTitle($title);
                 
-                // Set the document title. Reduce calls to the adapter by 
-                // caching each title and checking if it already exists.
-                if (array_key_exists($documentIds[0], $documentTitles)) {
+                // Set the document title and document page name. Reduce calls 
+                // to the adapter by caching each document title and page name, 
+                // and checking if they exist.
+                $cachedDocument = array_key_exists($documentIds[0], $documentTitles);
+                $cachedDocumentPage = array_key_exists($documentIds[1], $documentPageNames);
+                
+                // The document title and page name have been cached.
+                if ($cachedDocument && $cachedDocumentPage) {
                     $documentTitle = $documentTitles[$documentIds[0]];
+                    $documentPageName = $documentPageNames[$documentIds[1]];
+                
+                // The document title has been cached, but not the page name.
+                } else if ($cachedDocument && !$cachedDocumentPage) {
+                    // Filter out invalid document pages.
+                    if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
+                        continue;
+                    }
+                    $documentTitle = $documentTitles[$documentIds[0]];
+                    $documentPageName = $this->_adapter->getDocumentPageName($documentIds[0], $documentIds[1]);
+                    $documentPageNames[$documentIds[1]] = $documentPageName;
+                
+                // The document title and page name have not been cached.
                 } else {
-                    // Before getting the title, filter out contributions that 
-                    // are not valid document pages.
+                    // Filter out invalid document pages.
                     if (!$this->_adapter->documentPageExists($documentIds[0], $documentIds[1])) {
                         continue;
                     }
                     $documentTitle = $this->_adapter->getDocumentTitle($documentIds[0]);
                     $documentTitles[$documentIds[0]] = $documentTitle;
+                    $documentPageName = $this->_adapter->getDocumentPageName($documentIds[0], $documentIds[1]);
+                    $documentPageNames[$documentIds[1]] = $documentPageName;
                 }
                 
                 $watchlist[] = array(
-                    'namespace_index'  => $value['ns'], 
-                    'namespace_name'   => $namespaces[$value['ns']], 
-                    'mediawiki_title'  => $value['title'], 
-                    'page_id'          => $value['pageid'], 
-                    'revision_id'      => $value['revid'], 
-                    'user'             => $value['user'], 
-                    'old_length'       => $value['oldlen'], 
-                    'new_length'       => $value['newlen'], 
-                    'timestamp'        => $value['timestamp'], 
-                    'comment'          => $value['comment'], 
-                    'new'              => isset($value['new']) ? true: false, 
-                    'minor'            => isset($value['minor']) ? true: false, 
-                    'anonymous'        => isset($value['anon']) ? true: false, 
-                    'document_id'      => $documentIds[0], 
-                    'document_page_id' => $documentIds[1], 
-                    'document_title'   => $documentTitle, 
+                    'namespace_index'    => $value['ns'], 
+                    'namespace_name'     => $namespaces[$value['ns']], 
+                    'mediawiki_title'    => $value['title'], 
+                    'page_id'            => $value['pageid'], 
+                    'revision_id'        => $value['revid'], 
+                    'user'               => $value['user'], 
+                    'old_length'         => $value['oldlen'], 
+                    'new_length'         => $value['newlen'], 
+                    'timestamp'          => $value['timestamp'], 
+                    'comment'            => $value['comment'], 
+                    'new'                => isset($value['new']) ? true: false, 
+                    'minor'              => isset($value['minor']) ? true: false, 
+                    'anonymous'          => isset($value['anon']) ? true: false, 
+                    'document_id'        => $documentIds[0], 
+                    'document_page_id'   => $documentIds[1], 
+                    'document_title'     => $documentTitle, 
+                    'document_page_name' => $documentPageName, 
                 );
                 
                 // Break out of the loops if limit has been reached.
