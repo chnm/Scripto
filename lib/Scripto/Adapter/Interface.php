@@ -93,13 +93,13 @@ interface Scripto_Adapter_Interface
     public function getDocumentTitle($documentId);
     
     /**
-     * Get the title of the document page.
+     * Get the name of the document page.
      * 
      * @param int|string $documentId The document ID
      * @param int|string $pageId The unique page ID
      * @return string
      */
-    public function getDocumentPageTitle($documentId, $pageId);
+    public function getDocumentPageName($documentId, $pageId);
     
     /**
      * Indicate whether the document transcription has been imported.

@@ -142,7 +142,7 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
         return $this->_documents[$documentId]['document_title'];
     }
     
-    public function getDocumentPageTitle($documentId, $pageId)
+    public function getDocumentPageName($documentId, $pageId)
     {
         return $this->_documents[$documentId]['document_pages'][$pageId]['page_name'];
     }
