@@ -147,7 +147,7 @@ class Scripto_Document
         $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $baseTitle);
         
         $this->_pageId = $pageId;
-        $this->_pageTitle = $this->_adapter->getDocumentPageTitle($pageId);
+        $this->_pageTitle = $this->_adapter->getDocumentPageTitle($this->_id, $pageId);
         $this->_baseTitle = $baseTitle;
     }
     
@@ -479,47 +479,33 @@ class Scripto_Document
     }
     
     /**
-     * Watch the current transcription page.
+     * Watch the current page.
+     * 
+     * Watching a transcription page implies watching its talk page.
+     * 
+     * @uses Scripto_Service_MediaWiki::watch()
      */
-    public function watchTranscriptionPage()
+    public function watchPage()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before watching the transcription page.');
+            throw new Scripto_Exception('The document page must be set before watching the page.');
         }
-        $this->_watchPage($this->_baseTitle);
+        $this->_mediawiki->watch($this->_baseTitle);
     }
     
     /**
-     * Watch the current talk page.
+     * Unwatch the current page.
+     * 
+     * Unwatching a transcription page implies unwatching its talk page.
+     * 
+     * @uses Scripto_Service_MediaWiki::watch()
      */
-    public function watchTalkPage()
+    public function unwatchPage()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before watching the talk page.');
+            throw new Scripto_Exception('The document page must be set before unwatching the page.');
         }
-        $this->_watchPage('Talk:' . $this->_baseTitle);
-    }
-    
-    /**
-     * Unatch the current transcription page.
-     */
-    public function unwatchTranscriptionPage()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before unwatching the transcription page.');
-        }
-        $this->_unwatchPage($this->_baseTitle);
-    }
-    
-    /**
-     * Unwatch the current talk page.
-     */
-    public function unwatchTalkPage()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before unwatching the talk page.');
-        }
-        $this->_unwatchPage('Talk:' . $this->_baseTitle);
+        $this->_mediawiki->watch($this->_baseTitle, array('unwatch' => true));
     }
     
     /**
@@ -549,30 +535,16 @@ class Scripto_Document
     }
     
      /**
-     * Determine whether the current user is watching the current transcription 
-     * page.
+     * Determine whether the current user is watching the current page.
      * 
      * @return bool
      */
-    public function isWatchedTranscriptionPage()
+    public function isWatchedPage()
     {
         if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before determining whether the current user is watching the transcription page.');
+            throw new Scripto_Exception('The document page must be set before determining whether the current user is watching the page.');
         }
         return $this->_transcriptionPageInfo['watched'];
-    }
-    
-    /**
-     * Determine whether the current user is watching the current talk page.
-     * 
-     * @return bool
-     */
-    public function isWatchedTalkPage()
-    {
-        if (is_null($this->_pageId)) {
-            throw new Scripto_Exception('The document page must be set before determining whether the current user is watching the talk page.');
-        }
-        return $this->_talkPageInfo['watched'];
     }
     
     /**
@@ -764,28 +736,6 @@ class Scripto_Document
             $protections = 'create=all';
         }
         $this->_mediawiki->protect($title, $protections, $protectToken);
-    }
-    
-    /**
-     * Watch the specified page.
-     * 
-     * @uses Scripto_Service_MediaWiki::watch()
-     * @param string $title
-     */
-    protected function _watchPage($title)
-    {
-        $this->_mediawiki->watch($title);
-    }
-    
-    /**
-     * Unwatch the specified page.
-     * 
-     * @uses Scripto_Service_MediaWiki::watch()
-     * @param string $title
-     */
-    protected function _unwatchPage($title)
-    {
-        $this->_mediawiki->watch($title, array('unwatch' => true));
     }
     
     /**
