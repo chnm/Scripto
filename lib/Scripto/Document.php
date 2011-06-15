@@ -263,6 +263,32 @@ class Scripto_Document
     }
     
     /**
+     * Get the MediaWiki URL for the current transcription page.
+     * 
+     * @return string
+     */
+    public function getTranscriptionPageMediawikiUrl()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the transcription page MediaWiki URL.');
+        }
+        return $this->_getPageMediawikiUrl($this->_baseTitle);
+    }
+    
+    /**
+     * Get the MediaWiki URL for the current talk page.
+     * 
+     * @return string
+     */
+    public function getTalkPageMediawikiUrl()
+    {
+        if (is_null($this->_pageId)) {
+            throw new Scripto_Exception('The document page must be set before getting the talk page MediaWiki URL.');
+        }
+        return $this->_getPageMediawikiUrl('Talk:' . $this->_baseTitle);
+    }
+    
+    /**
      * Get the MediaWiki transcription page wikitext for the current page.
      * 
      * @uses Scripto_Service_MediaWiki::getLatestRevisionWikitext()
@@ -736,6 +762,20 @@ class Scripto_Document
             $protections = 'create=all';
         }
         $this->_mediawiki->protect($title, $protections, $protectToken);
+    }
+    
+    /**
+     * Get the MediaWiki URL for the specified page.
+     * 
+     * @uses Scripto_Service_MediaWiki::getSiteInfo()
+     * @param string $title
+     * @return string
+     */
+    protected function _getPageMediawikiUrl($title)
+    {
+        $siteInfo = $this->_mediawiki->getSiteInfo();
+        return $siteInfo['query']['general']['server'] 
+             . str_replace('$1', $title, $siteInfo['query']['general']['articlepath']);
     }
     
     /**
