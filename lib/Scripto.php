@@ -449,6 +449,7 @@ class Scripto
         $start = null;
         $watchlist = array();
         $documentTitles = array();
+        $documentPageNames = array();
         
         // Namespaces to get: ns_index => ns_name
         // See http://www.mediawiki.org/wiki/Manual:Namespace#Built-in_namespaces
