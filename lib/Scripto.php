@@ -393,6 +393,10 @@ class Scripto
                     $documentPageNames[$documentIds[1]] = $documentPageName;
                 }
                 
+                $logAction = isset($value['logaction']) ? $value['logaction']: null;
+                $action = self::getChangeAction(array('comment' => $value['comment'], 
+                                                      'log_action' => $logAction));
+                
                 $recentChanges[] = array(
                     'type'               => $value['type'], 
                     'namespace_index'    => $value['ns'], 
@@ -407,9 +411,10 @@ class Scripto
                     'new_length'         => $value['newlen'], 
                     'timestamp'          => $value['timestamp'], 
                     'comment'            => $value['comment'], 
+                    'action'             => $action, 
                     'log_id'             => isset($value['logid']) ? $value['logid']: null, 
                     'log_type'           => isset($value['logtype']) ? $value['logtype']: null, 
-                    'log_action'         => isset($value['logaction']) ? $value['logaction']: null, 
+                    'log_action'         => $logAction, 
                     'new'                => isset($value['new']) ? true: false, 
                     'minor'              => isset($value['minor']) ? true: false, 
                     'document_id'        => $documentIds[0], 
@@ -511,6 +516,9 @@ class Scripto
                     $documentPageNames[$documentIds[1]] = $documentPageName;
                 }
                 
+                $action = self::getChangeAction(array('comment' => $value['comment'], 
+                                                      'revision_id' => $value['revid']));
+                
                 $watchlist[] = array(
                     'namespace_index'    => $value['ns'], 
                     'namespace_name'     => $namespaces[$value['ns']], 
@@ -522,6 +530,7 @@ class Scripto
                     'new_length'         => $value['newlen'], 
                     'timestamp'          => $value['timestamp'], 
                     'comment'            => $value['comment'], 
+                    'action'             => $action, 
                     'new'                => isset($value['new']) ? true: false, 
                     'minor'              => isset($value['minor']) ? true: false, 
                     'anonymous'          => isset($value['anon']) ? true: false, 
@@ -651,30 +660,66 @@ class Scripto
         );
         $page = current($response['query']['pages']);
         
-        // Set the action.
-        $actions = array('Replaced content', 'Unprotected', 'Protected', 'Created page');
-        $actionPattern = '/^(' . implode('|', $actions) . ').+$/s';
-        if (preg_match($actionPattern, $page['revisions'][0]['comment'])) {
-            $action = preg_replace($actionPattern, '$1', $page['revisions'][0]['comment']);
-        } else {
-            $action = '';
-        }
-        
         // Parse the wikitext into HTML.
         $response = $this->_mediawiki->parse(
             array('text' => '__NOEDITSECTION__' . $page['revisions'][0]['*'])
         );
+        
+        $action = self::getChangeAction(array('comment' => $page['revisions'][0]['comment']));
         
         $revision = array('revision_id' => $page['revisions'][0]['revid'], 
                           'parent_id'   => $page['revisions'][0]['parentid'], 
                           'user'        => $page['revisions'][0]['user'], 
                           'timestamp'   => $page['revisions'][0]['timestamp'], 
                           'comment'     => $page['revisions'][0]['comment'], 
-                          'action'      => $action, 
                           'size'        => $page['revisions'][0]['size'], 
+                          'action'      => $action, 
                           'wikitext'    => $page['revisions'][0]['*'], 
                           'html'        => $response['parse']['text']['*']);
         return $revision;
+    }
+    
+    /**
+     * Infer a change action verb from hints containted in various responses.
+     * 
+     * @param array $hints Keyed hints from which to infer an change action:
+     * <ul>
+     *     <li>comment</li>
+     *     <li>log_action</li>
+     *     <li>revision_id</li>
+     * </ul>
+     * @return string
+     */
+    static public function getChangeAction(array $hints = array())
+    {
+        $action = '';
+        
+        // Recent changes returns log_action=protect|unprotect with no comment.
+        if (array_key_exists('log_action', $hints)) {
+            $logActions = array('protect' => 'protected', 'unprotect' => 'unprotected');
+            if (array_key_exists($hints['log_action'], $logActions)) {
+                return $logActions[$hints['log_action']];
+            }
+        }
+        
+        // Infer from comment and revision_id.
+        if (array_key_exists('comment', $hints)) {
+            $commentActions = array('Replaced', 'Unprotected', 'Protected', 'Created');
+            $actionPattern = '/^(' . implode('|', $commentActions) . ').+$/se';
+            if (preg_match($actionPattern, $hints['comment'])) {
+                $action = preg_replace($actionPattern, 'strtolower("$1")', $hints['comment']);
+            } else {
+                // Watchlist returns revision_id=0 when the action is protect 
+                // or unprotect.
+                if (array_key_exists('revision_id', $hints) && 0 == $hints['revision_id']) {
+                    $action = 'un/protected';
+                } else {
+                    $action = 'edited';
+                }
+            }
+        }
+        
+        return $action;
     }
     
     /**
