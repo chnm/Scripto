@@ -651,6 +651,15 @@ class Scripto
         );
         $page = current($response['query']['pages']);
         
+        // Set the action.
+        $actions = array('Replaced content', 'Unprotected', 'Protected', 'Created page');
+        $actionPattern = '/^(' . implode('|', $actions) . ').+$/';
+        if (preg_match($actionPattern, $page['revisions'][0]['comment'])) {
+            $action = preg_replace($actionPattern, '$1', $page['revisions'][0]['comment']);
+        } else {
+            $action = '';
+        }
+        
         // Parse the wikitext into HTML.
         $response = $this->_mediawiki->parse(
             array('text' => '__NOEDITSECTION__' . $page['revisions'][0]['*'])
@@ -661,6 +670,7 @@ class Scripto
                           'user'        => $page['revisions'][0]['user'], 
                           'timestamp'   => $page['revisions'][0]['timestamp'], 
                           'comment'     => $page['revisions'][0]['comment'], 
+                          'action'      => $action, 
                           'size'        => $page['revisions'][0]['size'], 
                           'wikitext'    => $page['revisions'][0]['*'], 
                           'html'        => $response['parse']['text']['*']);
