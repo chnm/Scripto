@@ -653,7 +653,7 @@ class Scripto
         
         // Set the action.
         $actions = array('Replaced content', 'Unprotected', 'Protected', 'Created page');
-        $actionPattern = '/^(' . implode('|', $actions) . ').+$/';
+        $actionPattern = '/^(' . implode('|', $actions) . ').+$/s';
         if (preg_match($actionPattern, $page['revisions'][0]['comment'])) {
             $action = preg_replace($actionPattern, '$1', $page['revisions'][0]['comment']);
         } else {

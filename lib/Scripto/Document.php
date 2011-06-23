@@ -823,10 +823,9 @@ class Scripto_Document
      */
     protected function _getPageHistory($title, $limit = 10, $startRevisionId = null)
     {
-        $actions = array('Replaced content', 
-                         'Unprotected', 
-                         'Protected', 
-                         'Created page');
+        $actions = array('Replaced content', 'Unprotected', 'Protected', 'Created page');
+        $actionPattern = '/^(' . implode('|', $actions) . ').+$/s';
+        
         $revisions = array();
         do {
             $response = $this->_mediawiki->getRevisions(
@@ -843,8 +842,6 @@ class Scripto_Document
             }
             
             foreach ($page['revisions'] as $revision) {
-                
-                $actionPattern = '/^(' . implode('|', $actions) . ').+$/';
                 if (preg_match($actionPattern, $revision['comment'])) {
                     $action = preg_replace($actionPattern, '$1', $revision['comment']);
                 } else {
