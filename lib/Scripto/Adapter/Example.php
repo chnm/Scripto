@@ -147,6 +147,16 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
         return $this->_documents[$documentId]['document_pages'][$pageId]['page_name'];
     }
     
+    public function documentTranscriptionIsImported($documentId)
+    {
+        return false;
+    }
+    
+    public function documentPageTranscriptionIsImported($documentId, $pageId)
+    {
+        return false;
+    }
+    
     public function importDocumentPageTranscription($documentId, $pageId, $text)
     {
         return false;
