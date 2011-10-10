@@ -741,6 +741,7 @@ class Scripto
      * often contains MediaWiki-specific attributes that may conflict with local 
      * settings.
      * 
+     * @see http://www.php.net/manual/en/domdocument.loadhtml.php#95251
      * @param string $html
      * @return string
      */
@@ -752,9 +753,10 @@ class Scripto
             return $html;
         }
         
-        // Load the HTML into DOM.
+        // Load the HTML into DOM. Must inject an XML declaration with encoding 
+        // set to UTF-8 to prevent DOMDocument from munging Unicode characters.
         $doc = new DOMDocument();
-        $doc->loadHTML($html);
+        $doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         $xpath = new DOMXPath($doc);
         
         // Iterate over and remove all attributes.
