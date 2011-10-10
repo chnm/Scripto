@@ -33,31 +33,41 @@ if (isset($_POST['submit_logout'])) {
 }
 
 // Determine if the current user can edit MediaWiki.
-$canEdit = $doc->canEdit();
+$canEditTranscription = $doc->canEditTranscriptionPage();
+$canEditTalk = $doc->canEditTalkPage();
 
-if ($canEdit) {
+if ($canEditTranscription) {
     // Edit the transcription if submitted.
     if (isset($_POST['submit_transcription'])) {
         $doc->editTranscriptionPage($_POST['transcription']);
     }
-
-    // Set up the OpenLayers image viewer.
-    $olExternalGraphicUrl = $doc->getPageImageUrl();
-    $size = getimagesize($olExternalGraphicUrl);
-    $olGraphicWidth = 400;
-    $olGraphicHeight = (400 * $size[1]) / $size[0];
-    $olMapWidth = 700;
-	$olMapHeight = 250;
-    
-    // Set up the MediaWiki edit toolbar.
-    $mwUrl = dirname(MEDIAWIKI_API_URL);
 }
+
+if ($canEditTalk){
+    // Edit the talk page if submitted
+    if (isset($_POST['submit_talk'])) {
+        $doc->editTalkPage($_POST['talk']);		
+        }
+}
+
+
+// Set up the OpenLayers image viewer.
+$olExternalGraphicUrl = $doc->getPageFileUrl();
+$size = getimagesize($olExternalGraphicUrl);
+$olGraphicWidth = 400;
+$olGraphicHeight = (400 * $size[1]) / $size[0];
+$olMapHeight = 400;
+$olMapWidth = 460;
+
+// Set up the MediaWiki edit toolbar.
+$mwUrl = dirname(MEDIAWIKI_API_URL);
+
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Scripto Example</title>
-    <?php if ($canEdit): // Include the necessary scripts if the user can edit. ?>
+    <?php if ($canEditTranscription): // Include the necessary scripts if the user can edit. ?>
     <script src="../shared/jquery-1.4.2.min.js" type="text/javascript"></script>
     <script type="text/javascript">
 		jQuery.noConflict();
@@ -75,11 +85,11 @@ if ($canEdit) {
     </script>
     <?php endif; ?>
 </head>
-<body <?php echo $canEdit ? 'onload="init()"' : ''; ?>>
+<body <?php echo $canEditTranscription ? 'onload="init()"' : ''; ?>>
 <div id="wrap">
 		
     <h1>Scripto Example</h1>
-    <?php if (!$canEdit): // Display the login form if the current user does not have permission to edit. ?>
+    <?php if (!$canEditTranscription): // Display the login form if the current user does not have permission to edit. ?>
     <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
         <p>Username: <input type="input" name="username" /></p>
         <p>Password: <input type="password" name="password" /></p>

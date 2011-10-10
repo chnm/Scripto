@@ -33,28 +33,35 @@ if (isset($_POST['submit_logout'])) {
 }
 
 // Determine if the current user can edit MediaWiki.
-$canEdit = $doc->canEdit();
+$canEditTranscription = $doc->canEditTranscriptionPage();
+$canEditTalk = $doc->canEditTalkPage();
 
-if ($canEdit) {
+if ($canEditTranscription) {
     // Edit the transcription if submitted.
     if (isset($_POST['submit_transcription'])) {
         $doc->editTranscriptionPage($_POST['transcription']);
+    }
 }
+
+if ($canEditTalk){
+    // Edit the talk page if submitted
     if (isset($_POST['submit_talk'])) {
         $doc->editTalkPage($_POST['talk']);		
-    }
-
-    // Set up the OpenLayers image viewer.
-    $olExternalGraphicUrl = $doc->getPageImageUrl();
-    $size = getimagesize($olExternalGraphicUrl);
-    $olGraphicWidth = 400;
-    $olGraphicHeight = (400 * $size[1]) / $size[0];
-	$olMapHeight = 250;
-	$olMapWidth = 700;
-    
-    // Set up the MediaWiki edit toolbar.
-    $mwUrl = dirname(MEDIAWIKI_API_URL);
+        }
 }
+
+
+// Set up the OpenLayers image viewer.
+$olExternalGraphicUrl = $doc->getPageFileUrl();
+$size = getimagesize($olExternalGraphicUrl);
+$olGraphicWidth = 400;
+$olGraphicHeight = (400 * $size[1]) / $size[0];
+$olMapHeight = 400;
+$olMapWidth = 460;
+
+// Set up the MediaWiki edit toolbar.
+$mwUrl = dirname(MEDIAWIKI_API_URL);
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -62,7 +69,7 @@ if ($canEdit) {
     <title>Scripto Example</title>
     <!--link rel="stylesheet" href="screen.css" /-->
 	<link rel="stylesheet" href="screen.css" />
-    <?php if ($canEdit): // Include the necessary scripts if the user can edit. ?>
+    <?php if ($canEditTranscription): // Include the necessary scripts if the user can edit. ?>
     <script src="../shared/jquery-1.4.2.min.js" type="text/javascript"></script>
 	<script src="../shared/jquery-ui-1.8.5.js" type="text/javascript"></script>
 	<script src="../shared/jquery.form.js" type="text/javascript"></script>
@@ -99,11 +106,11 @@ if ($canEdit) {
 
 <?php endif; ?>
 </head>
-<body <?php echo $canEdit ? 'onload="init()"' : ''; ?>>
+<body <?php echo $canEditTranscription ? 'onload="init()"' : ''; ?>>
 <div id="wrap">
 	
     <h1>Scripto Example</h1>
-    <?php if (!$canEdit): // Display the login form if the current user does not have permission to edit. ?>
+    <?php if (!$canEditTranscription): // Display the login form if the current user does not have permission to edit. ?>
     <form action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
         <p>Username: <input type="input" name="username" /></p>
         <p>Password: <input type="password" name="password" /></p>
@@ -140,11 +147,17 @@ if ($canEdit) {
 	</div>
 
 	<div id="discussionEdit">
+	    
+	    <?php if ($canEditTalk): ?>     
 		<div class="toolbar"><!-- MediaWiki edit toolbar --></div>
         <form id="talkEditForm" action="?documentId=<?php echo urlencode($doc->getId()); ?>&amp;pageId=<?php echo urlencode($doc->getPageId()); ?>" method="post">
             <textarea name="talk" id="wpTextbox2" rows="4" cols="80"><?php echo $doc->getTalkPageWikitext(); ?></textarea><br />
             <input type="submit" name="submit_talk" value="Submit" />
-        </form>
+        </form>       
+            
+        <?php else: ?>
+            <p>You do not have permission to edit the talk page.</p>
+        <?php endif; ?>
 	</div>
 	
 	<ul>
