@@ -29,15 +29,14 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     const COOKIE_PREFIX = 'scripto_';
     
     /**
-     * @var string The MediaWiki database name, used to namespace Scripto/
-     * MediaWiki cookies.
-     */
-    protected $_dbName;
-    
-    /**
      * @var bool Pass Scripto cookies to the web browser.
      */
     protected $_passCookies;
+    
+    /**
+     * @var string The cookie prefix set by MediaWiki during login.
+     */
+    protected $_mediawikiCookiePrefix;
     
     /**
      * @var array Scripto/MediaWiki cookie name suffixes.
@@ -104,12 +103,10 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * 
      * @link http://www.mediawiki.org/wiki/API:Main_page
      * @param string $apiUrl The URL to the MediaWiki API.
-     * @param string $dbName The name of the MediaWiki database.
      * @param bool $passCookies Pass cookies to the web browser.
      */
-    public function __construct($apiUrl, $dbName, $passCookies = true)
+    public function __construct($apiUrl, $passCookies = true)
     {
-        $this->_dbName = (string) $dbName;
         $this->_passCookies = (bool) $passCookies;
         
         // Set the HTTP client for the MediaWiki API .
@@ -117,15 +114,21 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
                              ->setConfig(array('keepalive' => true))
                              ->setCookieJar();
         
-        // If MediaWiki API authentication cookies are being passed, get them 
-        // from the browser and add them to the HTTP client cookie jar. Doing so 
-        // maintains state between browser requests. 
-        if ($this->_passCookies) {
+        // Set the cookie prefix that was set by MediaWiki during login.
+        if (isset($_COOKIE[self::COOKIE_PREFIX . 'cookieprefix'])) {
+            $this->_mediawikiCookiePrefix = $_COOKIE[self::COOKIE_PREFIX . 'cookieprefix'];
+        }
+        
+        // If MediaWiki API authentication cookies are being passed and the 
+        // MediaWiki cookieprefix is set, get the cookies from the browser and 
+        // add them to the HTTP client cookie jar. Doing so maintains state 
+        // between browser requests.
+        if ($this->_passCookies && $this->_mediawikiCookiePrefix) {
             require_once 'Zend/Http/Cookie.php';
             foreach ($this->_cookieSuffixes as $cookieSuffix) {
-                $cookieName = self::COOKIE_PREFIX . $this->_dbName . $cookieSuffix;
+                $cookieName = self::COOKIE_PREFIX . $this->_mediawikiCookiePrefix . $cookieSuffix;
                 if (array_key_exists($cookieName, $_COOKIE)) {
-                    $cookie = new Zend_Http_Cookie($this->_dbName . $cookieSuffix, 
+                    $cookie = new Zend_Http_Cookie($this->_mediawikiCookiePrefix . $cookieSuffix, 
                                                    $_COOKIE[$cookieName], 
                                                    self::getHttpClient()->getUri()->getHost());
                     self::getHttpClient()->getCookieJar()->addCookie($cookie);
@@ -538,6 +541,14 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // Process a successful login.
         if ('Success' == $response['login']['result']) {
             if ($this->_passCookies) {
+                
+                // Persist the MediaWiki cookie prefix in the browser. Set to 
+                // expire in 30 days, the same as MediaWiki cookies.
+                setcookie(self::COOKIE_PREFIX . 'cookieprefix', 
+                          $response['login']['cookieprefix'], 
+                          time() + 60 * 60 * 24 * 30, 
+                          '/');
+                
                 // Persist MediaWiki authentication cookies in the browser.
                 foreach (self::getHttpClient()->getCookieJar()->getAllCookies() as $cookie) {
                     setcookie(self::COOKIE_PREFIX . $cookie->getName(), 
@@ -579,10 +590,11 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // Reset the cookie jar.
         self::getHttpClient()->getCookieJar()->reset();
         
-        if ($this->_passCookies) {
+        if ($this->_passCookies && $this->_mediawikiCookiePrefix) {
             // Delete the MediaWiki authentication cookies from the browser.
+            setcookie(self::COOKIE_PREFIX . 'cookieprefix', false, 0, '/');
             foreach ($this->_cookieSuffixes as $cookieSuffix) {
-                $cookieName = self::COOKIE_PREFIX . $this->_dbName . $cookieSuffix;
+                $cookieName = self::COOKIE_PREFIX . $this->_mediawikiCookiePrefix . $cookieSuffix;
                 if (array_key_exists($cookieName, $_COOKIE)) {
                     setcookie($cookieName, false, 0, '/');
                 }

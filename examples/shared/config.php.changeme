@@ -10,9 +10,6 @@ define('SCRIPTO_PATH', '');
 // URL to the MediaWiki installation API.
 define('MEDIAWIKI_API_URL', '');
 
-// Name of the MediaWiki database.
-define('MEDIAWIKI_DB_NAME', '');
-
 // Set the include path to Zend and Scripto libraries.
 set_include_path(get_include_path() 
                  . PATH_SEPARATOR . ZEND_PATH 

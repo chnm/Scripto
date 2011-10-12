@@ -51,7 +51,6 @@ class Scripto
      * @param array|Scripto_Service_MediaWiki $mediawiki If an array:
      * <ul>
      *     <li>$mediawiki['api_url']: required; the MediaWiki API URL</li>
-     *     <li>$mediawiki['db_name']: required; the MediaWiki database name</li>
      *     <li>$mediawiki['pass_cookies']: optional pass cookies to the web 
      *     browser via API client</li>
      * </ul>
@@ -64,15 +63,12 @@ class Scripto
         // Set the MediaWiki service.
         if ($mediawiki instanceof Scripto_Service_MediaWiki) {
             $this->_mediawiki = $mediawiki;
-        } else if (is_array($mediawiki) 
-                   && array_key_exists('api_url', $mediawiki) 
-                   && array_key_exists('db_name', $mediawiki)) {
+        } else if (is_array($mediawiki) && array_key_exists('api_url', $mediawiki)) {
             if (!isset($mediawiki['pass_cookies'])) {
                 $mediawiki['pass_cookies'] = true;
             }
             
             $this->_mediawiki = new Scripto_Service_MediaWiki($mediawiki['api_url'], 
-                                                              $mediawiki['db_name'], 
                                                               (bool) $mediawiki['pass_cookies']);
         } else {
             throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
