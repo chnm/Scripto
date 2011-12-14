@@ -762,4 +762,23 @@ class Scripto
         
         return $doc->saveHTML();
     }
+    
+    /**
+     * Remove all preprocessor limit reports from the provided markup.
+     * 
+     * This filter is useful after getting HTML from the MediaWiki API, which 
+     * always contains a preprocessor limit report within hidden tags.
+     * 
+     * @see http://en.wikipedia.org/wiki/Wikipedia:Template_limits#How_can_you_find_out.3F
+     * @param string $text
+     * @return string
+     */
+    static public function removeNewPPLimitReports($html)
+    {
+        // The "s" modifier means the "." meta-character will include newlines. 
+        // The "?" means the "+" quantifier is not greedy, thus will not remove 
+        // text between pages when importing document transcriptions.
+        $html = preg_replace("/<!-- \nNewPP limit report.+?-->/s", '', $html);
+        return $html;
+    }
 }
