@@ -469,6 +469,9 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before protecting the transcription page.');
         }
         $this->_protectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
+        
+        // Update information about this page.
+        $this->_transcriptionPageInfo = $this->_getPageInfo($this->_baseTitle);
     }
     
     /**
@@ -480,6 +483,9 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before protecting the talk page.');
         }
         $this->_protectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
+        
+        // Update information about this page.
+        $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $this->_baseTitle);
     }
     
     /**
@@ -491,6 +497,9 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before unprotecting the transcription page.');
         }
         $this->_unprotectPage($this->_baseTitle, $this->_transcriptionPageInfo['protect_token']);
+        
+        // Update information about this page.
+        $this->_transcriptionPageInfo = $this->_getPageInfo($this->_baseTitle);
     }
     
     /**
@@ -502,6 +511,9 @@ class Scripto_Document
             throw new Scripto_Exception('The document page must be set before unprotecting the talk page.');
         }
         $this->_unprotectPage('Talk:' . $this->_baseTitle, $this->_talkPageInfo['protect_token']);
+        
+        // Update information about this page.
+        $this->_talkPageInfo = $this->_getPageInfo('Talk:' . $this->_baseTitle);
     }
     
     /**
