@@ -29,6 +29,11 @@ require_once 'Scripto/Service/MediaWiki.php';
 class Scripto
 {
     /**
+     * This Scripto version.
+     */
+    const VERSION = '1.0';
+    
+    /**
      * @var Scripto_Adapter_Interface The adapter object for the external 
      * system.
      */
