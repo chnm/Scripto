@@ -20,9 +20,6 @@ define('SCRIPTO_PATH', '');
 // URL to the MediaWiki installation API.
 define('TEST_MEDIAWIKI_API_URL', '');
 
-// Name of the MediaWiki database.
-define('TEST_MEDIAWIKI_DB_NAME', '');
-
 // MediaWiki username, if required.
 define('TEST_MEDIAWIKI_USERNAME', '');
 
