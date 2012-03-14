@@ -6,19 +6,24 @@ License: [GNU GPL v3](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 Scripto is an open source documentary transcription tool written in PHP. It 
 features a lightweight library that interfaces MediaWiki and potentially any 
-content management system that serves document files. MediaWiki is a good 
-choice for the transcription database for several reasons:
+content management system that serves transcribable resources, including text, 
+still image, moving image, and audio files.
+
+Scripto is not a content management system. Scripto is not a graphical user 
+interface. Scripto is a software library powered by wiki technology that 
+developers can use to integrate a custom transcription GUI into an existing CMS. 
+You provide the CMS and GUI; Scripto provides the engine for crowdsourcing the 
+transcription of your content.
+
+Why MediaWiki?
+-------------
+
+MediaWiki is a good choice for the transcription database for several reasons:
 
 * It is the most popular wiki application and has a sizable and active developer community;
 * It offers helpful features, such as talk pages, version history, and user administration;
 * [Wiki markup](http://en.wikipedia.org/wiki/Help:Wiki_markup) is easy to learn;
 * It comes with a powerful, fully-featured [API](http://www.mediawiki.org/wiki/API).
-
-Scripto is not a content management system (CMS). Scripto is not a graphical 
-user interface (GUI). Scripto is a PHP library powered by wiki technology that 
-developers can use to integrate a custom transcription GUI into an existing 
-CMS. You provide the CMS and GUI; Scripto provides the engine for crowdsourcing 
-the transcription of your content.
 
 Requirements
 -------------
@@ -45,20 +50,21 @@ Here's a basic configuration:
 ```php
 <?php
 // Path to directory containing Zend Framework, from root.
-define('ZEND_PATH', '');
+define('ZEND_PATH', '/path/to/ZendFramework/library');
 
 // Path to directory containing the Scripto library, from root.
-define('SCRIPTO_PATH', '');
+define('SCRIPTO_PATH', '/path/to/Scripto/lib');
 
 // URL to the MediaWiki installation API.
-define('MEDIAWIKI_API_URL', '');
+define('MEDIAWIKI_API_URL', 'http://example.com/mediawiki/api.php');
 
 // Set the include path to Zend and Scripto libraries.
 set_include_path(get_include_path() 
                . PATH_SEPARATOR . ZEND_PATH 
                . PATH_SEPARATOR . SCRIPTO_PATH);
 
-// Set the Scripto object by passing the adapter object and MediaWiki configuration.
+// Set the Scripto object by passing the custom adapter object and 
+// MediaWiki configuration.
 require_once 'Scripto.php';
 require_once 'Scripto/Adapter/Example.php';
 $scripto = new Scripto(new Scripto_Adapter_Example, 
