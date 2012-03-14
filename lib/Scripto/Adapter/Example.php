@@ -134,6 +134,7 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
     
     public function getDocumentFirstPageId($documentId)
     {
+        reset($this->_documents[$documentId]['document_pages']);
         return key($this->_documents[$documentId]['document_pages']);
     }
     
