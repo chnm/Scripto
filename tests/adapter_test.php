@@ -73,7 +73,7 @@ class TestAdapter extends UnitTestCase
             // Assert document page URLs are valid. There's no consistant, 
             // reliable, and lightweight way to validate a URL, even with 
             // regular expressions, so just check to see if it returns a string.
-            $documentPageImageUrl = $this->_testAdapter->getDocumentPageImageUrl($this->_testDocumentId, $pageId);
+            $documentPageImageUrl = $this->_testAdapter->getDocumentPageFileUrl($this->_testDocumentId, $pageId);
             $this->assertIsA($documentPageImageUrl, 'string', "Document page image URL for page ID \"$pageId\" must be a string. " . gettype($documentPageImageUrl) . " given");
         }
     }
