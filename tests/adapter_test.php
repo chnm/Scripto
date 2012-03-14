@@ -15,7 +15,6 @@ class TestAdapter extends UnitTestCase
     private $_testAdapterClassName;
     private $_testDocumentId;
     private $_testAdapter;
-    private $_testDocumentPages;
     
     /**
      * Use __construct() instead of setUp() because it's unnecessary to set up 
@@ -46,35 +45,42 @@ class TestAdapter extends UnitTestCase
     public function testDocumentIsValid()
     {
         // Assert document ID is valid and exists.
-        $this->assertTrue((is_int($this->_testDocumentId) || is_string($this->_testDocumentId)), 'Document ID must be int or string. ' . gettype($this->_testDocumentId) . ' given');
+        $this->assertTrue((is_int($this->_testDocumentId) || is_string($this->_testDocumentId)), 'Document ID must be int or string (' . gettype($this->_testDocumentId) . ' given)');
         $this->assertTrue($this->_testAdapter->documentExists($this->_testDocumentId), "Document ID \"{$this->_testDocumentId}\" does not exist");
         
-        // Assert valid document pages format.
-        $documentPages = $this->_testAdapter->getDocumentPages($this->_testDocumentId);
-        $this->assertIsA($documentPages, 'array', 'Document pages must be an array. ' . gettype($documentPages) . ' given');
-        $this->assertTrue(count($documentPages), 'Document pages must not be empty');
-        
-        $this->_testDocumentPages = $documentPages;
+        // Assert document title exists.
+        $documentTitle = $this->_testAdapter->getDocumentTitle($this->_testDocumentId);
+        $this->assertIsA($documentTitle, 'string', 'Document title must be a string (' . gettype($documentTitle) . ' given)');
     }
     
     public function testDocumentPagesAreValid()
     {
+        // Assert valid document pages format.
+        $documentPages = $this->_testAdapter->getDocumentPages($this->_testDocumentId);
+        $this->assertIsA($documentPages, 'array', 'Document pages must be an array (' . gettype($documentPages) . ' given)');
+        $this->assertTrue(count($documentPages), 'Document pages must not be empty');
+        
         // Assert document first page is valid and exists.
         $documentFirstPageId = $this->_testAdapter->getDocumentFirstPageId($this->_testDocumentId);
-        $this->assertTrue((is_int($documentFirstPageId) || is_string($documentFirstPageId)), 'Document first page ID must be int or string. ' . gettype($documentFirstPageId) . ' given');
-        $this->assertTrue(array_key_exists($documentFirstPageId, $this->_testDocumentPages), "Document first page ID \"$documentFirstPageId\" does not exist");
+        $this->assertTrue((is_int($documentFirstPageId) || is_string($documentFirstPageId)), 'Document first page ID must be int or string (' . gettype($documentFirstPageId) . ' given)');
+        $this->assertTrue(array_key_exists($documentFirstPageId, $documentPages), "Document first page ID \"$documentFirstPageId\" does not exist");
         
         // Iterate all document pages.
-        foreach ($this->_testDocumentPages as $pageId => $pageName) {
-            // Assert document pages exist.
+        foreach ($documentPages as $pageId => $pageName) {
+            
+            // Assert document page exists.
             $documentPageExists = $this->_testAdapter->documentPageExists($this->_testDocumentId, $pageId);
             $this->assertIdentical($documentPageExists, true, "Document page ID \"$pageId\" does not exist");
             
-            // Assert document page URLs are valid. There's no consistant, 
+            // Assert document page name exists.
+            $documentPageName = $this->_testAdapter->getDocumentPageName($this->_testDocumentId, $pageId);
+            $this->assertIsA($documentPageName, 'string', "Document page name for page ID \"$pageId\" must be a string (" . gettype($documentPageName) . " given)");
+            
+            // Assert document page URL is valid. There's no consistant, 
             // reliable, and lightweight way to validate a URL, even with 
             // regular expressions, so just check to see if it returns a string.
             $documentPageImageUrl = $this->_testAdapter->getDocumentPageFileUrl($this->_testDocumentId, $pageId);
-            $this->assertIsA($documentPageImageUrl, 'string', "Document page image URL for page ID \"$pageId\" must be a string. " . gettype($documentPageImageUrl) . " given");
+            $this->assertIsA($documentPageImageUrl, 'string', "Document page image URL for page ID \"$pageId\" must be a string (" . gettype($documentPageImageUrl) . " given)");
         }
     }
     
