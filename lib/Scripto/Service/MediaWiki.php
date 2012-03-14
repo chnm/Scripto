@@ -394,7 +394,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     public function getPreview($text)
     {
         $response = $this->parse(array('text' => '__NOEDITSECTION__' . $text));
-        return $parse['parse']['text']['*'];
+        return $response['parse']['text']['*'];
     }
     
     /**
