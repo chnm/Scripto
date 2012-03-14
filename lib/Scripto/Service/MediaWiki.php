@@ -112,8 +112,13 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
         // Set the HTTP client for the MediaWiki API .
         self::getHttpClient()->setUri($apiUrl)
                              ->setConfig(array('keepalive' => true))
-                             ->setHeaders('X-Forwarded-For', $_SERVER['REMOTE_ADDR'] . ', ' . $_SERVER['SERVER_ADDR'])
                              ->setCookieJar();
+        
+        // Add X-Forwarded-For header if applicable.
+        if (isset($_SERVER['REMOTE_ADDR']) && isset($_SERVER['SERVER_ADDR'])) {
+            self::getHttpClient()->setHeaders('X-Forwarded-For', 
+                                              $_SERVER['REMOTE_ADDR'] . ', ' . $_SERVER['SERVER_ADDR']);
+        }
         
         // Set the cookie prefix that was set by MediaWiki during login.
         if (isset($_COOKIE[self::COOKIE_PREFIX . 'cookieprefix'])) {
