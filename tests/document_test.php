@@ -19,14 +19,12 @@ class TestDocument extends UnitTestCase
         
         $this->_testDocumentId = TEST_DOCUMENT_ID;
         
-        // Assume TestAdapter has already verified the test adapter and the test 
-        // document via the MediaWiki API client.
         require_once TEST_ADAPTER_FILENAME;
         require_once 'Scripto/Service/MediaWiki.php';
-        $testAdapterClassName = TEST_ADAPTER_CLASS_NAME;
+        require_once 'Scripto/Document.php';
         
         // Instantiate the Scripto_Document object and set it.
-        require 'Scripto/Document.php';
+        $testAdapterClassName = TEST_ADAPTER_CLASS_NAME;
         $this->_testDocument = new Scripto_Document(
             $this->_testDocumentId, 
             new $testAdapterClassName, 
