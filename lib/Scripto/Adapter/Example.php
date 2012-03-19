@@ -11,6 +11,11 @@
 require_once 'Scripto/Adapter/Interface.php';
 
 /**
+ * @see Scripto_Adapter_Exception
+ */
+require_once 'Scripto/Adapter/Exception.php';
+
+/**
  * An example adapter for a hypothetical CMS.
  * 
  * @package Scripto
@@ -115,11 +120,17 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
     
     public function documentPageExists($documentId, $pageId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            return false;
+        }
         return array_key_exists($pageId, $this->_documents[$documentId]['document_pages']);
     }
     
     public function getDocumentPages($documentId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            throw new Scripto_Adapter_Exception('Document does not exist.');
+        }
         $pages = array();
         foreach ($this->_documents[$documentId]['document_pages'] as $pageId => $page) {
             $pages[$pageId] = $page['page_name'];
@@ -129,22 +140,40 @@ class Scripto_Adapter_Example implements Scripto_Adapter_Interface
     
     public function getDocumentPageFileUrl($documentId, $pageId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            throw new Scripto_Adapter_Exception('Document does not exist.');
+        }
+        if (!array_key_exists($pageId, $this->_documents[$documentId]['document_pages'])) {
+            throw new Scripto_Adapter_Exception('Document page does not exist.');
+        }
         return $this->_documents[$documentId]['document_pages'][$pageId]['page_file_url'];
     }
     
     public function getDocumentFirstPageId($documentId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            throw new Scripto_Adapter_Exception('Document does not exist.');
+        }
         reset($this->_documents[$documentId]['document_pages']);
         return key($this->_documents[$documentId]['document_pages']);
     }
     
     public function getDocumentTitle($documentId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            throw new Scripto_Adapter_Exception('Document does not exist.');
+        }
         return $this->_documents[$documentId]['document_title'];
     }
     
     public function getDocumentPageName($documentId, $pageId)
     {
+        if (!array_key_exists($documentId, $this->_documents)) {
+            throw new Scripto_Adapter_Exception('Document does not exist.');
+        }
+        if (!array_key_exists($pageId, $this->_documents[$documentId]['document_pages'])) {
+            throw new Scripto_Adapter_Exception('Document page does not exist.');
+        }
         return $this->_documents[$documentId]['document_pages'][$pageId]['page_name'];
     }
     
