@@ -10,6 +10,7 @@ class AllTests extends TestSuite {
         $path = dirname(__FILE__) . DIRECTORY_SEPARATOR;
         $this->addFile($path . 'adapter_test.php');
         $this->addFile($path . 'mediawiki_test.php');
+        $this->addFile($path . 'scripto_test.php');
         $this->addFile($path . 'document_test.php');
     }
 }
