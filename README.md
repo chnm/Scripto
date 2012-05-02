@@ -125,3 +125,9 @@ function fnScriptoDecodePageTitle(&$out, &$sk, $prefix = '.', $delimiter = '.')
     return false;
 }
 ```
+
+Changelog
+-------------
+
+* 1.1
+   * Add option to retain specified HTML attributes.
