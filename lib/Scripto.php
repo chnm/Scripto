@@ -744,9 +744,10 @@ class Scripto
      * 
      * @see http://www.php.net/manual/en/domdocument.loadhtml.php#95251
      * @param string $html
+     * @param array $exceptions Do not remove these attributes.
      * @return string
      */
-    static public function removeHtmlAttributes($html)
+    static public function removeHtmlAttributes($html, array $exceptions = array('href'))
     {
         // Check for an empty string.
         $html = trim($html);
@@ -760,8 +761,12 @@ class Scripto
         $doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         $xpath = new DOMXPath($doc);
         
-        // Iterate over and remove all attributes.
+        // Iterate over and remove attributes.
         foreach ($xpath->evaluate('//@*') as $attribute) {
+            // Do not remove specified attributes.
+            if (in_array($attribute->name, $exceptions)) {
+                continue;
+            }
             $attribute->ownerElement->removeAttributeNode($attribute);
         }
         
