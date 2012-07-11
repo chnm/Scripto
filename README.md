@@ -130,4 +130,6 @@ Changelog
 -------------
 
 * 1.1
-   * Add option to retain specified HTML attributes.
+    * Add option to retain specified HTML attributes.
+* 1.1.1
+    * Fix watch and unwatch pages.

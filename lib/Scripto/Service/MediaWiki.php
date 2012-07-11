@@ -64,7 +64,7 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
             'title', 'token', 'protections', 'expiry', 'reason', 'cascade'
         ), 
         'watch' => array(
-            'title', 'unwatch'
+            'title', 'unwatch', 'token'
         ), 
         'query' => array(
             // title specifications
@@ -331,6 +331,25 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
     }
     
     /**
+     * Gets the watch token for a given page.
+     * 
+     * @link http://www.mediawiki.org/wiki/API:Watch#Token
+     * @param string $title
+     * @return string
+     */
+    public function getWatchToken($title)
+    {
+        $response = $this->getInfo($title, array('intoken' => 'watch'));
+        $page = current($response['query']['pages']);
+        
+        $watchtoken = null;
+        if (isset($page['watchtoken'])) {
+            $watchtoken = $page['watchtoken'];
+        }
+        return $watchtoken;
+    }
+    
+    /**
      * Gets the protections for a given page.
      * 
      * @link http://www.mediawiki.org/wiki/API:Properties#info_.2F_in
@@ -451,9 +470,14 @@ class Scripto_Service_MediaWiki extends Zend_Service_Abstract
      * @param array $params
      * @return array
      */
-    public function watch($title, array $params = array())
+    public function watch($title, $watchtoken = null, array $params = array())
     {
+        // Get the watch token if not passed.
+        if (is_null($watchtoken)) {
+            $watchtoken = $this->getWatchToken($title);
+        }
         $params['title'] = $title;
+        $params['token'] = $watchtoken;
         return $this->_request('watch', $params);
     }
     

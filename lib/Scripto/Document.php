@@ -543,7 +543,7 @@ class Scripto_Document
         if (is_null($this->_pageId)) {
             throw new Scripto_Exception('The document page must be set before unwatching the page.');
         }
-        $this->_mediawiki->watch($this->_baseTitle, array('unwatch' => true));
+        $this->_mediawiki->watch($this->_baseTitle, null, array('unwatch' => true));
     }
     
     /**
