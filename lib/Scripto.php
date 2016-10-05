@@ -706,9 +706,11 @@ class Scripto
         // Infer from comment and revision_id.
         if (array_key_exists('comment', $hints)) {
             $commentActions = array('Replaced', 'Unprotected', 'Protected', 'Created');
-            $actionPattern = '/^(' . implode('|', $commentActions) . ').+$/se';
+            $actionPattern = '/^(' . implode('|', $commentActions) . ').+$/s';
             if (preg_match($actionPattern, $hints['comment'])) {
-                $action = preg_replace($actionPattern, 'strtolower("$1")', $hints['comment']);
+                $action = preg_replace_callback($actionPattern, function ($matches) {
+                    return strtolower($matches[1]);
+                }, $hints['comment']);
             } else {
                 // Watchlist returns revision_id=0 when the action is protect 
                 // or unprotect.
