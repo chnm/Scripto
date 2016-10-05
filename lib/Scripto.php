@@ -31,7 +31,7 @@ class Scripto
     /**
      * This Scripto version.
      */
-    const VERSION = '1.1.1';
+    const VERSION = '1.1.2';
     
     /**
      * @var Scripto_Adapter_Interface The adapter object for the external 

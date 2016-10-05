@@ -133,3 +133,6 @@ Changelog
     * Add option to retain specified HTML attributes.
 * 1.1.1
     * Fix watch and unwatch pages.
+* 1.1.2
+    * The /e modifier is deprecated in PHP 5.5.0 and removed in 7.0.0. Use
+      preg_replace_callback() instead.
