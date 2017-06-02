@@ -57,6 +57,7 @@ class Scripto
      * <ul>
      *     <li>$mediawiki['api_url']: required; the MediaWiki API URL</li>
      *     <li>$mediawiki['pass_cookies']: optional pass cookies to the web 
+     *     <li>$mediawiki['cookie_prefix']: optional; set the cookie prefix
      *     browser via API client</li>
      * </ul>
      */
@@ -72,9 +73,13 @@ class Scripto
             if (!isset($mediawiki['pass_cookies'])) {
                 $mediawiki['pass_cookies'] = true;
             }
+            if (!isset($mediawiki['cookie_prefix'])) {
+                $mediawiki['cookie_prefix'] = null;
+            }
             
             $this->_mediawiki = new Scripto_Service_MediaWiki($mediawiki['api_url'], 
-                                                              (bool) $mediawiki['pass_cookies']);
+                                                              (bool) $mediawiki['pass_cookies'],
+                                                              $mediawiki['cookie_prefix']);
         } else {
             throw new Scripto_Exception('The provided mediawiki parameter is invalid.');
         }
